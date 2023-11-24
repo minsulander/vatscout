@@ -2,6 +2,8 @@
 import { defineStore } from "pinia"
 import { ref, reactive } from "vue"
 import axios from "axios"
+import GeoJSON from "ol/format/GeoJSON"
+import FeatureLike from "ol/Feature"
 
 export interface GeneralData {
     version: number
@@ -120,6 +122,7 @@ export const useVatsimStore = defineStore("vatsim", () => {
     const data = ref({} as VatsimData)
     const transceivers = ref({} as { [key: string]: Transceiver[] })
     const spy = ref({} as VatspyData)
+    const boundaries = ref([] as FeatureLike[])
 
     async function getData() {
         const response = await axios.get("https://data.vatsim.net/v3/vatsim-data.json")
@@ -194,9 +197,22 @@ export const useVatsimStore = defineStore("vatsim", () => {
         spy.value = spydata
     }
 
+    async function getBoundaries() {
+        const response = await axios.get("https://raw.githubusercontent.com/vatsimnetwork/vatspy-data-project/master/Boundaries.geojson")
+        const features = new GeoJSON().readFeatures(response.data)
+        // for (const feature of features) {
+        //     const geometry = feature.getGeometry()
+        //     if (geometry.intersectsCoordinate([19, 59])) {
+        //         console.log("EUREKA", geometry, feature.getProperties())
+        //     }
+        // }
+        boundaries.value = features
+    }
+
     getData()
     getTransceivers()
     getSpy()
+    getBoundaries()
 
-    return { data, transceivers, spy, getData, getTransceivers, getSpy }
+    return { data, transceivers, spy, boundaries, getData, getTransceivers, getSpy, getBoundaries }
 })

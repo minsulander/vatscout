@@ -38,6 +38,16 @@
                 <v-col sm="9" class="value">{{ moment(pilot.last_updated).format("HH:mm:ss") }}</v-col>
             </v-row>
         </div>
+        <div v-if="within" class="mt-3">
+            <v-row no-gutters>
+                <v-col sm="3" class="label">Within airspace</v-col>
+                <v-col sm="9" class="value">
+                    <span v-for="boundary in within">
+                        {{ boundary.getProperties().id }}
+                    </span>
+                </v-col>
+            </v-row>
+        </div>
         <div v-else-if="prefile">
             <v-row no-gutters>
                 <v-col sm="3" class="label">Pre-filed by</v-col>
@@ -131,5 +141,15 @@ const flightplan = computed(() => {
 })
 const transceivers = computed(() => {
     return vatsim.transceivers[id]
+})
+const within = computed(() => {
+    if (!pilot.value || !pilot.value.longitude || !pilot.value.latitude) return []
+    const boundaries = []
+    for (const boundary of vatsim.boundaries) {
+        if (boundary.getGeometry().intersectsCoordinate([pilot.value.longitude, pilot.value.latitude])) {
+            boundaries.push(boundary)
+        }
+    }
+    return boundaries
 })
 </script>

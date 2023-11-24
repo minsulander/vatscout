@@ -28,7 +28,7 @@ const vatsim = useVatsimStore()
 const id = (route.params.id as string).toUpperCase()
 
 const airport = computed(() => {
-    return vatsim.spy.airports.find((a) => a.icao == id)
+    return vatsim.spy && vatsim.spy.airports && vatsim.spy.airports.find((a) => a.icao == id)
 })
 
 const departurePilots = computed(() => {
