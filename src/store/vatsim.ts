@@ -123,6 +123,7 @@ export const useVatsimStore = defineStore("vatsim", () => {
     const transceivers = ref({} as { [key: string]: Transceiver[] })
     const spy = ref({} as VatspyData)
     const boundaries = ref([] as FeatureLike[])
+    const traconBoundaries = ref([]as FeatureLike[])
 
     async function getData() {
         const response = await axios.get("https://data.vatsim.net/v3/vatsim-data.json")
@@ -209,10 +210,17 @@ export const useVatsimStore = defineStore("vatsim", () => {
         boundaries.value = features
     }
 
+    async function getTraconBoundaries() {
+        const response = await axios.get("https://raw.githubusercontent.com/VATSIM-SSA/SSA-SimAware-Tracon-Project/main/TRACONBoundaries.geojson")
+        const features = new GeoJSON().readFeatures(response.data)
+        traconBoundaries.value = features
+    }
+
     getData()
     getTransceivers()
     getSpy()
     getBoundaries()
+    getTraconBoundaries()
 
-    return { data, transceivers, spy, boundaries, getData, getTransceivers, getSpy, getBoundaries }
+    return { data, transceivers, spy, boundaries, traconBoundaries, getData, getTransceivers, getSpy, getBoundaries, getTraconBoundaries }
 })
