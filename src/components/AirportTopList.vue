@@ -5,14 +5,26 @@
         </v-col>
         <v-col sm="5">{{ airport.name }} </v-col>
         <v-col sm="1" class="text-right">
-            <span v-if="departurePrefiles(airport.icao)" class="font-weight-light text-grey">{{ departurePrefiles(airport.icao) }}</span>
-            <span v-if="departurePrefiles(airport.icao) && departingPilots(airport.icao)" class="font-weight-light text-grey ml-1">+</span>
-            <span v-if="departingPilots(airport.icao)" class="ml-1">{{ departingPilots(airport.icao) }}</span>
+            <span v-if="vatsim.movements[airport.icao].prefiledDepartures" class="font-weight-light text-grey">{{
+                vatsim.movements[airport.icao].prefiledDepartures
+            }}</span>
+            <span
+                v-if="vatsim.movements[airport.icao].prefiledDepartures && vatsim.movements[airport.icao].departing"
+                class="font-weight-light text-grey ml-1"
+                >+</span
+            >
+            <span v-if="vatsim.movements[airport.icao].departing" class="ml-1">{{ vatsim.movements[airport.icao].departing }}</span>
         </v-col>
         <v-col sm="1" class="text-right">
-            <span v-if="arrivalPrefiles(airport.icao)" class="font-weight-light text-grey">{{ arrivalPrefiles(airport.icao) }}</span>
-            <span v-if="arrivalPrefiles(airport.icao) && arrivingPilots(airport.icao)" class="font-weight-light text-grey ml-1">+</span>
-            <span v-if="arrivingPilots(airport.icao)" class="ml-1">{{ arrivingPilots(airport.icao) }}</span>
+            <span v-if="vatsim.movements[airport.icao].prefiledArrivals" class="font-weight-light text-grey">{{
+                vatsim.movements[airport.icao].prefiledArrivals
+            }}</span>
+            <span
+                v-if="vatsim.movements[airport.icao].prefiledArrivals && vatsim.movements[airport.icao].arriving"
+                class="font-weight-light text-grey ml-1"
+                >+</span
+            >
+            <span v-if="vatsim.movements[airport.icao].arriving" class="ml-1">{{ vatsim.movements[airport.icao].arriving }}</span>
         </v-col>
         <v-col sm="4" class="text-right">
             <span v-for="atis in atises(airport)" :key="atis.callsign" class="mr-3">
@@ -62,42 +74,6 @@ function labelForController(controller: Controller) {
     return controller.callsign
 }
 
-function departingPilots(icao: string) {
-    if (!vatsim.data.pilots) return 0
-    return vatsim.data.pilots.filter(
-        (p) => p.flight_plan && p.flight_plan.departure == icao && p.groundspeed < constants.inflightGroundspeed
-    ).length
-}
-
-function departurePrefiles(icao: string) {
-    if (!vatsim.data.prefiles) return 0
-    return vatsim.data.prefiles.filter((p) => p.flight_plan && p.flight_plan.departure == icao).length
-}
-
-function arrivingPilots(icao: string) {
-    if (!vatsim.data.pilots) return 0
-    return vatsim.data.pilots.filter(
-        (p) => p.flight_plan && p.flight_plan.arrival == icao && p.groundspeed >= constants.inflightGroundspeed
-    ).length
-}
-
-function arrivalPrefiles(icao: string) {
-    if (!vatsim.data.prefiles) return 0
-    return vatsim.data.prefiles.filter((p) => p.flight_plan && p.flight_plan.arrival == icao).length
-}
-
-function movements(icao: string) {
-    if (!vatsim.data.pilots || !vatsim.data.prefiles) return 0
-    return (
-        vatsim.data.pilots.filter((p) => p.flight_plan && p.flight_plan.departure == icao && p.groundspeed < constants.inflightGroundspeed)
-            .length +
-        vatsim.data.prefiles.filter((p) => p.flight_plan && p.flight_plan.departure == icao).length +
-        vatsim.data.pilots.filter((p) => p.flight_plan && p.flight_plan.arrival == icao && p.groundspeed >= constants.inflightGroundspeed)
-            .length +
-        vatsim.data.prefiles.filter((p) => p.flight_plan && p.flight_plan.arrival == icao).length
-    )
-}
-
 function atises(airport: Airport) {
     if (!vatsim.data.atis) return []
     return vatsim.data.atis.filter((c) => c.callsign && c.callsign.startsWith(`${airport.icao}_`))
@@ -105,15 +81,20 @@ function atises(airport: Airport) {
 
 function controllers(airport: Airport) {
     if (!vatsim.data.controllers) return []
-    return vatsim.data.controllers.filter((c) => c.callsign && c.callsign.startsWith(`${airport.icao}_`))
+    return vatsim.data.controllers.filter(
+        (c) =>
+            c.callsign && !c.callsign.endsWith("_CTR") && 
+            (c.callsign.startsWith(`${airport.icao}_`) ||
+                (airport.icao.startsWith("K") && c.callsign.startsWith(`${airport.icao.substring(1)}_`)))
+    )
 }
 
 const activeAirports = computed(() => {
     return vatsim.spy.airports
-        .filter((a) => !a.pseudo && firs.includes(a.fir) && movements(a.icao) > 0)
+        .filter((a) => !a.pseudo && a.icao in vatsim.movements && firs.includes(a.fir) && vatsim.movements[a.icao].pending > 0)
         .sort((a, b) => {
-            const acount = movements(a.icao)
-            const bcount = movements(b.icao)
+            const acount = vatsim.movements[a.icao].pending
+            const bcount = vatsim.movements[b.icao].pending
             return acount >= bcount ? -1 : 1
         })
 })

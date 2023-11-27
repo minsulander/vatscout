@@ -4,6 +4,7 @@ import { ref, reactive } from "vue"
 import axios from "axios"
 import GeoJSON from "ol/format/GeoJSON"
 import FeatureLike from "ol/Feature"
+import constants from "@/constants"
 
 export interface Controller {
     callsign: string
@@ -154,16 +155,79 @@ export interface VatspyData {
     uirs: UIR[]
 }
 
+export class AirportMovements {
+    departed: number = 0
+    departing: number = 0
+    prefiledDepartures: number = 0
+    arrived: number = 0
+    arriving: number = 0
+    prefiledArrivals: number = 0
+
+    get departures() {
+        return this.departed + this.departing + this.prefiledDepartures
+    }
+
+    get arrivals() {
+        return this.arrived + this.arriving + this.prefiledArrivals
+    }
+
+    get total() {
+        return this.departures + this.arrivals
+    }
+
+    get pending() {
+        return this.departing + this.prefiledDepartures + this.arriving + this.prefiledArrivals
+    }
+}
+
 export const useVatsimStore = defineStore("vatsim", () => {
     const data = ref({} as VatsimData)
     const transceivers = ref({} as { [key: string]: Transceiver[] })
     const spy = ref({} as VatspyData)
     const boundaries = ref([] as FeatureLike[])
-    const traconBoundaries = ref([]as FeatureLike[])
+    const traconBoundaries = ref([] as FeatureLike[])
+    const movements = ref({} as { [key: string]: AirportMovements })
+
+    function calculateMovements() {
+        const start = new Date().getTime()
+        const moves = {} as { [key: string]: AirportMovements }
+        for (const pilot of data.value.pilots) {
+            if (pilot.flight_plan) {
+                if (pilot.flight_plan.departure) {
+                    if (!(pilot.flight_plan.departure in moves)) moves[pilot.flight_plan.departure] = new AirportMovements()
+                    if (pilot.groundspeed >= constants.inflightGroundspeed)
+                        moves[pilot.flight_plan.departure].departed++
+                    else
+                        moves[pilot.flight_plan.departure].departing++
+                }
+                if (pilot.flight_plan.arrival) {
+                    if (!(pilot.flight_plan.arrival in moves)) moves[pilot.flight_plan.arrival] = new AirportMovements()
+                    if (pilot.groundspeed >= constants.inflightGroundspeed)
+                        moves[pilot.flight_plan.arrival].arriving++
+                    else
+                        moves[pilot.flight_plan.arrival].arrived++
+                }
+            }
+        }
+        for (const prefile of data.value.prefiles) {
+            if (prefile.flight_plan) {
+                if (prefile.flight_plan.departure) {
+                    if (!(prefile.flight_plan.departure in moves)) moves[prefile.flight_plan.departure] = new AirportMovements()
+                    moves[prefile.flight_plan.departure].prefiledDepartures++
+                }
+                if (prefile.flight_plan.arrival) {
+                    if (!(prefile.flight_plan.arrival in moves)) moves[prefile.flight_plan.arrival] = new AirportMovements()
+                    moves[prefile.flight_plan.arrival].prefiledArrivals++
+                }
+            }
+        }
+        movements.value = moves
+    }
 
     async function getData() {
         const response = await axios.get("https://data.vatsim.net/v3/vatsim-data.json")
         data.value = response.data as VatsimData
+        if (spy.value.airports && spy.value.airports.length > 0) calculateMovements()
     }
 
     async function getTransceivers() {
@@ -232,6 +296,7 @@ export const useVatsimStore = defineStore("vatsim", () => {
             }
         }
         spy.value = spydata
+        if (data.value.pilots && data.value.pilots.length > 0) calculateMovements()
     }
 
     async function getBoundaries() {
@@ -247,7 +312,9 @@ export const useVatsimStore = defineStore("vatsim", () => {
     }
 
     async function getTraconBoundaries() {
-        const response = await axios.get("https://raw.githubusercontent.com/VATSIM-SSA/SSA-SimAware-Tracon-Project/main/TRACONBoundaries.geojson")
+        const response = await axios.get(
+            "https://raw.githubusercontent.com/VATSIM-SSA/SSA-SimAware-Tracon-Project/main/TRACONBoundaries.geojson"
+        )
         const features = new GeoJSON().readFeatures(response.data)
         traconBoundaries.value = features
     }
@@ -258,5 +325,5 @@ export const useVatsimStore = defineStore("vatsim", () => {
     getBoundaries()
     getTraconBoundaries()
 
-    return { data, transceivers, spy, boundaries, traconBoundaries, getData, getTransceivers, getSpy, getBoundaries, getTraconBoundaries }
+    return { data, transceivers, spy, boundaries, traconBoundaries, movements, getData, getTransceivers, getSpy, getBoundaries, getTraconBoundaries }
 })

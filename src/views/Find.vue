@@ -1,5 +1,7 @@
 <template>
-    find {{id}}
+    <v-container>
+        Looking for {{id}}...
+    </v-container>
 </template>
 
 <script lang="ts" setup>
@@ -29,5 +31,6 @@ function stuffChanged() {
 
 watch(() => vatsim.data, stuffChanged)
 watch(() => vatsim.spy, stuffChanged)
+stuffChanged()
 
 </script>
