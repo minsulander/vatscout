@@ -6,21 +6,22 @@
             {{ fir.callsignPrefix }} |
             {{ fir.firBoundary }}
         </div>
+        <airport-top-list :fir="id" />
     </v-container>
 </template>
 
 <script lang="ts" setup>
 import { useRoute } from "vue-router"
 import { useVatsimStore } from "@/store/vatsim"
-import { computed, inject } from "vue"
-const moment = inject("moment")
+import { computed } from "vue"
+import constants from "@/constants";
+import AirportTopList from "@/components/AirportTopList.vue"
 const route = useRoute()
 const vatsim = useVatsimStore()
 
 const id = (route.params.id as string).toUpperCase()
 
 const fir = computed(() => {
-    return vatsim.spy.firs.find((f) => f.icao == id)
+    return vatsim.spy && vatsim.spy.firs && vatsim.spy.firs.find((f) => f.icao == id)
 })
-
 </script>

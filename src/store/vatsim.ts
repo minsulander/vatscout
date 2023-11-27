@@ -5,6 +5,42 @@ import axios from "axios"
 import GeoJSON from "ol/format/GeoJSON"
 import FeatureLike from "ol/Feature"
 
+export interface Controller {
+    callsign: string
+    cid: number
+    facility: number
+    frequency: string
+    last_updated: string
+    logon_time: string
+    name: string
+    rating: number
+    server: string
+    text_atis?: string[]
+    visual_range: number
+}
+
+export interface Atis extends Controller {
+    atis_code: string
+}
+
+export interface Facility {
+    id: number
+    long: string
+    short: string
+}
+
+export interface PilotRating {
+    id: number
+    short_name: string
+    long_name: string
+}
+
+export interface Rating {
+    id: number
+    short: string
+    long: string
+}
+
 export interface GeneralData {
     version: number
     reload: number
@@ -61,15 +97,15 @@ export interface Prefile {
 }
 
 export interface VatsimData {
-    // atis
-    // controllers
-    // facilities
+    atis: Atis[]
+    controllers: Controller[]
+    facilities: Facility[]
     general: GeneralData
-    // military_ratings
-    // pilot_ratings
+    military_ratings: PilotRating[]
+    pilot_ratings: PilotRating[]
     pilots: Pilot[]
     prefiles: Prefile[]
-    // ratings
+    ratings: Rating[]
     // servers
 }
 
