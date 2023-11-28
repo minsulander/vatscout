@@ -24,7 +24,7 @@
                 {{ value.flight_plan.deptime }}
             </span>
             <span v-else-if="arrival && pending && flightplanArrivalTime(value.flight_plan)" style="opacity: 0.5">
-                {{ flightplanArrivalTime(value.flight_plan) }}
+                {{ flightplanArrivalTime(value.flight_plan).format("HHmm") }}
             </span>
         </v-col>
     </v-row>
@@ -39,11 +39,12 @@
 
 <script setup lang="ts">
 import constants from "@/constants"
-import { FlightPlan, Pilot, Prefile, useVatsimStore } from "@/store/vatsim"
+import { Pilot, Prefile, useVatsimStore } from "@/store/vatsim"
 import { computed, inject } from "vue"
 import * as turf from "@turf/turf"
 import * as calc from "@/calc"
 import { useRouter } from "vue-router"
+import { flightplanArrivalTime } from "@/calc"
 const router = useRouter()
 const moment = inject("moment")
 const vatsim = useVatsimStore()
@@ -61,26 +62,10 @@ const eta = computed(() => calc.eta(props.value as Pilot))
 
 const rowclass = computed(() => {
     if (props.prefile) return "text-grey"
-    if (props.departure && !pending.value) return "text-blue"
-    if (props.arrival && !pending.value) return "text-brown"
+    if (props.departure && !pending.value) return "text-blue-darken-2"
+    if (props.arrival && !pending.value) return "text-brown-lighten-1"
     return ""
 })
-
-function flightplanArrivalTime(fp: FlightPlan) {
-    if (!fp.deptime || fp.deptime == "0000" || !fp.enroute_time || fp.enroute_time == "0000") return undefined
-    let depHours = parseInt(fp.deptime.substring(0, 2))
-    let depMinutes = parseInt(fp.deptime.substring(2, 4))
-    let enrHours = parseInt(fp.enroute_time.substring(0, 2))
-    let enrMinutes = parseInt(fp.enroute_time.substring(2, 4))
-    let arrHours = depHours + enrHours
-    let arrMinutes = depMinutes + enrMinutes
-    while (arrMinutes >= 60) {
-        arrHours += 1
-        arrMinutes -= 60
-    }
-    if (arrHours >= 24) arrHours -= 24
-    return `${String(arrHours).padStart(2, '0')}${String(arrMinutes).padStart(2, '0')}`
-}
 
 function click() {
     router.push(`/flight/${props.value.callsign}`)

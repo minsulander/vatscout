@@ -35,11 +35,14 @@
                     <v-col sm="9" class="text-right">
                         <span v-if="departurePrefiles.length > 0" class="text-grey mr-3">{{ departurePrefiles.length }}</span>
                         <span>{{ departingPilots.length }}</span>
-                        <span v-if="departedPilots.length > 0" class="text-blue ml-3">{{ departedPilots.length }}</span>
+                        <span v-if="departedPilots.length > 0" class="text-blue-darken-2 ml-3">{{ departedPilots.length }}</span>
                     </v-col>
                 </v-row>
+                <div class="text-caption text-grey-darken-2 font-weight-light mt-2 ml-1" v-if="departurePrefiles.length > 0">PREFILED</div>
                 <flight-row v-for="p in departurePrefiles" :key="p.callsign" :value="p" departure prefile />
+                <div class="text-caption text-grey-darken-2 font-weight-light mt-2 ml-1" v-if="departingPilots.length > 0">DEPARTING</div>
                 <flight-row v-for="p in departingPilots" :key="p.callsign" :value="p" departure />
+                <div class="text-caption text-grey-darken-2 font-weight-light mt-2 ml-1" v-if="departedPilots.length > 0">DEPARTED</div>
                 <flight-row v-for="p in departedPilots" :key="p.callsign" :value="p" departure />
             </v-col>
             <v-col sm="6">
@@ -48,11 +51,14 @@
                     <v-col sm="9" class="text-right">
                         <span v-if="arrivalPrefiles.length > 0" class="text-grey mr-3">{{ arrivalPrefiles.length }}</span>
                         <span>{{ arrivingPilots.length }}</span>
-                        <span v-if="arrivedPilots.length > 0" class="text-brown ml-3">{{ arrivedPilots.length }}</span>
+                        <span v-if="arrivedPilots.length > 0" class="text-brown-lighten-1 ml-3">{{ arrivedPilots.length }}</span>
                     </v-col>
                 </v-row>
+                <div class="text-caption text-grey-darken-2 font-weight-light mt-2 ml-1" v-if="arrivalPrefiles.length > 0">PREFILED</div>
                 <flight-row v-for="p in arrivalPrefiles" :key="p.callsign" :value="p" arrival prefile />
+                <div class="text-caption text-grey-darken-2 font-weight-light mt-2 ml-1" v-if="arrivingPilots.length > 0">ARRIVING</div>
                 <flight-row v-for="p in arrivingPilots" :key="p.callsign" :value="p" arrival />
+                <div class="text-caption text-grey-darken-2 font-weight-light mt-2 ml-1" v-if="arrivedPilots.length > 0">ARRIVED</div>
                 <flight-row v-for="p in arrivedPilots" :key="p.callsign" :value="p" arrival />
             </v-col>
         </v-row>
@@ -65,7 +71,7 @@ import { useVatsimStore } from "@/store/vatsim"
 import { computed, inject } from "vue"
 import constants from "@/constants"
 import { colorForController, compareControllers, labelForController } from "@/common"
-import { eta, departureDistance, arrivalDistance } from "@/calc"
+import { eta, departureDistance, arrivalDistance, flightplanArrivalTime } from "@/calc"
 import FlightRow from "@/components/FlightRow.vue"
 const moment = inject("moment")
 const route = useRoute()
@@ -99,7 +105,14 @@ const arrivingPilots = computed(() => {
     if (!vatsim.data || !vatsim.data.pilots) return []
     return vatsim.data.pilots
         .filter((p) => p.flight_plan && p.flight_plan.arrival == id.value && (p.groundspeed >= constants.inflightGroundspeed || arrivalDistance(p) >= constants.atAirportDistance))
-        .sort((a, b) => eta(a) - eta(b))
+        .sort((a, b) => {
+            const etaA = eta(a) || flightplanArrivalTime(a.flight_plan)
+            const etaB = eta(b) || flightplanArrivalTime(b.flight_plan)
+            if (etaA && etaB) return etaA - etaB
+            else if (etaA) return -1
+            else if (etaB) return 1
+            else return a.callsign.localeCompare(b.callsign)
+        })
 })
 const arrivedPilots = computed(() => {
     if (!vatsim.data || !vatsim.data.pilots) return []

@@ -1,8 +1,15 @@
 <template>
     <v-container>
-        <div class="text-h3">{{ id }}</div>
+        <v-row>
+            <v-col sm="4">
+                <div class="text-h3">{{ id }}</div>
+            </v-col>
+            <v-col sm="8" class="text-right pt-6" v-if="pilot">
+                <!-- TODO replace with more useful short info -->
+                <flight-row :value="pilot || prefile" :prefile="!!prefile" hide-icao />
+            </v-col>
+        </v-row>
         <div v-if="pilot" class="mt-3">
-            <flight-row :value="pilot || prefile" :prefile="!!prefile" hide-icao />
             <v-row no-gutters>
                 <v-col sm="3" class="label">Pilot</v-col>
                 <v-col sm="9" class="value">{{ pilot.name }} {{ pilot.cid }} {{ pilot.pilot_rating }} {{ pilot.military_rating }}</v-col>
@@ -32,7 +39,7 @@
             </v-row>
             <v-row no-gutters>
                 <v-col sm="3" class="label">Logon time</v-col>
-                <v-col sm="9" class="value">{{ moment(pilot.logon_time).format("HH:mm:ss") }}</v-col>
+                <v-col sm="9" class="value">{{ moment(pilot.logon_time).utcOffset(0).format("HH:mm:ss") }}</v-col>
             </v-row>
             <v-row no-gutters>
                 <v-col sm="3" class="label">Server</v-col>
@@ -40,7 +47,7 @@
             </v-row>
             <v-row no-gutters>
                 <v-col sm="3" class="label">Last updated</v-col>
-                <v-col sm="9" class="value">{{ moment(pilot.last_updated).format("HH:mm:ss") }}</v-col>
+                <v-col sm="9" class="value">{{ moment(pilot.last_updated).utcOffset(0).format("HH:mm:ss") }}</v-col>
             </v-row>
         </div>
         <div v-if="within.length > 0" class="mt-3">
@@ -60,7 +67,7 @@
             </v-row>
             <v-row no-gutters>
                 <v-col sm="3" class="label">Last updated</v-col>
-                <v-col sm="9" class="value">{{ moment(prefile.last_updated).format("HH:mm:ss") }}</v-col>
+                <v-col sm="9" class="value">{{ moment(prefile.last_updated).utcOffset(0).format("HH:mm:ss") }}</v-col>
             </v-row>
         </div>
         <div v-if="flightplan" class="mt-3">

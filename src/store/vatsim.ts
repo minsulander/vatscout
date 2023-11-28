@@ -200,13 +200,17 @@ export const useVatsimStore = defineStore("vatsim", () => {
             if (pilot.flight_plan) {
                 if (pilot.flight_plan.departure) {
                     if (!(pilot.flight_plan.departure in moves)) moves[pilot.flight_plan.departure] = new AirportMovements()
-                    if (pilot.groundspeed >= constants.inflightGroundspeed || departureDistance(pilot) >= constants.atAirportDistance) moves[pilot.flight_plan.departure].departed++
-                    else if (pilot.groundspeed < constants.inflightGroundspeed && departureDistance(pilot) < constants.atAirportDistance) moves[pilot.flight_plan.departure].departing++
+                    if (pilot.groundspeed >= constants.inflightGroundspeed || departureDistance(pilot) >= constants.atAirportDistance)
+                        moves[pilot.flight_plan.departure].departed++
+                    else if (pilot.groundspeed < constants.inflightGroundspeed && departureDistance(pilot) < constants.atAirportDistance)
+                        moves[pilot.flight_plan.departure].departing++
                 }
                 if (pilot.flight_plan.arrival) {
                     if (!(pilot.flight_plan.arrival in moves)) moves[pilot.flight_plan.arrival] = new AirportMovements()
-                    if (pilot.groundspeed >= constants.inflightGroundspeed || arrivalDistance(pilot) >= constants.atAirportDistance) moves[pilot.flight_plan.arrival].arriving++
-                    else if (pilot.groundspeed < constants.inflightGroundspeed && arrivalDistance(pilot) < constants.atAirportDistance) moves[pilot.flight_plan.arrival].arrived++
+                    if (pilot.groundspeed >= constants.inflightGroundspeed || arrivalDistance(pilot) >= constants.atAirportDistance)
+                        moves[pilot.flight_plan.arrival].arriving++
+                    else if (pilot.groundspeed < constants.inflightGroundspeed && arrivalDistance(pilot) < constants.atAirportDistance)
+                        moves[pilot.flight_plan.arrival].arrived++
                 }
             }
         }
@@ -349,22 +353,34 @@ export const useVatsimStore = defineStore("vatsim", () => {
 
     if (!(window as any).refreshInterval) {
         ;(window as any).refreshInterval = setInterval(() => {
-            timeUntilRefresh.value -= 500;
-            if (timeUntilRefresh.value <= 0 && document.visibilityState == "visible") {
+            timeUntilRefresh.value -= 500
+            if (timeUntilRefresh.value <= 0) {
                 timeUntilRefresh.value = constants.refreshInterval
-                getData()
-                getTransceivers()
-                // TODO get spy, boundaries, traconboundaries at lower interval
-                if (!spy.value.countries) setTimeout(() => getSpy(), 500)
-                if (boundaries.value.length == 0) setTimeout(() => getBoundaries(), 1000)
-                if (traconBoundaries.value.length == 0) setTimeout(() => getTraconBoundaries(), 1500)
+                if (document.visibilityState == "visible") {
+                    getData()
+                    getTransceivers()
+                    // TODO get spy, boundaries, traconboundaries at lower interval
+                    if (!spy.value.countries) setTimeout(() => getSpy(), 500)
+                    if (boundaries.value.length == 0) setTimeout(() => getBoundaries(), 1000)
+                    if (traconBoundaries.value.length == 0) setTimeout(() => getTraconBoundaries(), 1500)
+                } else {
+                    console.log("Not refreshing - not visible")
+                }
             }
         }, 500)
         document.addEventListener("visibilitychange", (event) => {
             if (document.visibilityState == "visible") {
-                if (!data.value.general || !data.value.general.update_timestamp || moment(data.value.general.update_timestamp).isBefore(moment().add(-constants.refreshInterval, "millisecond"))) {
-                    console.log("Became visible with outdated data - refresh")
-                    timeUntilRefresh.value = 0
+                if (
+                    !data.value.general ||
+                    !data.value.general.update_timestamp ||
+                    moment(data.value.general.update_timestamp).isBefore(moment().add(-constants.refreshInterval, "millisecond"))
+                ) {
+                    if (refreshing.value > 0) {
+                        console.log("Became visible with outdated data but already refreshing")
+                    } else {
+                        console.log("Became visible with outdated data - refresh")
+                        timeUntilRefresh.value = 0
+                    }
                 }
             }
         })
