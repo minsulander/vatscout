@@ -2,6 +2,7 @@
     <v-container>
         <div class="text-h3">{{ id }}</div>
         <div v-if="pilot" class="mt-3">
+            <flight-row :value="pilot || prefile" :prefile="!!prefile" hide-icao />
             <v-row no-gutters>
                 <v-col sm="3" class="label">Pilot</v-col>
                 <v-col sm="9" class="value">{{ pilot.name }} {{ pilot.cid }} {{ pilot.pilot_rating }} {{ pilot.military_rating }}</v-col>
@@ -12,6 +13,10 @@
                     >{{ pilot.latitude }} {{ pilot.longitude }} {{ pilot.heading }}° {{ pilot.altitude }} ft
                     {{ pilot.groundspeed }} kts</v-col
                 >
+            </v-row>
+            <v-row no-gutters>
+                <v-col sm="3" class="label">Distance</v-col>
+                <v-col sm="9" class="value">{{ departureDistance(pilot).toFixed(0) }} nm from departure {{ pilot.flight_plan.departure }}, {{ arrivalDistance(pilot).toFixed(0) }} nm from arrival {{ pilot.flight_plan.arrival }}</v-col>
             </v-row>
             <v-row no-gutters>
                 <v-col sm="3" class="label">Settings</v-col>
@@ -123,6 +128,8 @@
 import { useRoute } from "vue-router"
 import { useVatsimStore } from "@/store/vatsim"
 import { computed, inject } from "vue"
+import FlightRow from "@/components/FlightRow.vue"
+import { arrivalDistance, departureDistance } from "@/calc";
 const moment = inject("moment")
 const route = useRoute()
 const vatsim = useVatsimStore()

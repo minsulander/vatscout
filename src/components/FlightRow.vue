@@ -1,0 +1,88 @@
+<template>
+    <v-row no-gutters :class="rowclass" @click="click" class="px-1" v-if="value && value.flight_plan">
+        <v-col sm="3" v-if="!hideIcao">
+            {{ value.callsign }}
+        </v-col>
+        <v-col sm="3">
+            {{ value.flight_plan.aircraft_short }}
+        </v-col>
+        <v-col sm="3">
+            <span v-if="!departure">
+                {{ value.flight_plan.departure }}
+            </span>
+            <span v-if="!arrival">
+                <span v-if="!departure"> - </span>
+                {{ value.flight_plan.arrival }}
+            </span>
+        </v-col>
+        <v-col sm="3">
+            <!-- TODO for prefiles, show time since last updated -->
+            <span v-if="arrival && eta">
+                {{ moment(eta).utcOffset(0).format("HHmm") }}
+            </span>
+            <span v-else-if="departure && pending && value.flight_plan.deptime && value.flight_plan.deptime != '0000'">
+                {{ value.flight_plan.deptime }}
+            </span>
+            <span v-else-if="arrival && pending && flightplanArrivalTime(value.flight_plan)" style="opacity: 0.5">
+                {{ flightplanArrivalTime(value.flight_plan) }}
+            </span>
+        </v-col>
+    </v-row>
+</template>
+
+<style scoped>
+.v-row:hover {
+    background: rgba(200, 200, 200, 0.2);
+    cursor: pointer;
+}
+</style>
+
+<script setup lang="ts">
+import constants from "@/constants"
+import { FlightPlan, Pilot, Prefile, useVatsimStore } from "@/store/vatsim"
+import { computed, inject } from "vue"
+import * as turf from "@turf/turf"
+import * as calc from "@/calc"
+import { useRouter } from "vue-router"
+const router = useRouter()
+const moment = inject("moment")
+const vatsim = useVatsimStore()
+const props = defineProps<{ value: Pilot | Prefile; departure?: boolean; arrival?: boolean; prefile?: boolean; hideIcao?: boolean }>()
+
+const pending = computed(() => {
+    const pilot = props.value as Pilot
+    if (!pilot) return false
+    return (
+        (props.departure && pilot.groundspeed < constants.inflightGroundspeed && calc.departureDistance(pilot) < constants.atAirportDistance) ||
+        (props.arrival && (pilot.groundspeed >= constants.inflightGroundspeed || calc.arrivalDistance(pilot) >= constants.atAirportDistance))
+    )
+})
+const eta = computed(() => calc.eta(props.value as Pilot))
+
+const rowclass = computed(() => {
+    if (props.prefile) return "text-grey"
+    if (props.departure && !pending.value) return "text-blue"
+    if (props.arrival && !pending.value) return "text-brown"
+    return ""
+})
+
+function flightplanArrivalTime(fp: FlightPlan) {
+    if (!fp.deptime || fp.deptime == "0000" || !fp.enroute_time || fp.enroute_time == "0000") return undefined
+    let depHours = parseInt(fp.deptime.substring(0, 2))
+    let depMinutes = parseInt(fp.deptime.substring(2, 4))
+    let enrHours = parseInt(fp.enroute_time.substring(0, 2))
+    let enrMinutes = parseInt(fp.enroute_time.substring(2, 4))
+    let arrHours = depHours + enrHours
+    let arrMinutes = depMinutes + enrMinutes
+    while (arrMinutes >= 60) {
+        arrHours += 1
+        arrMinutes -= 60
+    }
+    if (arrHours >= 24) arrHours -= 24
+    return `${String(arrHours).padStart(2, '0')}${String(arrMinutes).padStart(2, '0')}`
+}
+
+function click() {
+    router.push(`/flight/${props.value.callsign}`)
+}
+</script>
