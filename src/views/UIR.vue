@@ -16,10 +16,10 @@ const moment = inject("moment")
 const route = useRoute()
 const vatsim = useVatsimStore()
 
-const id = (route.params.id as string).toUpperCase()
+const id = computed(() => (route.params.id as string).toUpperCase())
 
 const uir = computed(() => {
-    return vatsim.spy.uirs.find((u) => u.id == id)
+    return vatsim.spy.uirs.find((u) => u.id == id.value)
 })
 
 </script>

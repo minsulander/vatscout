@@ -26,34 +26,34 @@ const moment = inject("moment")
 const route = useRoute()
 const vatsim = useVatsimStore()
 
-const id = (route.params.id as string).toUpperCase()
+const id = computed(() => (route.params.id as string).toUpperCase())
 
 const airport = computed(() => {
-    return vatsim.spy && vatsim.spy.airports && vatsim.spy.airports.find((a) => a.icao == id)
+    return vatsim.spy && vatsim.spy.airports && vatsim.spy.airports.find((a) => a.icao == id.value)
 })
 
 const departedPilots = computed(() => {
     if (!vatsim.data || !vatsim.data.pilots) return []
-    return vatsim.data.pilots.filter((p) => p.flight_plan && p.flight_plan.departure == id && p.groundspeed >= constants.inflightGroundspeed)
+    return vatsim.data.pilots.filter((p) => p.flight_plan && p.flight_plan.departure == id.value && p.groundspeed >= constants.inflightGroundspeed)
 })
 const departingPilots = computed(() => {
     if (!vatsim.data || !vatsim.data.pilots) return []
-    return vatsim.data.pilots.filter((p) => p.flight_plan && p.flight_plan.departure == id && p.groundspeed < constants.inflightGroundspeed)
+    return vatsim.data.pilots.filter((p) => p.flight_plan && p.flight_plan.departure == id.value && p.groundspeed < constants.inflightGroundspeed)
 })
 const departurePrefiles = computed(() => {
     if (!vatsim.data || !vatsim.data.prefiles) return []
-    return vatsim.data.prefiles.filter((p) => p.flight_plan && p.flight_plan.departure == id)
+    return vatsim.data.prefiles.filter((p) => p.flight_plan && p.flight_plan.departure == id.value)
 })
 const arrivingPilots = computed(() => {
     if (!vatsim.data || !vatsim.data.pilots) return []
-    return vatsim.data.pilots.filter((p) => p.flight_plan && p.flight_plan.arrival == id && p.groundspeed >= constants.inflightGroundspeed)
+    return vatsim.data.pilots.filter((p) => p.flight_plan && p.flight_plan.arrival == id.value && p.groundspeed >= constants.inflightGroundspeed)
 })
 const arrivedPilots = computed(() => {
     if (!vatsim.data || !vatsim.data.pilots) return []
-    return vatsim.data.pilots.filter((p) => p.flight_plan && p.flight_plan.arrival == id && p.groundspeed < constants.inflightGroundspeed)
+    return vatsim.data.pilots.filter((p) => p.flight_plan && p.flight_plan.arrival == id.value && p.groundspeed < constants.inflightGroundspeed)
 })
 const arrivalPrefiles = computed(() => {
     if (!vatsim.data || !vatsim.data.prefiles) return []
-    return vatsim.data.prefiles.filter((p) => p.flight_plan && p.flight_plan.arrival == id)
+    return vatsim.data.prefiles.filter((p) => p.flight_plan && p.flight_plan.arrival == id.value)
 })
 </script>

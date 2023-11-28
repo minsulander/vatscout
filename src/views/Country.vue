@@ -5,11 +5,6 @@
             {{ country.name }}
             {{ country.facility }}
         </div>
-        <!--
-        <div v-if="firs">
-            <span v-for="fir in firs" :key="fir.icao" class="mr-3"><router-link :to="`/fir/${fir.icao}`">{{ fir.icao }}</router-link></span>
-        </div>
-        -->
         <airport-top-list v-if="firs" :firs="firs.map(f => f.icao)" />
      </v-container>
 </template>
@@ -22,14 +17,14 @@ import AirportTopList from "@/components/AirportTopList.vue"
 const route = useRoute()
 const vatsim = useVatsimStore()
 
-const id = (route.params.id as string).toUpperCase()
+const id = computed(() => (route.params.id as string).toUpperCase())
 
 const country = computed(() => {
-    return vatsim.spy && vatsim.spy.countries && vatsim.spy.countries.find((c) => c.prefix == id)
+    return vatsim.spy && vatsim.spy.countries && vatsim.spy.countries.find((c) => c.prefix == id.value)
 })
 
 const firs = computed(() => {
-    return vatsim.spy && vatsim.spy.firs && vatsim.spy.firs.filter(f => f.icao.startsWith(id))
+    return vatsim.spy && vatsim.spy.firs && vatsim.spy.firs.filter(f => f.icao.startsWith(id.value))
 })
 
 </script>

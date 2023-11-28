@@ -5,21 +5,12 @@
         </v-app-bar-title>
         <v-row>
             <v-col sm="10">
-                <v-text-field variant="underlined" placeholder="Search" v-model="search" autofocus @keyup.enter="enter" />
+                <Search />
             </v-col>
         </v-row>
     </v-app-bar>
 </template>
 
 <script lang="ts" setup>
-import { ref } from "vue"
-import { useRouter } from "vue-router"
-const router = useRouter()
-const search = ref("")
-
-function enter() {
-    router.push(`/${search.value}`)
-    search.value = ""
-    // TODO handle not found
-}
+import Search from "@/components/Search.vue"
 </script>

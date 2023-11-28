@@ -6,7 +6,6 @@ import Airport from "@/views/Airport.vue"
 import FIR from "@/views/FIR.vue"
 import UIR from "@/views/UIR.vue"
 import Country from "@/views/Country.vue"
-import Find from "@/views/Find.vue"
 
 const routes = [
     {
@@ -42,17 +41,7 @@ const routes = [
                 component: Country,
             },
         ],
-    },
-    {
-        path: "/:id",
-        component: () => import("@/layouts/default/Default.vue"),
-        children: [
-            {
-                path: "",
-                component: Find,
-            },
-        ],
-    },
+    }
 ]
 
 const router = createRouter({

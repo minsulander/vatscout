@@ -54,7 +54,7 @@ import constants from "@/constants"
 const vatsim = useVatsimStore()
 const props = defineProps<{ firs?: string[]; fir?: string }>()
 
-const firs = props.firs ? props.firs : [props.fir]
+const firs = computed(() => props.firs ? props.firs : [props.fir])
 
 function colorForController(controller: Controller) {
     if (controller.callsign.endsWith("DEL")) return "blue"
@@ -91,7 +91,7 @@ function controllers(airport: Airport) {
 
 const activeAirports = computed(() => {
     return vatsim.spy.airports
-        .filter((a) => !a.pseudo && a.icao in vatsim.movements && firs.includes(a.fir) && vatsim.movements[a.icao].pending > 0)
+        .filter((a) => !a.pseudo && a.icao in vatsim.movements && firs.value.includes(a.fir) && vatsim.movements[a.icao].pending > 0)
         .sort((a, b) => {
             const acount = vatsim.movements[a.icao].pending
             const bcount = vatsim.movements[b.icao].pending

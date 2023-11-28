@@ -19,9 +19,9 @@ import AirportTopList from "@/components/AirportTopList.vue"
 const route = useRoute()
 const vatsim = useVatsimStore()
 
-const id = (route.params.id as string).toUpperCase()
+const id = computed(() => (route.params.id as string).toUpperCase())
 
 const fir = computed(() => {
-    return vatsim.spy && vatsim.spy.firs && vatsim.spy.firs.find((f) => f.icao == id)
+    return vatsim.spy && vatsim.spy.firs && vatsim.spy.firs.find((f) => f.icao == id.value)
 })
 </script>

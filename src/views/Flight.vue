@@ -127,20 +127,20 @@ const moment = inject("moment")
 const route = useRoute()
 const vatsim = useVatsimStore()
 
-const id = (route.params.id as string).toUpperCase()
+const id = computed(() => (route.params.id as string).toUpperCase())
 
 const pilot = computed(() => {
-    return vatsim.data.pilots && vatsim.data.pilots.find((p) => p.callsign == id)
+    return vatsim.data.pilots && vatsim.data.pilots.find((p) => p.callsign == id.value)
 })
 const prefile = computed(() => {
-    return vatsim.data.prefiles && vatsim.data.prefiles.find((p) => p.callsign == id)
+    return vatsim.data.prefiles && vatsim.data.prefiles.find((p) => p.callsign == id.value)
 })
 const flightplan = computed(() => {
     if (pilot.value) return pilot.value.flight_plan
     if (prefile.value) return prefile.value.flight_plan
 })
 const transceivers = computed(() => {
-    return vatsim.transceivers[id]
+    return vatsim.transceivers[id.value]
 })
 const within = computed(() => {
     if (!pilot.value || !pilot.value.longitude || !pilot.value.latitude) return []
