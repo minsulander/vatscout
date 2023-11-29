@@ -188,62 +188,60 @@ export const useVatsimStore = defineStore("vatsim", () => {
     const spy = ref({} as VatspyData)
     const boundaries = ref([] as FeatureLike[])
     const traconBoundaries = ref([] as FeatureLike[])
-    const movements = ref({} as { [key: string]: AirportMovements })
-
     const timeUntilRefresh = ref(0)
     const refreshing = ref(0)
 
-    function calculateMovements() {
-        const start = new Date().getTime()
-        const moves = {} as { [key: string]: AirportMovements }
-        for (const pilot of data.value.pilots) {
-            if (pilot.flight_plan) {
-                if (pilot.flight_plan.departure) {
-                    if (!(pilot.flight_plan.departure in moves)) moves[pilot.flight_plan.departure] = new AirportMovements()
-                    if (pilot.groundspeed >= constants.inflightGroundspeed || departureDistance(pilot) >= constants.atAirportDistance)
-                        moves[pilot.flight_plan.departure].departed++
-                    else if (pilot.groundspeed < constants.inflightGroundspeed && departureDistance(pilot) < constants.atAirportDistance)
-                        moves[pilot.flight_plan.departure].departing++
-                }
-                if (pilot.flight_plan.arrival) {
-                    if (!(pilot.flight_plan.arrival in moves)) moves[pilot.flight_plan.arrival] = new AirportMovements()
-                    if (pilot.groundspeed >= constants.inflightGroundspeed || arrivalDistance(pilot) >= constants.atAirportDistance)
-                        moves[pilot.flight_plan.arrival].arriving++
-                    else if (pilot.groundspeed < constants.inflightGroundspeed && arrivalDistance(pilot) < constants.atAirportDistance)
-                        moves[pilot.flight_plan.arrival].arrived++
-                }
+    let cachedMovements = {} as { [key: string]: AirportMovements }
+
+    function getMovements(airport_icao: string) {
+        if (airport_icao in cachedMovements) return cachedMovements[airport_icao]
+        const moves = new AirportMovements()
+        for (const pilot of data.value.pilots.filter(p => p.flight_plan && (p.flight_plan.departure == airport_icao || p.flight_plan.arrival == airport_icao))) {
+            if (pilot.flight_plan.departure == airport_icao) {
+                if (pilot.groundspeed >= constants.inflightGroundspeed || departureDistance(pilot) >= constants.atAirportDistance)
+                    moves.departed++
+                else if (pilot.groundspeed < constants.inflightGroundspeed && departureDistance(pilot) < constants.atAirportDistance)
+                    moves.departing++
+            }
+            if (pilot.flight_plan.arrival == airport_icao) {
+                if (pilot.groundspeed >= constants.inflightGroundspeed || arrivalDistance(pilot) >= constants.atAirportDistance)
+                    moves.arriving++
+                else if (pilot.groundspeed < constants.inflightGroundspeed && arrivalDistance(pilot) < constants.atAirportDistance)
+                    moves.arrived++
             }
         }
-        for (const prefile of data.value.prefiles) {
-            if (prefile.flight_plan) {
-                if (prefile.flight_plan.departure) {
-                    if (!(prefile.flight_plan.departure in moves)) moves[prefile.flight_plan.departure] = new AirportMovements()
-                    moves[prefile.flight_plan.departure].prefiledDepartures++
-                }
-                if (prefile.flight_plan.arrival) {
-                    if (!(prefile.flight_plan.arrival in moves)) moves[prefile.flight_plan.arrival] = new AirportMovements()
-                    moves[prefile.flight_plan.arrival].prefiledArrivals++
-                }
+        for (const prefile of data.value.prefiles.filter(p => p.flight_plan && (p.flight_plan.departure == airport_icao || p.flight_plan.arrival == airport_icao))) {
+            if (prefile.flight_plan.departure == airport_icao) {
+                moves.prefiledDepartures++
+            }
+            if (prefile.flight_plan.arrival == airport_icao) {
+                moves.prefiledArrivals++
             }
         }
-        movements.value = moves
+        cachedMovements[airport_icao] = moves
+        return moves
     }
 
-    async function getData() {
+    async function fetchData() {
         refreshing.value++
         try {
+            const startRequest = new Date().getTime()
             const response = await axios.get("https://data.vatsim.net/v3/vatsim-data.json")
+            const startProcessing = new Date().getTime()
             data.value = response.data as VatsimData
-            if (spy.value.airports && spy.value.airports.length > 0) calculateMovements()
+            if (spy.value.airports && spy.value.airports.length > 0) cachedMovements = {}
+            console.log(`Got data in ${(new Date().getTime() - startRequest).toFixed()} ms, processing ${(new Date().getTime() - startProcessing).toFixed()} ms`)
         } finally {
             refreshing.value--
         }
     }
 
-    async function getTransceivers() {
+    async function fetchTransceivers() {
         refreshing.value++
         try {
+            const startRequest = new Date().getTime()
             const response = await axios.get("https://data.vatsim.net/v3/transceivers-data.json")
+            const startProcessing = new Date().getTime()
             let xcs: { [key: string]: Transceiver[] } = {}
             for (const entry of response.data) {
                 if (!(entry.callsign in xcs)) xcs[entry.callsign] = []
@@ -252,15 +250,18 @@ export const useVatsimStore = defineStore("vatsim", () => {
                 }
             }
             transceivers.value = xcs
+            console.log(`Got transceivers in ${(new Date().getTime() - startRequest).toFixed()} ms, processing ${(new Date().getTime() - startProcessing).toFixed()} ms`)
         } finally {
             refreshing.value--
         }
     }
 
-    async function getSpy() {
+    async function fetchSpy() {
         refreshing.value++
         try {
+            const startRequest = new Date().getTime()
             const response = await axios.get("https://raw.githubusercontent.com/vatsimnetwork/vatspy-data-project/master/VATSpy.dat")
+            const startProcessing = new Date().getTime()
             let section = ""
             const spydata = { countries: [], airports: [], firs: [], uirs: [] } as VatspyData
             for (const line of response.data.replaceAll("\r", "").split("\n")) {
@@ -313,18 +314,20 @@ export const useVatsimStore = defineStore("vatsim", () => {
                 }
             }
             spy.value = spydata
-            if (data.value.pilots && data.value.pilots.length > 0) calculateMovements()
+            console.log(`Got spy in ${(new Date().getTime() - startRequest).toFixed()} ms, processing ${(new Date().getTime() - startProcessing).toFixed()} ms`)
         } finally {
             refreshing.value--
         }
     }
 
-    async function getBoundaries() {
+    async function fetchBoundaries() {
         refreshing.value++
         try {
+            const startRequest = new Date().getTime()
             const response = await axios.get(
                 "https://raw.githubusercontent.com/vatsimnetwork/vatspy-data-project/master/Boundaries.geojson"
             )
+            const startProcessing = new Date().getTime()
             const features = new GeoJSON().readFeatures(response.data)
             // for (const feature of features) {
             //     const geometry = feature.getGeometry()
@@ -333,19 +336,23 @@ export const useVatsimStore = defineStore("vatsim", () => {
             //     }
             // }
             boundaries.value = features
+            console.log(`Got boundaries in ${(new Date().getTime() - startRequest).toFixed()} ms, processing ${(new Date().getTime() - startProcessing).toFixed()} ms`)
         } finally {
             refreshing.value--
         }
     }
 
-    async function getTraconBoundaries() {
+    async function fetchTraconBoundaries() {
         refreshing.value++
         try {
+            const startRequest = new Date().getTime()
             const response = await axios.get(
                 "https://raw.githubusercontent.com/VATSIM-SSA/SSA-SimAware-Tracon-Project/main/TRACONBoundaries.geojson"
             )
+            const startProcessing = new Date().getTime()
             const features = new GeoJSON().readFeatures(response.data)
             traconBoundaries.value = features
+            console.log(`Got tracon boundaries in ${(new Date().getTime() - startRequest).toFixed()} ms, processing ${(new Date().getTime() - startProcessing).toFixed()} ms`)
         } finally {
             refreshing.value--
         }
@@ -357,12 +364,12 @@ export const useVatsimStore = defineStore("vatsim", () => {
             if (timeUntilRefresh.value <= 0) {
                 timeUntilRefresh.value = constants.refreshInterval
                 if (document.visibilityState == "visible") {
-                    getData()
-                    getTransceivers()
+                    fetchData()
+                    fetchTransceivers()
                     // TODO get spy, boundaries, traconboundaries at lower interval
-                    if (!spy.value.countries) setTimeout(() => getSpy(), 500)
-                    if (boundaries.value.length == 0) setTimeout(() => getBoundaries(), 1000)
-                    if (traconBoundaries.value.length == 0) setTimeout(() => getTraconBoundaries(), 1500)
+                    if (!spy.value.countries) setTimeout(() => fetchSpy(), 500)
+                    if (boundaries.value.length == 0) setTimeout(() => fetchBoundaries(), 1000)
+                    if (traconBoundaries.value.length == 0) setTimeout(() => fetchTraconBoundaries(), 1500)
                 } else {
                     console.log("Not refreshing - not visible")
                 }
@@ -392,13 +399,13 @@ export const useVatsimStore = defineStore("vatsim", () => {
         spy,
         boundaries,
         traconBoundaries,
-        movements,
+        getMovements,
         timeUntilRefresh,
         refreshing,
-        getData,
-        getTransceivers,
-        getSpy,
-        getBoundaries,
-        getTraconBoundaries,
+        fetchData,
+        fetchTransceivers,
+        fetchSpy,
+        fetchBoundaries,
+        fetchTraconBoundaries,
     }
 })
