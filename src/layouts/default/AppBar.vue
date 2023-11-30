@@ -15,7 +15,7 @@
                     @click="clickProgress"
                     style="cursor: pointer"
                 >
-                    <span v-if="vatsim.data.general">{{ moment(vatsim.data.general.update_timestamp).utcOffset(0).format("HH:mm") }}</span>
+                    <span v-if="vatsim.data.general">{{ moment(vatsim.data.general.update_timestamp).utcOffset(0).format("HHmm") }}</span>
                 </v-progress-circular>
             </v-col>
         </v-row>

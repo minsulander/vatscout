@@ -1,21 +1,27 @@
 import { Controller } from "./store/vatsim"
 
 export function colorForController(controller: Controller) {
-    if (controller.callsign.endsWith("DEL")) return "blue-darken-3"
-    if (controller.callsign.endsWith("GND")) return "green-darken-3"
-    if (controller.callsign.endsWith("TWR")) return "red-darken-3"
-    if (controller.callsign.endsWith("DEP")) return "purple-darken-3"
-    if (controller.callsign.endsWith("APP")) return "cyan-darken-3"
-    if (controller.callsign.endsWith("CTR")) return "grey-darken-3"
-    return "grey"
+    return colorForControllerCallsign(controller.callsign) || "grey"
+}
+
+export function colorForControllerCallsign(callsign: string) {
+    if (callsign.endsWith("DEL")) return "blue-darken-3"
+    if (callsign.endsWith("GND")) return "green-darken-3"
+    if (callsign.endsWith("TWR")) return "red-darken-3"
+    if (callsign.endsWith("DEP")) return "purple-darken-3"
+    if (callsign.endsWith("APP")) return "cyan-darken-3"
+    if (callsign.endsWith("CTR")) return "grey-darken-1"
 }
 
 export function labelForController(controller: Controller) {
-    const underscore = controller.callsign.lastIndexOf("_")
+    return labelForControllerCallsign(controller.callsign) || controller.callsign
+}
+
+export function labelForControllerCallsign(callsign: string) {
+    const underscore = callsign.lastIndexOf("_")
     if (underscore >= 0) {
-        return controller.callsign.substring(underscore + 1)
+        return callsign.substring(underscore + 1)
     }
-    return controller.callsign
 }
 
 export function compareControllers(a: Controller, b: Controller) {

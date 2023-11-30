@@ -13,7 +13,6 @@ const vatsim = useVatsimStore()
 function enter() {
     const query = search.value.toUpperCase()
     search.value = ""
-    console.log("search", query)
     // Exact matches
     if (vatsim.data && vatsim.data.pilots && vatsim.data.pilots.find((p) => p.callsign == query)) return router.push(`/flight/${query}`)
     if (vatsim.data && vatsim.data.prefiles && vatsim.data.prefiles.find((p) => p.callsign == query)) return router.push(`/flight/${query}`)
@@ -23,7 +22,7 @@ function enter() {
     if (vatsim.spy && vatsim.spy.countries && vatsim.spy.countries.find((c) => c.prefix == query)) return router.push(`/country/${query}`)
     // Partial matches
     const shortPilot = query.length == 3 && vatsim.data && vatsim.data.pilots && vatsim.data.pilots.find((p) => `${p.callsign.substring(0, 1)}${p.callsign.substring(3)}` == query)
-    if (shortPilot) return router.push(`/flight/${shortPilot.callsign}`) 
+    if (shortPilot) return router.push(`/flight/${shortPilot.callsign}`)
     // const iataAirport = vatsim.spy && vatsim.spy.airports && vatsim.spy.airports.find((a) => a.iata == query)
     // if (iataAirport) return router.push(`/airport/${iataAirport.icao}`)
     const endsPilot = vatsim.data && vatsim.data.pilots && vatsim.data.pilots.find((p) => p.callsign.endsWith(query))
@@ -35,6 +34,6 @@ function enter() {
     const startsPrefile = vatsim.data && vatsim.data.prefiles && vatsim.data.prefiles.find((p) => p.callsign.startsWith(query))
     if (startsPrefile) return router.push(`/flight/${startsPrefile.callsign}`)
     // TODO handle
-    console.log("Not found")
+    console.log(`Search ${query}: Nothing found`)
 }
 </script>

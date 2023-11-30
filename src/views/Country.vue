@@ -13,18 +13,25 @@
                 {{ controller.frequency }}<br />{{ controller.name }}
             </v-col>
         </v-row>
+        <div class="bg-grey-darken-4 pa-1 mt-5 mb-2">Active airports</div>
         <airport-top-list v-if="firs" :firs="firs.map((f) => f.icao)" class="mt-2" />
+        <div v-if="bookings.length > 0" class="mt-5 text-grey">
+            <div class="bg-grey-darken-4 pa-1 mb-2">Bookings</div>
+            <Booking v-for="booking in bookings" :key="booking.id" :value="booking" class="mt-1" />
+        </div>
     </v-container>
 </template>
 
 <script lang="ts" setup>
 import { useRoute } from "vue-router"
 import { useVatsimStore } from "@/store/vatsim"
-import { computed } from "vue"
-import { colorForController, labelForController } from "@/common"
+import { computed, inject } from "vue"
+import { colorForController } from "@/common"
 import AirportTopList from "@/components/AirportTopList.vue"
+import Booking from "@/components/Booking.vue"
 const route = useRoute()
 const vatsim = useVatsimStore()
+const moment = inject("moment")
 
 const id = computed(() => (route.params.id as string).toUpperCase())
 
@@ -50,5 +57,23 @@ const controllers = computed(() => {
             c.callsign.endsWith("_CTR") &&
             (c.callsign.startsWith(id.value) || callsignPrefixes.find((prefix) => c.callsign.startsWith(prefix)))
     )
+})
+
+const bookings = computed(() => {
+    if (!vatsim.bookings) return []
+    const callsignPrefixes: string[] = []
+    if (firs.value) {
+        for (const fir of firs.value) {
+            if (fir.callsignPrefix) callsignPrefixes.push(fir.callsignPrefix)
+        }
+    }
+    return vatsim.bookings
+        .filter(
+            (b) =>
+                b.callsign &&
+                b.callsign.endsWith("_CTR") &&
+                (b.callsign.startsWith(id.value) || callsignPrefixes.find((prefix) => b.callsign.startsWith(prefix)))
+        )
+        .sort((a, b) => moment(a.start) - moment(b.start))
 })
 </script>

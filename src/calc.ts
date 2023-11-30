@@ -10,7 +10,8 @@ export function eta(pilot: Pilot) {
         !pilot.latitude ||
         !pilot.flight_plan ||
         !pilot.flight_plan.arrival ||
-        pilot.groundspeed < constants.inflightGroundspeed
+        pilot.groundspeed < constants.inflightGroundspeed ||
+        departureDistance(pilot) < constants.atAirportDistance
     )
         return undefined
     const vatsim = useVatsimStore()

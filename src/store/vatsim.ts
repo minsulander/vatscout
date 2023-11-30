@@ -8,6 +8,8 @@ import constants from "@/constants"
 import moment from "moment"
 import { arrivalDistance, departureDistance } from "@/calc"
 
+const apiBaseUrl = "https://api.vatscout.com"
+
 export interface Controller {
     callsign: string
     cid: number
@@ -157,6 +159,17 @@ export interface VatspyData {
     uirs: UIR[]
 }
 
+export interface Booking {
+    callsign: string
+    cid: number
+    division: string
+    end: string
+    id: number
+    start: string
+    subdivision: string
+    type: string
+}
+
 export class AirportMovements {
     departed: number = 0
     departing: number = 0
@@ -188,6 +201,7 @@ export const useVatsimStore = defineStore("vatsim", () => {
     const spy = ref({} as VatspyData)
     const boundaries = ref([] as FeatureLike[])
     const traconBoundaries = ref([] as FeatureLike[])
+    const bookings = ref([] as Booking[])
     const timeUntilRefresh = ref(0)
     const refreshing = ref(0)
 
@@ -196,6 +210,7 @@ export const useVatsimStore = defineStore("vatsim", () => {
     function getMovements(airport_icao: string) {
         if (airport_icao in cachedMovements) return cachedMovements[airport_icao]
         const moves = new AirportMovements()
+        if (!data.value.pilots || !data.value.prefiles) return moves
         for (const pilot of data.value.pilots.filter(p => p.flight_plan && (p.flight_plan.departure == airport_icao || p.flight_plan.arrival == airport_icao))) {
             if (pilot.flight_plan.departure == airport_icao) {
                 if (pilot.groundspeed >= constants.inflightGroundspeed || departureDistance(pilot) >= constants.atAirportDistance)
@@ -226,11 +241,10 @@ export const useVatsimStore = defineStore("vatsim", () => {
         refreshing.value++
         try {
             const startRequest = new Date().getTime()
-            const response = await axios.get("https://data.vatsim.net/v3/vatsim-data.json")
-            const startProcessing = new Date().getTime()
+            const response = await axios.get(`${apiBaseUrl}/data`)
             data.value = response.data as VatsimData
             if (spy.value.airports && spy.value.airports.length > 0) cachedMovements = {}
-            console.log(`Got data in ${(new Date().getTime() - startRequest).toFixed()} ms, processing ${(new Date().getTime() - startProcessing).toFixed()} ms`)
+            console.log(`Got data in ${(new Date().getTime() - startRequest).toFixed()} ms`)
         } finally {
             refreshing.value--
         }
@@ -240,8 +254,7 @@ export const useVatsimStore = defineStore("vatsim", () => {
         refreshing.value++
         try {
             const startRequest = new Date().getTime()
-            const response = await axios.get("https://data.vatsim.net/v3/transceivers-data.json")
-            const startProcessing = new Date().getTime()
+            const response = await axios.get(`${apiBaseUrl}/transceivers`)
             let xcs: { [key: string]: Transceiver[] } = {}
             for (const entry of response.data) {
                 if (!(entry.callsign in xcs)) xcs[entry.callsign] = []
@@ -250,7 +263,7 @@ export const useVatsimStore = defineStore("vatsim", () => {
                 }
             }
             transceivers.value = xcs
-            console.log(`Got transceivers in ${(new Date().getTime() - startRequest).toFixed()} ms, processing ${(new Date().getTime() - startProcessing).toFixed()} ms`)
+            console.log(`Got transceivers in ${(new Date().getTime() - startRequest).toFixed()} ms`)
         } finally {
             refreshing.value--
         }
@@ -260,8 +273,7 @@ export const useVatsimStore = defineStore("vatsim", () => {
         refreshing.value++
         try {
             const startRequest = new Date().getTime()
-            const response = await axios.get("https://raw.githubusercontent.com/vatsimnetwork/vatspy-data-project/master/VATSpy.dat")
-            const startProcessing = new Date().getTime()
+            const response = await axios.get(`${apiBaseUrl}/spy`)
             let section = ""
             const spydata = { countries: [], airports: [], firs: [], uirs: [] } as VatspyData
             for (const line of response.data.replaceAll("\r", "").split("\n")) {
@@ -314,7 +326,7 @@ export const useVatsimStore = defineStore("vatsim", () => {
                 }
             }
             spy.value = spydata
-            console.log(`Got spy in ${(new Date().getTime() - startRequest).toFixed()} ms, processing ${(new Date().getTime() - startProcessing).toFixed()} ms`)
+            console.log(`Got spy in ${(new Date().getTime() - startRequest).toFixed()} ms`)
         } finally {
             refreshing.value--
         }
@@ -324,10 +336,7 @@ export const useVatsimStore = defineStore("vatsim", () => {
         refreshing.value++
         try {
             const startRequest = new Date().getTime()
-            const response = await axios.get(
-                "https://raw.githubusercontent.com/vatsimnetwork/vatspy-data-project/master/Boundaries.geojson"
-            )
-            const startProcessing = new Date().getTime()
+            const response = await axios.get(`${apiBaseUrl}/boundaries`)
             const features = new GeoJSON().readFeatures(response.data)
             // for (const feature of features) {
             //     const geometry = feature.getGeometry()
@@ -336,7 +345,7 @@ export const useVatsimStore = defineStore("vatsim", () => {
             //     }
             // }
             boundaries.value = features
-            console.log(`Got boundaries in ${(new Date().getTime() - startRequest).toFixed()} ms, processing ${(new Date().getTime() - startProcessing).toFixed()} ms`)
+            console.log(`Got boundaries in ${(new Date().getTime() - startRequest).toFixed()} ms`)
         } finally {
             refreshing.value--
         }
@@ -346,16 +355,33 @@ export const useVatsimStore = defineStore("vatsim", () => {
         refreshing.value++
         try {
             const startRequest = new Date().getTime()
-            const response = await axios.get(
-                "https://raw.githubusercontent.com/VATSIM-SSA/SSA-SimAware-Tracon-Project/main/TRACONBoundaries.geojson"
-            )
-            const startProcessing = new Date().getTime()
+            const response = await axios.get(`${apiBaseUrl}/tracon-boundaries`)
             const features = new GeoJSON().readFeatures(response.data)
             traconBoundaries.value = features
-            console.log(`Got tracon boundaries in ${(new Date().getTime() - startRequest).toFixed()} ms, processing ${(new Date().getTime() - startProcessing).toFixed()} ms`)
+            console.log(`Got tracon boundaries in ${(new Date().getTime() - startRequest).toFixed()} ms`)
         } finally {
             refreshing.value--
         }
+    }
+
+    async function fetchBookings() {
+        refreshing.value++
+        try {
+            const startRequest = new Date().getTime()
+            const response = await axios.get(`${apiBaseUrl}/bookings`)
+            for (const d of response.data) {
+                if (d.start) d.start += "Z"
+                if (d.end) d.end += "Z"
+            }
+            bookings.value = response.data as Booking[]
+            console.log(`Got bookings in ${(new Date().getTime() - startRequest).toFixed()} ms`)
+        } finally {
+            refreshing.value--
+        }
+    }
+
+    async function fetchEvents() {
+
     }
 
     if (!(window as any).refreshInterval) {
@@ -367,9 +393,10 @@ export const useVatsimStore = defineStore("vatsim", () => {
                     fetchData()
                     fetchTransceivers()
                     // TODO get spy, boundaries, traconboundaries at lower interval
-                    if (!spy.value.countries) setTimeout(() => fetchSpy(), 500)
-                    if (boundaries.value.length == 0) setTimeout(() => fetchBoundaries(), 1000)
-                    if (traconBoundaries.value.length == 0) setTimeout(() => fetchTraconBoundaries(), 1500)
+                    if (!spy.value.countries) setTimeout(() => fetchSpy(), 200)
+                    if (boundaries.value.length == 0) setTimeout(() => fetchBoundaries(), 400)
+                    if (traconBoundaries.value.length == 0) setTimeout(() => fetchTraconBoundaries(), 600)
+                    if (bookings.value.length == 0) setTimeout(() => fetchBookings(), 800)
                 } else {
                     console.log("Not refreshing - not visible")
                 }
@@ -399,6 +426,7 @@ export const useVatsimStore = defineStore("vatsim", () => {
         spy,
         boundaries,
         traconBoundaries,
+        bookings,
         getMovements,
         timeUntilRefresh,
         refreshing,
@@ -407,5 +435,6 @@ export const useVatsimStore = defineStore("vatsim", () => {
         fetchSpy,
         fetchBoundaries,
         fetchTraconBoundaries,
+        fetchBookings
     }
 })

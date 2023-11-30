@@ -20,7 +20,7 @@
             <span v-if="arrival && eta">
                 {{ moment(eta).utcOffset(0).format("HHmm") }}
             </span>
-            <span v-else-if="departure && pending && value.flight_plan.deptime && value.flight_plan.deptime != '0000'">
+            <span v-else-if="departure && (pending || prefile) && value.flight_plan.deptime && value.flight_plan.deptime != '0000'">
                 {{ value.flight_plan.deptime }}
             </span>
             <span v-else-if="arrival && pending && flightplanArrivalTime(value.flight_plan)" style="opacity: 0.5">
@@ -39,15 +39,13 @@
 
 <script setup lang="ts">
 import constants from "@/constants"
-import { Pilot, Prefile, useVatsimStore } from "@/store/vatsim"
+import { Pilot, Prefile } from "@/store/vatsim"
 import { computed, inject } from "vue"
-import * as turf from "@turf/turf"
 import * as calc from "@/calc"
 import { useRouter } from "vue-router"
 import { flightplanArrivalTime } from "@/calc"
 const router = useRouter()
 const moment = inject("moment")
-const vatsim = useVatsimStore()
 const props = defineProps<{ value: Pilot | Prefile; departure?: boolean; arrival?: boolean; prefile?: boolean; hideIcao?: boolean }>()
 
 const pending = computed(() => {

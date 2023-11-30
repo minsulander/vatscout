@@ -1,25 +1,25 @@
 <template>
     <div>
         <v-row v-for="airport in activeAirports" :key="airport.icao" no-gutters class="py-1" @click="clickAirport(airport)">
-            <v-col sm="1">
+            <v-col cols="3" sm="1">
                 {{ airport.icao }}
             </v-col>
-            <v-col sm="5">{{ airport.name }} </v-col>
-            <v-col sm="1" class="text-right">
+            <v-col cols="9" sm="5">{{ airport.name }} </v-col>
+            <v-col cols="2" sm="1" class="text-center">
                 <span v-if="vatsim.getMovements(airport.icao).prefiledDepartures" class="text-grey mr-3">{{
                     vatsim.getMovements(airport.icao).prefiledDepartures
                 }}</span>
                 <span v-if="vatsim.getMovements(airport.icao).departing">{{ vatsim.getMovements(airport.icao).departing }}</span>
                 <span v-if="vatsim.getMovements(airport.icao).departed" class="text-blue-darken-2 ml-3">{{  vatsim.getMovements(airport.icao).departed }}</span>
             </v-col>
-            <v-col sm="1" class="text-right">
+            <v-col cols="2" sm="1" class="text-center">
                 <span v-if="vatsim.getMovements(airport.icao).prefiledArrivals" class="text-grey mr-3">{{
                     vatsim.getMovements(airport.icao).prefiledArrivals
                 }}</span>
                 <span v-if="vatsim.getMovements(airport.icao).arriving">{{ vatsim.getMovements(airport.icao).arriving }}</span>
                 <span v-if="vatsim.getMovements(airport.icao).arrived" class="text-brown-lighten-1 ml-3">{{  vatsim.getMovements(airport.icao).arrived }}</span>
             </v-col>
-            <v-col sm="4" class="text-right">
+            <v-col cols="8" sm="4" class="text-right">
                 <span v-for="atis in atises(airport)" :key="atis.callsign" class="mr-3">
                     <v-tooltip :text="`${atis.callsign} ${atis.frequency} ${atis.name}`" location="bottom">
                         <template v-slot:activator="{ props }">
