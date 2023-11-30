@@ -24,7 +24,7 @@
                 {{ value.flight_plan.deptime }}
             </span>
             <span v-else-if="arrival && pending && flightplanArrivalTime(value.flight_plan)" style="opacity: 0.5">
-                {{ flightplanArrivalTime(value.flight_plan).format("HHmm") }}
+                {{ flightplanArrivalTime(value.flight_plan)!.format("HHmm") }}
             </span>
         </v-col>
     </v-row>
@@ -44,8 +44,8 @@ import { computed, inject } from "vue"
 import * as calc from "@/calc"
 import { useRouter } from "vue-router"
 import { flightplanArrivalTime } from "@/calc"
+import moment from "moment"
 const router = useRouter()
-const moment = inject("moment")
 const props = defineProps<{ value: Pilot | Prefile; departure?: boolean; arrival?: boolean; prefile?: boolean; hideIcao?: boolean }>()
 
 const pending = computed(() => {

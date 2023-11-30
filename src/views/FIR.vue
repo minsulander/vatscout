@@ -28,9 +28,9 @@ import { computed, inject } from "vue"
 import { colorForController, compareControllers, labelForController } from "@/common"
 import AirportTopList from "@/components/AirportTopList.vue"
 import Booking from "@/components/Booking.vue"
+import moment from "moment"
 const route = useRoute()
 const vatsim = useVatsimStore()
-const moment = inject("moment")
 
 const id = computed(() => (route.params.id as string).toUpperCase())
 
@@ -45,7 +45,7 @@ const controllers = computed(() => {
 
 const bookings = computed(() => {
     if (!vatsim.bookings) return []
-    return vatsim.bookings.filter((b) => isMatchingCallsign(b.callsign) /* || isAirportCallsign(b.callsign)*/).sort((a, b) => moment(a.start) - moment(b.start))
+    return vatsim.bookings.filter((b) => isMatchingCallsign(b.callsign) /* || isAirportCallsign(b.callsign)*/).sort((a, b) => moment(a.start).diff(moment(b.start)))
 })
 
 function isMatchingCallsign(callsign: string) {

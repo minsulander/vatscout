@@ -137,7 +137,7 @@ import { useVatsimStore } from "@/store/vatsim"
 import { computed, inject } from "vue"
 import FlightRow from "@/components/FlightRow.vue"
 import { arrivalDistance, departureDistance } from "@/calc";
-const moment = inject("moment")
+import moment from "moment"
 const route = useRoute()
 const vatsim = useVatsimStore()
 

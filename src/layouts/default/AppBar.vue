@@ -34,8 +34,8 @@ import constants from "@/constants"
 import { useVatsimStore } from "@/store/vatsim"
 import { inject } from "vue"
 import { computed } from "vue"
+import moment from "moment"
 const vatsim = useVatsimStore()
-const moment = inject("moment")
 
 const progress = computed(() => (vatsim.timeUntilRefresh * 100) / constants.refreshInterval)
 

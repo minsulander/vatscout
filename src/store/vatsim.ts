@@ -52,12 +52,13 @@ export interface GeneralData {
     unique_users: number
     update: string
     update_timestamp: string
+    connected_clients: number
 }
 
 export interface FlightPlan {
     aircraft: string
     aircraft_faa: string
-    aicraft_short: string
+    aircraft_short: string
     alternate: string
     altitude: string
     arrival: string
@@ -337,7 +338,7 @@ export const useVatsimStore = defineStore("vatsim", () => {
         try {
             const startRequest = new Date().getTime()
             const response = await axios.get(`${apiBaseUrl}/boundaries`)
-            const features = new GeoJSON().readFeatures(response.data)
+            const features = new GeoJSON().readFeatures(response.data) as FeatureLike[]
             // for (const feature of features) {
             //     const geometry = feature.getGeometry()
             //     if (geometry.intersectsCoordinate([19, 59])) {
@@ -356,7 +357,7 @@ export const useVatsimStore = defineStore("vatsim", () => {
         try {
             const startRequest = new Date().getTime()
             const response = await axios.get(`${apiBaseUrl}/tracon-boundaries`)
-            const features = new GeoJSON().readFeatures(response.data)
+            const features = new GeoJSON().readFeatures(response.data) as FeatureLike[]
             traconBoundaries.value = features
             console.log(`Got tracon boundaries in ${(new Date().getTime() - startRequest).toFixed()} ms`)
         } finally {

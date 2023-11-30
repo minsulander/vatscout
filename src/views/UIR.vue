@@ -12,7 +12,7 @@
 import { useRoute } from "vue-router"
 import { useVatsimStore } from "@/store/vatsim"
 import { computed, inject } from "vue"
-const moment = inject("moment")
+import moment from "moment"
 const route = useRoute()
 const vatsim = useVatsimStore()
 

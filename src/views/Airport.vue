@@ -79,8 +79,8 @@ import { colorForController, compareControllers, labelForController } from "@/co
 import { eta, departureDistance, arrivalDistance, flightplanArrivalTime } from "@/calc"
 import FlightRow from "@/components/FlightRow.vue"
 import Booking from "@/components/Booking.vue"
+import moment from "moment"
 
-const moment = inject("moment")
 const route = useRoute()
 const vatsim = useVatsimStore()
 
@@ -131,7 +131,7 @@ const arrivingPilots = computed(() => {
         .sort((a, b) => {
             const etaA = eta(a) || flightplanArrivalTime(a.flight_plan)
             const etaB = eta(b) || flightplanArrivalTime(b.flight_plan)
-            if (etaA && etaB) return etaA - etaB
+            if (etaA && etaB) return etaA.diff(etaB)
             else if (etaA) return -1
             else if (etaB) return 1
             else return a.callsign.localeCompare(b.callsign)
@@ -168,7 +168,7 @@ const controllers = computed(() => {
 
 const bookings = computed(() => {
     if (!vatsim.bookings) return []
-    return vatsim.bookings.filter((b) => isMatchingCallsign(b.callsign)).sort((a,b) => moment(a.start) - moment(b.start))
+    return vatsim.bookings.filter((b) => isMatchingCallsign(b.callsign)).sort((a,b) => moment(a.start).diff(moment(b.start)))
 })
 
 function isMatchingCallsign(callsign: string) {

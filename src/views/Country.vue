@@ -29,9 +29,9 @@ import { computed, inject } from "vue"
 import { colorForController } from "@/common"
 import AirportTopList from "@/components/AirportTopList.vue"
 import Booking from "@/components/Booking.vue"
+import moment from "moment"
 const route = useRoute()
 const vatsim = useVatsimStore()
-const moment = inject("moment")
 
 const id = computed(() => (route.params.id as string).toUpperCase())
 
@@ -74,6 +74,6 @@ const bookings = computed(() => {
                 b.callsign.endsWith("_CTR") &&
                 (b.callsign.startsWith(id.value) || callsignPrefixes.find((prefix) => b.callsign.startsWith(prefix)))
         )
-        .sort((a, b) => moment(a.start) - moment(b.start))
+        .sort((a, b) => moment(a.start).diff(moment(b.start)))
 })
 </script>

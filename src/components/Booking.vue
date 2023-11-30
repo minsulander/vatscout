@@ -24,7 +24,6 @@
 <script setup lang="ts">
 import { colorForControllerCallsign, labelForControllerCallsign } from "@/common"
 import { Booking } from "@/store/vatsim"
-import { inject } from "vue"
+import moment from "moment"
 const props = defineProps<{ value: Booking }>()
-const moment = inject("moment")
 </script>
