@@ -30,8 +30,10 @@ import { colorForController } from "@/common"
 import AirportTopList from "@/components/AirportTopList.vue"
 import Booking from "@/components/Booking.vue"
 import moment from "moment"
+import { useSettingsStore } from "@/store/settings"
 const route = useRoute()
 const vatsim = useVatsimStore()
+const settings = useSettingsStore()
 
 const id = computed(() => (route.params.id as string).toUpperCase())
 
@@ -72,7 +74,9 @@ const bookings = computed(() => {
             (b) =>
                 b.callsign &&
                 b.callsign.endsWith("_CTR") &&
-                (b.callsign.startsWith(id.value) || callsignPrefixes.find((prefix) => b.callsign.startsWith(prefix)))
+                (b.callsign.startsWith(id.value) || callsignPrefixes.find((prefix) => b.callsign.startsWith(prefix))) &&
+                moment(b.start) &&
+                moment(b.start).utcOffset(0).isBefore(moment().add(settings.bookingsMaxHours, "hour"))
         )
         .sort((a, b) => moment(a.start).diff(moment(b.start)))
 })

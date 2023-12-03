@@ -29,8 +29,10 @@ import { colorForController, compareControllers, labelForController } from "@/co
 import AirportTopList from "@/components/AirportTopList.vue"
 import Booking from "@/components/Booking.vue"
 import moment from "moment"
+import { useSettingsStore } from "@/store/settings"
 const route = useRoute()
 const vatsim = useVatsimStore()
+const settings = useSettingsStore()
 
 const id = computed(() => (route.params.id as string).toUpperCase())
 
@@ -45,7 +47,14 @@ const controllers = computed(() => {
 
 const bookings = computed(() => {
     if (!vatsim.bookings) return []
-    return vatsim.bookings.filter((b) => isMatchingCallsign(b.callsign) /* || isAirportCallsign(b.callsign)*/).sort((a, b) => moment(a.start).diff(moment(b.start)))
+    return vatsim.bookings
+        .filter(
+            (b) =>
+                isMatchingCallsign(b.callsign) /* || isAirportCallsign(b.callsign)*/ &&
+                moment(b.start) &&
+                moment(b.start).utcOffset(0).isBefore(moment().add(settings.bookingsMaxHours, "hour"))
+        )
+        .sort((a, b) => moment(a.start).diff(moment(b.start)))
 })
 
 function isMatchingCallsign(callsign: string) {
@@ -60,7 +69,7 @@ function isMatchingCallsign(callsign: string) {
 // extracting bookings for airports this way on FIR / country pages takes too long...
 function isAirportCallsign(callsign: string) {
     if (!fir.value) return false
-    const airport = vatsim.spy.airports.find(a => a.icao == callsign.substring(0, 4))
+    const airport = vatsim.spy.airports.find((a) => a.icao == callsign.substring(0, 4))
     if (airport && airport.fir == fir.value.icao) return true
     return false
 }

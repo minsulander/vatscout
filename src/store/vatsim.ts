@@ -1,4 +1,3 @@
-// Utilities
 import { defineStore } from "pinia"
 import { ref, reactive } from "vue"
 import axios from "axios"
@@ -6,7 +5,8 @@ import GeoJSON from "ol/format/GeoJSON"
 import FeatureLike from "ol/Feature"
 import constants from "@/constants"
 import moment from "moment"
-import { arrivalDistance, departureDistance } from "@/calc"
+import { arrivalDistance, departureDistance, eta, flightplanArrivalTime, flightplanDepartureTime } from "@/calc"
+import { useSettingsStore } from "./settings"
 
 const apiBaseUrl = "https://api.vatscout.com"
 
@@ -197,6 +197,8 @@ export class AirportMovements {
 }
 
 export const useVatsimStore = defineStore("vatsim", () => {
+    const settings = useSettingsStore()
+
     const data = ref({} as VatsimData)
     const transceivers = ref({} as { [key: string]: Transceiver[] })
     const spy = ref({} as VatspyData)
@@ -212,25 +214,47 @@ export const useVatsimStore = defineStore("vatsim", () => {
         if (airport_icao in cachedMovements) return cachedMovements[airport_icao]
         const moves = new AirportMovements()
         if (!data.value.pilots || !data.value.prefiles) return moves
-        for (const pilot of data.value.pilots.filter(p => p.flight_plan && (p.flight_plan.departure == airport_icao || p.flight_plan.arrival == airport_icao))) {
-            if (pilot.flight_plan.departure == airport_icao) {
-                if (pilot.groundspeed >= constants.inflightGroundspeed || departureDistance(pilot) >= constants.atAirportDistance)
+        for (const p of data.value.pilots.filter(
+            (p) => p.flight_plan && (p.flight_plan.departure == airport_icao || p.flight_plan.arrival == airport_icao)
+        )) {
+            if (p.flight_plan.departure == airport_icao) {
+                if (
+                    (p.groundspeed >= constants.inflightGroundspeed || departureDistance(p) >= constants.atAirportDistance) &&
+                    departureDistance(p) < settings.departedMaxRange
+                )
                     moves.departed++
-                else if (pilot.groundspeed < constants.inflightGroundspeed && departureDistance(pilot) < constants.atAirportDistance)
+                else if (p.groundspeed < constants.inflightGroundspeed && departureDistance(p) < constants.atAirportDistance)
                     moves.departing++
             }
-            if (pilot.flight_plan.arrival == airport_icao) {
-                if (pilot.groundspeed >= constants.inflightGroundspeed || arrivalDistance(pilot) >= constants.atAirportDistance)
+            if (p.flight_plan.arrival == airport_icao) {
+                const departed = p.groundspeed >= constants.inflightGroundspeed || departureDistance(p) >= constants.atAirportDistance
+                const etaOrArrivalTime = eta(p) || flightplanArrivalTime(p.flight_plan, !departed)
+                if (
+                    (p.groundspeed >= constants.inflightGroundspeed || arrivalDistance(p) >= constants.atAirportDistance) &&
+                    (!etaOrArrivalTime || etaOrArrivalTime.isBefore(moment().add(settings.arrivingMaxMinutes, "minute")))
+                )
                     moves.arriving++
-                else if (pilot.groundspeed < constants.inflightGroundspeed && arrivalDistance(pilot) < constants.atAirportDistance)
-                    moves.arrived++
+                else if (p.groundspeed < constants.inflightGroundspeed && arrivalDistance(p) < constants.atAirportDistance) moves.arrived++
             }
         }
-        for (const prefile of data.value.prefiles.filter(p => p.flight_plan && (p.flight_plan.departure == airport_icao || p.flight_plan.arrival == airport_icao))) {
-            if (prefile.flight_plan.departure == airport_icao) {
+        for (const p of data.value.prefiles.filter(
+            (p) => p.flight_plan && (p.flight_plan.departure == airport_icao || p.flight_plan.arrival == airport_icao)
+        )) {
+            if (
+                p.flight_plan.departure == airport_icao &&
+                (!flightplanDepartureTime(p.flight_plan) ||
+                    (flightplanDepartureTime(p.flight_plan)?.isAfter(moment().subtract(settings.prefileMaxTardinessMinutes, "minute")) &&
+                        flightplanDepartureTime(p.flight_plan)?.isBefore(moment().add(settings.prefileDepartureMaxMinutes, "minute"))))
+            ) {
                 moves.prefiledDepartures++
             }
-            if (prefile.flight_plan.arrival == airport_icao) {
+            if (
+                p.flight_plan.arrival == airport_icao &&
+                (!flightplanArrivalTime(p.flight_plan) ||
+                    flightplanArrivalTime(p.flight_plan)?.isBefore(moment().add(settings.arrivingMaxMinutes, "minute"))) &&
+                (!flightplanDepartureTime(p.flight_plan) ||
+                    flightplanDepartureTime(p.flight_plan)?.isAfter(moment().subtract(settings.prefileMaxTardinessMinutes, "minute")))
+            ) {
                 moves.prefiledArrivals++
             }
         }
@@ -381,9 +405,7 @@ export const useVatsimStore = defineStore("vatsim", () => {
         }
     }
 
-    async function fetchEvents() {
-
-    }
+    async function fetchEvents() {}
 
     if (!(window as any).refreshInterval) {
         ;(window as any).refreshInterval = setInterval(() => {
@@ -436,6 +458,6 @@ export const useVatsimStore = defineStore("vatsim", () => {
         fetchSpy,
         fetchBoundaries,
         fetchTraconBoundaries,
-        fetchBookings
+        fetchBookings,
     }
 })

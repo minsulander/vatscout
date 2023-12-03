@@ -65,7 +65,7 @@
 
         <div v-if="bookings.length > 0" class="mt-5 text-grey">
             <div class="bg-grey-darken-4 pa-1 mb-2">Bookings</div>
-            <Booking v-for="booking in bookings" :key="booking.id" :value="booking" class="mt-1"/>
+            <Booking v-for="booking in bookings" :key="booking.id" :value="booking" class="mt-1" />
         </div>
     </v-container>
 </template>
@@ -73,16 +73,18 @@
 <script lang="ts" setup>
 import { useRoute } from "vue-router"
 import { useVatsimStore } from "@/store/vatsim"
+import { useSettingsStore } from "@/store/settings"
 import { computed, inject } from "vue"
 import constants from "@/constants"
 import { colorForController, compareControllers, labelForController } from "@/common"
-import { eta, departureDistance, arrivalDistance, flightplanArrivalTime } from "@/calc"
+import { eta, departureDistance, arrivalDistance, flightplanArrivalTime, flightplanDepartureTime } from "@/calc"
 import FlightRow from "@/components/FlightRow.vue"
 import Booking from "@/components/Booking.vue"
 import moment from "moment"
 
 const route = useRoute()
 const vatsim = useVatsimStore()
+const settings = useSettingsStore()
 
 const id = computed(() => (route.params.id as string).toUpperCase())
 
@@ -97,7 +99,8 @@ const departedPilots = computed(() => {
             (p) =>
                 p.flight_plan &&
                 p.flight_plan.departure == id.value &&
-                (p.groundspeed >= constants.inflightGroundspeed || departureDistance(p) >= constants.atAirportDistance)
+                (p.groundspeed >= constants.inflightGroundspeed || departureDistance(p) >= constants.atAirportDistance) &&
+                departureDistance(p) < settings.departedMaxRange
         )
         .sort((a, b) => departureDistance(a) - departureDistance(b))
 })
@@ -116,18 +119,28 @@ const departingPilots = computed(() => {
 const departurePrefiles = computed(() => {
     if (!vatsim.data || !vatsim.data.prefiles) return []
     return vatsim.data.prefiles
-        .filter((p) => p.flight_plan && p.flight_plan.departure == id.value)
+        .filter(
+            (p) =>
+                p.flight_plan &&
+                p.flight_plan.departure == id.value &&
+                (!flightplanDepartureTime(p.flight_plan) ||
+                    (flightplanDepartureTime(p.flight_plan)?.isAfter(moment().subtract(settings.prefileMaxTardinessMinutes, "minute")) &&
+                        flightplanDepartureTime(p.flight_plan)?.isBefore(moment().add(settings.prefileDepartureMaxMinutes, "minute"))))
+        )
         .sort((a, b) => a.flight_plan.deptime.localeCompare(b.flight_plan.deptime))
 })
 const arrivingPilots = computed(() => {
     if (!vatsim.data || !vatsim.data.pilots) return []
     return vatsim.data.pilots
-        .filter(
-            (p) =>
-                p.flight_plan &&
-                p.flight_plan.arrival == id.value &&
-                (p.groundspeed >= constants.inflightGroundspeed || arrivalDistance(p) >= constants.atAirportDistance)
-        )
+        .filter((p) => {
+            if (!p.flight_plan || p.flight_plan.arrival != id.value) return false
+            const departed = p.groundspeed >= constants.inflightGroundspeed || departureDistance(p) >= constants.atAirportDistance
+            const etaOrArrivalTime = eta(p) || flightplanArrivalTime(p.flight_plan, !departed)
+            return (
+                (p.groundspeed >= constants.inflightGroundspeed || arrivalDistance(p) >= constants.atAirportDistance) &&
+                (!etaOrArrivalTime || etaOrArrivalTime.isBefore(moment().add(settings.arrivingMaxMinutes, "minute")))
+            )
+        })
         .sort((a, b) => {
             const etaA = eta(a) || flightplanArrivalTime(a.flight_plan)
             const etaB = eta(b) || flightplanArrivalTime(b.flight_plan)
@@ -149,7 +162,22 @@ const arrivedPilots = computed(() => {
 })
 const arrivalPrefiles = computed(() => {
     if (!vatsim.data || !vatsim.data.prefiles) return []
-    return vatsim.data.prefiles.filter((p) => p.flight_plan && p.flight_plan.arrival == id.value)
+    return vatsim.data.prefiles
+        .filter(
+            (p) =>
+                p.flight_plan &&
+                p.flight_plan.arrival == id.value &&
+                (!flightplanArrivalTime(p.flight_plan) ||
+                    flightplanArrivalTime(p.flight_plan)?.isBefore(moment().add(settings.arrivingMaxMinutes, "minute"))) &&
+                (!flightplanDepartureTime(p.flight_plan) ||
+                    flightplanDepartureTime(p.flight_plan)?.isAfter(moment().subtract(settings.prefileMaxTardinessMinutes, "minute")))
+        )
+        .sort((a, b) => {
+            const arrivalTimeA = flightplanArrivalTime(a.flight_plan)
+            const arrivalTimeB = flightplanArrivalTime(b.flight_plan)
+            if (arrivalTimeA && arrivalTimeB) return arrivalTimeA.diff(arrivalTimeB)
+            return moment(a.last_updated).diff(b.last_updated)
+        })
 })
 
 const fir = computed(() => vatsim.spy && vatsim.spy.firs && vatsim.spy.firs.find((f) => airport.value && f.icao == airport.value.fir))
@@ -168,7 +196,14 @@ const controllers = computed(() => {
 
 const bookings = computed(() => {
     if (!vatsim.bookings) return []
-    return vatsim.bookings.filter((b) => isMatchingCallsign(b.callsign)).sort((a,b) => moment(a.start).diff(moment(b.start)))
+    return vatsim.bookings
+        .filter(
+            (b) =>
+                moment(b.start) &&
+                moment(b.start).utcOffset(0).isBefore(moment().add(settings.bookingsMaxHours, "hour")) &&
+                isMatchingCallsign(b.callsign)
+        )
+        .sort((a, b) => moment(a.start).diff(moment(b.start)))
 })
 
 function isMatchingCallsign(callsign: string) {
