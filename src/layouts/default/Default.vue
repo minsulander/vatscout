@@ -1,6 +1,6 @@
 <template>
   <v-app>
-    <default-bar />
+    <default-bar v-if="$route.path.length > 1"/>
 
     <default-view />
   </v-app>

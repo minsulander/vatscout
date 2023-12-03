@@ -1,16 +1,16 @@
 <template>
     <v-container>
         <v-row align="center">
-            <v-col cols="6" sm="3">
+            <v-col cols="6" md="3">
                 <div class="text-h3">{{ id }}</div>
             </v-col>
-            <v-col cols="6" sm="3" class="text-center">
+            <v-col cols="6" md="3" class="text-center">
                 <div v-if="flightplan" class="text-h5 font-weight-light pt-5" style="display: inline">{{ flightplan.aircraft_short }}</div>
                 <v-chip v-if="prefile" variant="flat" size="small" label color="grey-darken-2" class="ml-2" style="margin-top: -10px"
                     >PREFILE</v-chip
                 >
             </v-col>
-            <v-col cols="12" sm="6" style="white-space: nowrap">
+            <v-col cols="12" md="6" style="white-space: nowrap">
                 <span v-if="flightplan">
                     <div class="float-right mb-1">
                         <router-link :to="`/airport/${flightplan.arrival}`" class="pa-1">
@@ -41,7 +41,9 @@
                 </div>
             </v-col>
         </v-row>
-        <div v-if="pilot" class="mt-3">
+
+        
+        <div v-if="pilot" class="mt-5">
             <v-row align="baseline" no-gutters>
                 <v-col cols="2" sm="1" class="text-right pr-2 text-caption text-grey">Pilot</v-col>
                 <v-col cols="10" sm="5">
@@ -89,7 +91,7 @@
                 </v-col>
             </v-row>
         </div>
-        <div v-else-if="prefile">
+        <div v-else-if="prefile" class="mt-5">
             <v-row no-gutters align="baseline">
                 <v-col cols="2" sm="1" class="text-right pr-2 text-caption text-grey">Prefiled</v-col>
                 <v-col cols="10" sm="5">
@@ -101,7 +103,7 @@
                 </v-col>
             </v-row>
         </div>
-        <div v-if="flightplan" class="mt-4">
+        <div v-if="flightplan" class="mt-5">
             <div class="bg-grey-darken-4 text-grey-lighten-1 pa-1 mb-2">Flightplan</div>
 
             <v-row no-gutters align="baseline">

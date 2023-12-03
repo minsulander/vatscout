@@ -1,11 +1,16 @@
 <template>
     <v-app-bar>
-        <v-app-bar-title class="text-grey font-weight-light"> VATScout </v-app-bar-title>
-        <v-row class="mt-1">
-            <v-col sm="10">
+        <v-row align="center">
+            <v-col cols="1">
+                <v-btn icon plain @click="$router.back()" color="grey"><v-icon size="x-large">mdi-chevron-left</v-icon></v-btn>
+            </v-col>
+            <v-col cols="9">
                 <Search />
             </v-col>
-            <v-col sm="1" class="pt-4">
+            <v-col cols="1">
+                <v-btn icon plain to="/settings" color="grey-darken-2"><v-icon size="x-large">mdi-cog-outline</v-icon></v-btn>
+            </v-col>
+            <v-col cols="1">
                 <v-progress-circular
                     :model-value="progress"
                     :indeterminate="vatsim.refreshing > 0"

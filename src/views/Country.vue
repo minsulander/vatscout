@@ -33,7 +33,7 @@
             </v-row>
         </div>
         <airport-top-list v-if="firs" :firs="firs.map((f) => f.icao)" class="mt-2" />
-        <div v-if="firs.length > 0" class="mt-5">
+        <div v-if="firs && firs.length > 0" class="mt-5">
             <div class="bg-grey-darken-4 text-grey-lighten-1 pa-1 mb-2">FIRs</div>
             <v-row>
                 <v-col cols="12" sm="4" v-for="fir in firs" @click="router.push(`/fir/${fir.icao}`)" class="fir">
