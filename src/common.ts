@@ -25,11 +25,15 @@ export function labelForControllerCallsign(callsign: string) {
 }
 
 export function compareControllers(a: Controller, b: Controller) {
+    return compareCallsigns(a.callsign, b.callsign)
+}
+
+export function compareCallsigns(a: string, b: string) {
     let aOrder = 999, bOrder = 999
     const suffixes = [ "DEL", "GND", "TWR", "DEP", "APP", "CTR" ]
     for (let i = 0; i < suffixes.length; i++) {
-        if (a.callsign.endsWith(suffixes[i])) aOrder = i
-        if (b.callsign.endsWith(suffixes[i])) bOrder = i
+        if (a.endsWith(suffixes[i])) aOrder = i
+        if (b.endsWith(suffixes[i])) bOrder = i
     }
-    return aOrder > bOrder ? 1 : -1
+    return aOrder == bOrder ? 0 : aOrder > bOrder ? 1 : -1
 }

@@ -1,8 +1,18 @@
 <template>
     <v-container>
-        <div class="text-h3">{{ id }}</div>
+        <v-row>
+            <v-col cols="4">
+                <div class="text-h3">{{ id }}</div>
+            </v-col>
+            <v-col cols="8" class="text-right text-grey-lighten-1 text-h6 font-weight-light">
+                <div v-if="fir" class="mt-3">
+                    {{ fir.name }}<span v-if="fir.callsignPrefix"> | {{ fir.callsignPrefix }}</span> |
+                    <router-link :to="`/country/${id.substring(0, 2)}`" class="pa-1">{{ id.substring(0, 2) }}</router-link>
+                </div>
+            </v-col>
+        </v-row>
         <div v-if="fir">
-            {{ fir.name }}<span v-if="fir.callsignPrefix"> | {{ fir.callsignPrefix }}</span>
+            
         </div>
         <v-row class="mt-2">
             <v-col sm="3" v-for="controller in controllers">
@@ -10,14 +20,22 @@
                     >{{ controller.callsign }}
                 </v-chip>
                 {{ controller.frequency }}<br />{{ controller.name }}
+                <span class="text-grey">{{ moment.utc(moment().diff(moment(controller.logon_time))).format("HHmm") }}</span>
             </v-col>
         </v-row>
-        <div class="bg-grey-darken-4 pa-1 mt-5 mb-2">Active airports</div>
-        <airport-top-list :fir="id" class="mt-2" />
         <div v-if="bookings.length > 0" class="mt-5 text-grey">
-            <div class="bg-grey-darken-4 pa-1 mb-2">Bookings</div>
+            <div class="bg-grey-darken-4 text-grey-lighten-1 pa-1 mb-2">Bookings</div>
             <Booking v-for="booking in bookings" :key="booking.id" :value="booking" class="mt-1" />
         </div>
+        <div class="bg-grey-darken-4 text-grey-lighten-1 pa-1 mt-5 mb-2">
+            <v-row>
+                <v-col cols="6" sm="6">Active airports </v-col>
+                <v-col cols="3" sm="1" class="text-center"><v-icon>mdi-airplane-takeoff</v-icon></v-col>
+                <v-col cols="3" sm="1" class="text-center"><v-icon>mdi-airplane-landing</v-icon></v-col>
+                <v-col cols="3" sm="4" class="text-right d-none d-sm-block"><v-icon>mdi-antenna</v-icon></v-col>
+            </v-row>
+        </div>
+        <airport-top-list :fir="id" class="mt-2" />
     </v-container>
 </template>
 
@@ -69,7 +87,7 @@ function isMatchingCallsign(callsign: string) {
 // extracting bookings for airports this way on FIR / country pages takes too long...
 function isAirportCallsign(callsign: string) {
     if (!fir.value) return false
-    const airport = vatsim.spy.airports.find((a) => a.icao == callsign.substring(0, 4))
+    const airport = vatsim.airportByIcao[callsign.substring(0, 4)]
     if (airport && airport.fir == fir.value.icao) return true
     return false
 }

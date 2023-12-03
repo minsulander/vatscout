@@ -26,6 +26,7 @@
             <span v-else-if="arrival && pending && flightplanArrivalTime(value.flight_plan)" style="opacity: 0.5">
                 {{ flightplanArrivalTime(value.flight_plan)!.format("HHmm") }}
             </span>
+            <v-chip size="small" label class="float-right" v-if="value.flight_plan.flight_rules == 'V'">VFR</v-chip>
         </v-col>
     </v-row>
 </template>
@@ -60,8 +61,10 @@ const eta = computed(() => calc.eta(props.value as Pilot))
 
 const rowclass = computed(() => {
     if (props.prefile) return "text-grey"
-    if (props.departure && !pending.value) return "text-blue-darken-2"
+    if (props.departure && !pending.value) return "text-cyan-darken-3"
     if (props.arrival && !pending.value) return "text-brown-lighten-1"
+    if (props.departure) return "text-cyan-lighten-2"
+    if (props.arrival) return "text-yellow-lighten-2"
     return ""
 })
 

@@ -8,3 +8,11 @@
 // @use 'vuetify/settings' with (
 //   $color-pack: false
 // );
+
+a {
+    text-decoration: none;
+    color: white;
+}
+a:hover {
+    background: #333;
+}

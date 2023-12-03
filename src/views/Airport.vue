@@ -4,10 +4,16 @@
             <v-col cols="4">
                 <div class="text-h3">{{ id }}</div>
             </v-col>
-            <v-col cols="8" class="text-right">
+            <v-col cols="8" class="text-right text-grey-lighten-1 text-h6 font-weight-light">
                 <div v-if="airport" class="mt-3">
-                    <span v-if="airport.iata">{{ airport.iata }} | </span>
-                    {{ airport.name }} | {{ airport.fir }}
+                    <span v-if="airport.iata"
+                        ><span class="pa-1">{{ airport.iata }}</span> |
+                    </span>
+                    <span class="pa-1">{{ airport.name }}</span> |
+                    <router-link :to="`/fir/${airport.fir}`" class="pa-1">{{ airport.fir }}</router-link> |
+                    <router-link :to="`/country/${airport.fir.substring(0, 2)}`" class="pa-1">{{
+                        airport.fir.substring(0, 2)
+                    }}</router-link>
                 </div>
             </v-col>
         </v-row>
@@ -16,26 +22,33 @@
                 <v-chip variant="flat" elevated label size="small" color="yellow-darken-4" class="text-white font-weight-bold mb-1"
                     >{{ atis.atis_code }}
                 </v-chip>
-                {{ atis.frequency }} {{ atis.callsign.replace(`${id}_`, "") }}<br />
+                {{ atis.frequency }} {{ atis.callsign.replace(`${id}_`, "") }} {{ atis.name }}
+                <span class="text-grey">{{ moment.utc(moment().diff(moment(atis.logon_time))).format("HHmm") }}</span>
+                <br />
                 <div class="text-caption text-grey">
                     {{ atis.text_atis?.join("\n") }}
                 </div>
             </v-col>
             <v-col cols="6" sm="3" lg="2" v-for="controller in controllers">
                 <v-chip variant="flat" elevated label size="small" class="font-weight-bold mb-1" :color="colorForController(controller)"
-                    >{{ labelForController(controller) }}
+                    >{{ controller.callsign.replace(`${id}_`, "") }}
                 </v-chip>
                 {{ controller.frequency }}<br />{{ controller.name }}
+                <span class="text-grey">{{ moment.utc(moment().diff(moment(controller.logon_time))).format("HHmm") }}</span>
             </v-col>
         </v-row>
+        <div v-if="bookings.length > 0" class="mt-5 text-grey">
+            <div class="bg-grey-darken-4 text-grey-lighten-1 pa-1 mb-2">Bookings</div>
+            <Booking v-for="booking in bookings" :key="booking.id" :value="booking" :prefix="id" class="mt-1" />
+        </div>
         <v-row class="mt-3">
             <v-col cols="12" sm="6">
-                <v-row no-gutters class="bg-grey-darken-4 pa-1">
-                    <v-col sm="3">Departures</v-col>
-                    <v-col sm="9" class="text-right">
+                <v-row no-gutters class="bg-grey-darken-4 text-grey-lighten-1 pa-1">
+                    <v-col sm="7"><v-icon class="mr-1">mdi-airplane-takeoff</v-icon>Departures</v-col>
+                    <v-col sm="5" class="text-right">
                         <span v-if="departurePrefiles.length > 0" class="text-grey mr-3">{{ departurePrefiles.length }}</span>
-                        <span v-if="departingPilots.length > 0">{{ departingPilots.length }}</span>
-                        <span v-if="departedPilots.length > 0" class="text-blue-darken-2 ml-3">{{ departedPilots.length }}</span>
+                        <span v-if="departingPilots.length > 0" class="text-cyan-lighten-2">{{ departingPilots.length }}</span>
+                        <span v-if="departedPilots.length > 0" class="text-cyan-darken-3 ml-3">{{ departedPilots.length }}</span>
                     </v-col>
                 </v-row>
                 <div class="text-caption text-grey-darken-2 font-weight-light mt-2 ml-1" v-if="departurePrefiles.length > 0">PREFILED</div>
@@ -46,11 +59,11 @@
                 <flight-row v-for="p in departedPilots" :key="p.callsign" :value="p" departure />
             </v-col>
             <v-col cols="12" sm="6">
-                <v-row no-gutters class="bg-grey-darken-4 pa-1">
-                    <v-col sm="3" class="">Arrivals</v-col>
-                    <v-col sm="9" class="text-right">
+                <v-row no-gutters class="bg-grey-darken-4 text-grey-lighten-1 pa-1">
+                    <v-col sm="7" class=""><v-icon class="mr-1">mdi-airplane-landing</v-icon>Arrivals</v-col>
+                    <v-col sm="5" class="text-right">
                         <span v-if="arrivalPrefiles.length > 0" class="text-grey mr-3">{{ arrivalPrefiles.length }}</span>
-                        <span v-if="arrivingPilots.length > 0">{{ arrivingPilots.length }}</span>
+                        <span v-if="arrivingPilots.length > 0" class="text-yellow-lighten-2">{{ arrivingPilots.length }}</span>
                         <span v-if="arrivedPilots.length > 0" class="text-brown-lighten-1 ml-3">{{ arrivedPilots.length }}</span>
                     </v-col>
                 </v-row>
@@ -62,11 +75,6 @@
                 <flight-row v-for="p in arrivedPilots" :key="p.callsign" :value="p" arrival />
             </v-col>
         </v-row>
-
-        <div v-if="bookings.length > 0" class="mt-5 text-grey">
-            <div class="bg-grey-darken-4 pa-1 mb-2">Bookings</div>
-            <Booking v-for="booking in bookings" :key="booking.id" :value="booking" class="mt-1" />
-        </div>
     </v-container>
 </template>
 
@@ -76,7 +84,7 @@ import { useVatsimStore } from "@/store/vatsim"
 import { useSettingsStore } from "@/store/settings"
 import { computed, inject } from "vue"
 import constants from "@/constants"
-import { colorForController, compareControllers, labelForController } from "@/common"
+import { colorForController, compareControllers, labelForController, compareCallsigns } from "@/common"
 import { eta, departureDistance, arrivalDistance, flightplanArrivalTime, flightplanDepartureTime } from "@/calc"
 import FlightRow from "@/components/FlightRow.vue"
 import Booking from "@/components/Booking.vue"
@@ -89,7 +97,7 @@ const settings = useSettingsStore()
 const id = computed(() => (route.params.id as string).toUpperCase())
 
 const airport = computed(() => {
-    return vatsim.spy && vatsim.spy.airports && vatsim.spy.airports.find((a) => a.icao == id.value && !a.pseudo)
+    return vatsim.airportByIcao[id.value]
 })
 
 const departedPilots = computed(() => {
@@ -199,11 +207,12 @@ const bookings = computed(() => {
     return vatsim.bookings
         .filter(
             (b) =>
+                //!controllers.value.find(c => c.callsign == b.callsign) &&
                 moment(b.start) &&
                 moment(b.start).utcOffset(0).isBefore(moment().add(settings.bookingsMaxHours, "hour")) &&
                 isMatchingCallsign(b.callsign)
         )
-        .sort((a, b) => moment(a.start).diff(moment(b.start)))
+        .sort((a, b) => moment(a.start).diff(moment(b.start)) || compareCallsigns(a.callsign, b.callsign))
 })
 
 function isMatchingCallsign(callsign: string) {

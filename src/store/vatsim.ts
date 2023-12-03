@@ -202,6 +202,7 @@ export const useVatsimStore = defineStore("vatsim", () => {
     const data = ref({} as VatsimData)
     const transceivers = ref({} as { [key: string]: Transceiver[] })
     const spy = ref({} as VatspyData)
+    const airportByIcao = ref({} as { [key: string]: Airport})
     const boundaries = ref([] as FeatureLike[])
     const traconBoundaries = ref([] as FeatureLike[])
     const bookings = ref([] as Booking[])
@@ -327,6 +328,7 @@ export const useVatsimStore = defineStore("vatsim", () => {
                         pseudo: cols[6] == "1",
                     } as Airport
                     spydata.airports.push(airport)
+                    if (!airport.pseudo) airportByIcao.value[airport.icao] = airport
                 } else if (section == "firs") {
                     // ;ICAO|NAME|CALLSIGN PREFIX|FIR BOUNDARY
                     const cols = line.split("|")
@@ -447,6 +449,7 @@ export const useVatsimStore = defineStore("vatsim", () => {
         data,
         transceivers,
         spy,
+        airportByIcao,
         boundaries,
         traconBoundaries,
         bookings,

@@ -16,7 +16,7 @@ function enter() {
     // Exact matches
     if (vatsim.data && vatsim.data.pilots && vatsim.data.pilots.find((p) => p.callsign == query)) return router.push(`/flight/${query}`)
     if (vatsim.data && vatsim.data.prefiles && vatsim.data.prefiles.find((p) => p.callsign == query)) return router.push(`/flight/${query}`)
-    if (vatsim.spy && vatsim.spy.airports && vatsim.spy.airports.find((a) => a.icao == query)) return router.push(`/airport/${query}`)
+    if (query in vatsim.airportByIcao) return router.push(`/airport/${query}`)
     if (vatsim.spy && vatsim.spy.firs && vatsim.spy.firs.find((f) => f.icao == query)) return router.push(`/fir/${query}`)
     if (vatsim.spy && vatsim.spy.uirs && vatsim.spy.uirs.find((u) => u.id == query)) return router.push(`/uir/${query}`)
     if (vatsim.spy && vatsim.spy.countries && vatsim.spy.countries.find((c) => c.prefix == query)) return router.push(`/country/${query}`)
