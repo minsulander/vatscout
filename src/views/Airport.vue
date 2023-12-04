@@ -22,7 +22,8 @@
                 <v-chip variant="flat" elevated label size="small" color="yellow-darken-4" class="text-white font-weight-bold mb-1"
                     >{{ atis.atis_code }}
                 </v-chip>
-                {{ atis.frequency }} {{ atis.callsign.replace(`${id}_`, "") }} <router-link :to="`/member/${atis.cid}`">{{ atis.name }}</router-link>
+                {{ atis.frequency }} {{ atis.callsign.replace(`${id}_`, "") }}
+                <router-link :to="`/member/${atis.cid}`">{{ atis.name }}</router-link>
                 <span class="text-grey ml-1">{{ moment.utc(moment().diff(moment(atis.logon_time))).format("HHmm") }}</span>
                 <br />
                 <div class="text-caption text-grey">
@@ -85,7 +86,7 @@
 import { useRoute } from "vue-router"
 import { useVatsimStore } from "@/store/vatsim"
 import { useSettingsStore } from "@/store/settings"
-import { computed, inject } from "vue"
+import { computed, watch } from "vue"
 import constants from "@/constants"
 import { colorForController, compareControllers, labelForController, compareCallsigns } from "@/common"
 import { eta, departureDistance, arrivalDistance, flightplanArrivalTime, flightplanDepartureTime, distanceToAirport } from "@/calc"
@@ -97,7 +98,7 @@ const route = useRoute()
 const vatsim = useVatsimStore()
 const settings = useSettingsStore()
 
-const id = computed(() => (route.params.id as string).toUpperCase())
+const id = computed(() => (route.params.id as string)?.toUpperCase())
 
 const airport = computed(() => {
     return vatsim.airportByIcao[id.value]
@@ -220,7 +221,7 @@ const bookings = computed(() => {
                 moment(b.start) &&
                 moment(b.end) &&
                 moment(b.start).utc().isBefore(moment().add(settings.bookingsMaxHours, "hour")) &&
-                moment(b.end).utc().isAfter(moment()) && 
+                moment(b.end).utc().isAfter(moment()) &&
                 isMatchingCallsign(b.callsign)
         )
         .sort((a, b) => moment(a.start).diff(moment(b.start)) || compareCallsigns(a.callsign, b.callsign))
@@ -235,4 +236,54 @@ function isMatchingCallsign(callsign: string) {
             (callsign.endsWith("_CTR") && fir.value && fir.value.callsignPrefix && callsign.startsWith(`${fir.value.callsignPrefix}_`)))
     )
 }
+
+let lastDepartures = undefined as string[] | undefined
+watch([departurePrefiles, departingPilots, nofpPilots], () => {
+    setTimeout(() => {
+        let popup = false
+        const allDepartures = [
+            ...departurePrefiles.value.map((p) => p.callsign),
+            ...departingPilots.value.map((p) => p.callsign),
+            ...nofpPilots.value.map((p) => p.callsign),
+        ]
+        if (typeof lastDepartures != "undefined") {
+            for (const callsign of allDepartures) {
+                if (!lastDepartures.includes(callsign)) {
+                    popup = true
+                    console.log(`Popup departure ${callsign}`)
+                }
+            }
+        }
+        lastDepartures = allDepartures
+        if (popup) {
+            console.log("Gotta popup departure")
+            // TODO notify
+        }
+    }, 1000)
+})
+
+let lastArrivals = undefined as string[] | undefined
+watch([arrivalPrefiles, arrivingPilots], () => {
+    setTimeout(() => {
+        let popup = false
+        const allArrivals = [
+            ...arrivalPrefiles.value.map((p) => p.callsign),
+            ...arrivingPilots.value.map((p) => p.callsign),
+        ]
+        if (typeof lastArrivals != "undefined") {
+            for (const callsign of allArrivals) {
+                if (!lastArrivals.includes(callsign)) {
+                    popup = true
+                    console.log(`Popup arrival ${callsign}`)
+                }
+            }
+        }
+        lastArrivals = allArrivals
+        if (popup) {
+            console.log("Gotta popup arrival")
+            // TODO notify
+        }
+    }, 1000)
+})
+
 </script>
