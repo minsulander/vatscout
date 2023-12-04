@@ -71,10 +71,10 @@
                 <v-col cols="2" sm="1" class="text-right pr-2 text-caption text-grey">Within</v-col>
                 <v-col cols="10" sm="5">
                     <span v-for="boundary in within" class="mr-3">
-                        <span v-if="vatsim.spy.firs.find((f) => f.icao == boundary.getProperties().id)">
+                        <span v-if="vatsim.spy.firs && vatsim.spy.firs.find((f) => f.icao == boundary.getProperties().id)">
                             <router-link :to="`/fir/${boundary.getProperties().id}`">{{ boundary.getProperties().id }}</router-link>
                         </span>
-                        <span v-else-if="vatsim.spy.airports.find((a) => a.icao == boundary.getProperties().id)">
+                        <span v-else-if="vatsim.spy.airports && vatsim.spy.airports.find((a) => a.icao == boundary.getProperties().id)">
                             <router-link :to="`/airport/${boundary.getProperties().id}`">{{ boundary.getProperties().id }}</router-link>
                         </span>
                         <span v-else>
