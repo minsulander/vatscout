@@ -6,21 +6,21 @@
             </v-col>
             <v-col sm="5" class="d-none d-sm-block text-grey-lighten-1">{{ airport.name }} </v-col>
             <v-col cols="3" sm="1" class="text-center">
-                <span v-if="vatsim.getMovements(airport.icao).prefiledDepartures" class="text-grey mr-3">{{
-                    vatsim.getMovements(airport.icao).prefiledDepartures
+                <span v-if="vatsim.movements[airport.icao].prefiledDepartures" class="text-grey mr-3">{{
+                    vatsim.movements[airport.icao].prefiledDepartures
                 }}</span>
-                <span v-if="vatsim.getMovements(airport.icao).nofp" class="text-grey-lighten-1 mr-3">{{
-                    vatsim.getMovements(airport.icao).nofp
+                <span v-if="vatsim.movements[airport.icao].nofp" class="text-grey-lighten-1 mr-3">{{
+                    vatsim.movements[airport.icao].nofp
                 }}</span>
-                <span v-if="vatsim.getMovements(airport.icao).departing" class="text-cyan-lighten-2">{{ vatsim.getMovements(airport.icao).departing }}</span>
-                <span v-if="vatsim.getMovements(airport.icao).departed" class="text-cyan-darken-3 ml-3">{{  vatsim.getMovements(airport.icao).departed }}</span>
+                <span v-if="vatsim.movements[airport.icao].departing" class="text-cyan-lighten-2">{{ vatsim.movements[airport.icao].departing }}</span>
+                <span v-if="vatsim.movements[airport.icao].departed" class="text-cyan-darken-3 ml-3">{{  vatsim.movements[airport.icao].departed }}</span>
             </v-col>
             <v-col cols="3" sm="1" class="text-center">
-                <span v-if="vatsim.getMovements(airport.icao).prefiledArrivals" class="text-grey mr-3">{{
-                    vatsim.getMovements(airport.icao).prefiledArrivals
+                <span v-if="vatsim.movements[airport.icao].prefiledArrivals" class="text-grey mr-3">{{
+                    vatsim.movements[airport.icao].prefiledArrivals
                 }}</span>
-                <span v-if="vatsim.getMovements(airport.icao).arriving" class="text-yellow-lighten-2">{{ vatsim.getMovements(airport.icao).arriving }}</span>
-                <span v-if="vatsim.getMovements(airport.icao).arrived" class="text-brown-lighten-1 ml-3">{{  vatsim.getMovements(airport.icao).arrived }}</span>
+                <span v-if="vatsim.movements[airport.icao].arriving" class="text-yellow-lighten-2">{{ vatsim.movements[airport.icao].arriving }}</span>
+                <span v-if="vatsim.movements[airport.icao].arrived" class="text-brown-lighten-1 ml-3">{{  vatsim.movements[airport.icao].arrived }}</span>
             </v-col>
             <v-col sm="6" class="d-sm-none text-body-2 text-grey mt-1">{{ airport.name }} </v-col>
             <v-col cols="6" sm="4" class="text-right">
@@ -102,10 +102,16 @@ function controllers(airport: Airport) {
 const activeAirports = computed(() => {
     if (!vatsim.spy.airports) return []
     return vatsim.spy.airports
-        .filter((a) => !a.pseudo && firs.value.includes(a.fir) && vatsim.getMovements(a.icao).pending > 0)
+        .filter((a) => {
+            if (a.pseudo || !firs.value.includes(a.fir)) return false
+            if (!(a.icao in vatsim.movements)) vatsim.movements[a.icao] = vatsim.countMovements(a.icao)
+            return vatsim.movements[a.icao].pending > 0
+        })
         .sort((a, b) => {
-            const acount = vatsim.getMovements(a.icao).pending
-            const bcount = vatsim.getMovements(b.icao).pending
+            if (!(a.icao in vatsim.movements)) vatsim.movements[a.icao] = vatsim.countMovements(a.icao)
+            if (!(b.icao in vatsim.movements)) vatsim.movements[b.icao] = vatsim.countMovements(b.icao)
+            const acount = vatsim.movements[a.icao].pending
+            const bcount = vatsim.movements[b.icao].pending
             return acount >= bcount ? -1 : 1
         })
 })

@@ -210,10 +210,9 @@ export const useVatsimStore = defineStore("vatsim", () => {
     const timeUntilRefresh = ref(0)
     const refreshing = ref(0)
 
-    let cachedMovements = {} as { [key: string]: AirportMovements }
+    const movements = ref({} as { [key: string]: AirportMovements })
 
-    function getMovements(airport_icao: string) {
-        if (airport_icao in cachedMovements) return cachedMovements[airport_icao]
+    function countMovements(airport_icao: string) {
         const moves = new AirportMovements()
         if (!data.value.pilots || !data.value.prefiles) return moves
         for (const p of data.value.pilots.filter(
@@ -263,7 +262,6 @@ export const useVatsimStore = defineStore("vatsim", () => {
                 moves.prefiledArrivals++
             }
         }
-        cachedMovements[airport_icao] = moves
         return moves
     }
 
@@ -273,7 +271,7 @@ export const useVatsimStore = defineStore("vatsim", () => {
             const startRequest = new Date().getTime()
             const response = await axios.get(`${apiBaseUrl}/data`)
             data.value = response.data as VatsimData
-            if (spy.value.airports && spy.value.airports.length > 0) cachedMovements = {}
+            if (spy.value.airports && spy.value.airports.length > 0) movements.value = {}
             console.log(`Got data in ${(new Date().getTime() - startRequest).toFixed()} ms`)
         } finally {
             refreshing.value--
@@ -457,7 +455,8 @@ export const useVatsimStore = defineStore("vatsim", () => {
         boundaries,
         traconBoundaries,
         bookings,
-        getMovements,
+        movements,
+        countMovements,
         timeUntilRefresh,
         refreshing,
         fetchData,
