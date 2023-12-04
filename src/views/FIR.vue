@@ -23,10 +23,6 @@
                 <span class="text-grey">{{ moment.utc(moment().diff(moment(controller.logon_time))).format("HHmm") }}</span>
             </v-col>
         </v-row>
-        <div v-if="bookings.length > 0" class="mt-5 text-grey">
-            <div class="bg-grey-darken-4 text-grey-lighten-1 pa-1 mb-2">Bookings</div>
-            <Booking v-for="booking in bookings" :key="booking.id" :value="booking" class="mt-1" />
-        </div>
         <div class="bg-grey-darken-4 text-grey-lighten-1 pa-1 mt-5 mb-2">
             <v-row>
                 <v-col cols="6" sm="6">Active airports </v-col>
@@ -36,6 +32,10 @@
             </v-row>
         </div>
         <airport-top-list :fir="id" class="mt-2" />
+        <div v-if="bookings.length > 0" class="mt-5 text-grey">
+            <div class="bg-grey-darken-4 text-grey-lighten-1 pa-1 mb-2">Bookings</div>
+            <Booking v-for="booking in bookings" :key="booking.id" :value="booking" class="mt-1" />
+        </div>
     </v-container>
 </template>
 
@@ -70,7 +70,7 @@ const bookings = computed(() => {
             (b) =>
                 isMatchingCallsign(b.callsign) /* || isAirportCallsign(b.callsign)*/ &&
                 moment(b.start) &&
-                moment(b.start).utcOffset(0).isBefore(moment().add(settings.bookingsMaxHours, "hour"))
+                moment(b.start).utc().isBefore(moment().add(settings.bookingsMaxHours, "hour"))
         )
         .sort((a, b) => moment(a.start).diff(moment(b.start)))
 })

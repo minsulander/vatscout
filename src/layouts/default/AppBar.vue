@@ -8,7 +8,7 @@
                 <Search />
             </v-col>
             <v-col cols="1">
-                <v-btn icon plain to="/settings" color="grey-darken-2"><v-icon size="x-large">mdi-cog-outline</v-icon></v-btn>
+                <v-btn icon plain to="/settings" color="grey-darken-3"><v-icon>mdi-cog</v-icon></v-btn>
             </v-col>
             <v-col cols="1">
                 <v-progress-circular
@@ -20,7 +20,7 @@
                     @click="clickProgress"
                     style="cursor: pointer"
                 >
-                    <span v-if="vatsim.data.general">{{ moment(vatsim.data.general.update_timestamp).utcOffset(0).format("HHmm") }}</span>
+                    <span v-if="vatsim.data.general">{{ moment(vatsim.data.general.update_timestamp).utc().format("HHmm") }}</span>
                 </v-progress-circular>
             </v-col>
         </v-row>

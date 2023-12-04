@@ -9,6 +9,16 @@
                 <v-chip v-if="prefile" variant="flat" size="small" label color="grey-darken-2" class="ml-2" style="margin-top: -10px"
                     >PREFILE</v-chip
                 >
+                <v-chip
+                    v-if="pilot && !flightplan"
+                    variant="flat"
+                    size="small"
+                    label
+                    color="grey-darken-2"
+                    class="ml-2"
+                    style="margin-top: -10px"
+                    >NO FLIGHTPLAN</v-chip
+                >
             </v-col>
             <v-col cols="12" md="6" style="white-space: nowrap">
                 <span v-if="flightplan">
@@ -26,11 +36,16 @@
                     </div>
                 </span>
                 <div v-if="pilot">
-                    <v-progress-linear v-model="progress" color="grey" class="ma-1"></v-progress-linear>
-                    <div class="float-right px-1">
+                    <v-progress-linear
+                        v-model="progress"
+                        color="grey"
+                        class="ma-1"
+                        v-if="typeof progress !== 'undefined'"
+                    ></v-progress-linear>
+                    <div class="float-right px-1" v-if="isFinite(arrivalDistance(pilot))">
                         {{ arrivalDistance(pilot).toFixed(0) }} <span class="text-caption text-grey">nm to go</span>
                     </div>
-                    <div class="float-left px-1">
+                    <div class="float-left px-1" v-if="isFinite(departureDistance(pilot))">
                         {{ departureDistance(pilot).toFixed(0) }} <span class="text-caption text-grey">nm covered</span>
                     </div>
                     <div class="text-center text-body-2 text-grey pt-1">
@@ -42,13 +57,14 @@
             </v-col>
         </v-row>
 
-        
         <div v-if="pilot" class="mt-5">
             <v-row align="baseline" no-gutters>
                 <v-col cols="2" sm="1" class="text-right pr-2 text-caption text-grey">Pilot</v-col>
                 <v-col cols="10" sm="5">
-                    {{ pilot.name }}
-                    <span class="text-grey-lighten-1">{{ pilot.cid }}</span>
+                    <router-link :to="`/member/${pilot.cid}`">
+                        {{ pilot.name }}
+                        <span class="text-grey-lighten-1">{{ pilot.cid }}</span>
+                    </router-link>
                     <!--{{ pilot.pilot_rating }} {{ pilot.military_rating }}-->
                 </v-col>
 
@@ -87,7 +103,7 @@
 
                 <v-col cols="2" sm="1" class="text-right pr-2 text-caption text-grey">Updated</v-col>
                 <v-col cols="10" sm="5">
-                    {{ moment(pilot.last_updated).utcOffset(0).format("HH:mm:ss") }}
+                    {{ moment(pilot.last_updated).utc().format("HH:mm:ss") }}
                 </v-col>
             </v-row>
         </div>
@@ -99,7 +115,7 @@
                 </v-col>
                 <v-col cols="2" sm="1" class="text-right pr-2 text-caption text-grey">Updated</v-col>
                 <v-col cols="10" sm="5">
-                    {{ moment(prefile.last_updated).utcOffset(0).format("HH:mm:ss") }}
+                    {{ moment(prefile.last_updated).utc().format("HH:mm:ss") }}
                 </v-col>
             </v-row>
         </div>
@@ -169,13 +185,17 @@
                 </v-col>
             </v-row>
         </div>
+
+        <div v-if="!pilot && !prefile" class="text-h5 font-weight-light text-grey mt-5">
+            No connected pilot or prefiled flightplan with matching callsign.
+        </div>
     </v-container>
 </template>
 
 <script lang="ts" setup>
 import { useRoute } from "vue-router"
 import { useVatsimStore } from "@/store/vatsim"
-import { computed, inject } from "vue"
+import { computed } from "vue"
 import { arrivalDistance, departureDistance, flightplanArrivalTime } from "@/calc"
 import moment from "moment"
 const route = useRoute()
@@ -218,10 +238,11 @@ const arrivalAirport = computed(() => {
     return flightplan.value && vatsim.spy.airports && vatsim.spy.airports.find((a) => a.icao == flightplan.value!.arrival)
 })
 const progress = computed(() => {
-    if (!pilot.value) return
+    if (!pilot.value) return undefined
     const depdist = departureDistance(pilot.value)
     const arrdist = arrivalDistance(pilot.value)
-    if (!arrdist || !depdist) return
+    if (!isFinite(arrdist) || !isFinite(depdist)) return undefined
+    if (depdist + arrdist < 0.1) return undefined
     return (depdist * 100) / (depdist + arrdist)
 })
 </script>

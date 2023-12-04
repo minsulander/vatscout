@@ -9,6 +9,9 @@
                 <span v-if="vatsim.getMovements(airport.icao).prefiledDepartures" class="text-grey mr-3">{{
                     vatsim.getMovements(airport.icao).prefiledDepartures
                 }}</span>
+                <span v-if="vatsim.getMovements(airport.icao).nofp" class="text-grey-lighten-1 mr-3">{{
+                    vatsim.getMovements(airport.icao).nofp
+                }}</span>
                 <span v-if="vatsim.getMovements(airport.icao).departing" class="text-cyan-lighten-2">{{ vatsim.getMovements(airport.icao).departing }}</span>
                 <span v-if="vatsim.getMovements(airport.icao).departed" class="text-cyan-darken-3 ml-3">{{  vatsim.getMovements(airport.icao).departed }}</span>
             </v-col>

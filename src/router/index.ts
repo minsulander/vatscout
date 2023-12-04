@@ -7,6 +7,7 @@ import Airport from "@/views/Airport.vue"
 import FIR from "@/views/FIR.vue"
 import UIR from "@/views/UIR.vue"
 import Country from "@/views/Country.vue"
+import Member from "@/views/Member.vue"
 
 const routes = [
     {
@@ -45,6 +46,10 @@ const routes = [
                 path: "country/:id",
                 component: Country,
             },
+            {
+                path: "member/:id",
+                component: Member,
+            }
         ],
     }
 ]

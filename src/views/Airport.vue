@@ -22,8 +22,8 @@
                 <v-chip variant="flat" elevated label size="small" color="yellow-darken-4" class="text-white font-weight-bold mb-1"
                     >{{ atis.atis_code }}
                 </v-chip>
-                {{ atis.frequency }} {{ atis.callsign.replace(`${id}_`, "") }} {{ atis.name }}
-                <span class="text-grey">{{ moment.utc(moment().diff(moment(atis.logon_time))).format("HHmm") }}</span>
+                {{ atis.frequency }} {{ atis.callsign.replace(`${id}_`, "") }} <router-link :to="`/member/${atis.cid}`">{{ atis.name }}</router-link>
+                <span class="text-grey ml-1">{{ moment.utc(moment().diff(moment(atis.logon_time))).format("HHmm") }}</span>
                 <br />
                 <div class="text-caption text-grey">
                     {{ atis.text_atis?.join("\n") }}
@@ -33,26 +33,25 @@
                 <v-chip variant="flat" elevated label size="small" class="font-weight-bold mb-1" :color="colorForController(controller)"
                     >{{ controller.callsign.replace(`${id}_`, "") }}
                 </v-chip>
-                {{ controller.frequency }}<br />{{ controller.name }}
-                <span class="text-grey">{{ moment.utc(moment().diff(moment(controller.logon_time))).format("HHmm") }}</span>
+                {{ controller.frequency }}<br /><router-link :to="`/member/${controller.cid}`">{{ controller.name }}</router-link>
+                <span class="text-grey ml-1">{{ moment.utc(moment().diff(moment(controller.logon_time))).format("HHmm") }}</span>
             </v-col>
         </v-row>
-        <div v-if="bookings.length > 0" class="mt-5 text-grey">
-            <div class="bg-grey-darken-4 text-grey-lighten-1 pa-1 mb-2">Bookings</div>
-            <Booking v-for="booking in bookings" :key="booking.id" :value="booking" :prefix="id" class="mt-1" />
-        </div>
         <v-row class="mt-3">
             <v-col cols="12" sm="6">
                 <v-row no-gutters class="bg-grey-darken-4 text-grey-lighten-1 pa-1">
                     <v-col sm="7"><v-icon class="mr-1">mdi-airplane-takeoff</v-icon>Departures</v-col>
                     <v-col sm="5" class="text-right">
-                        <span v-if="departurePrefiles.length > 0" class="text-grey mr-3">{{ departurePrefiles.length }}</span>
-                        <span v-if="departingPilots.length > 0" class="text-cyan-lighten-2">{{ departingPilots.length }}</span>
+                        <span v-if="departurePrefiles.length > 0" class="text-grey ml-3">{{ departurePrefiles.length }}</span>
+                        <span v-if="nofpPilots.length > 0" class="text-grey-lighten-1 ml-3">{{ nofpPilots.length }}</span>
+                        <span v-if="departingPilots.length > 0" class="text-cyan-lighten-2 ml-3">{{ departingPilots.length }}</span>
                         <span v-if="departedPilots.length > 0" class="text-cyan-darken-3 ml-3">{{ departedPilots.length }}</span>
                     </v-col>
                 </v-row>
                 <div class="text-caption text-grey-darken-2 font-weight-light mt-2 ml-1" v-if="departurePrefiles.length > 0">PREFILED</div>
                 <flight-row v-for="p in departurePrefiles" :key="p.callsign" :value="p" departure prefile />
+                <div class="text-caption text-grey-darken-2 font-weight-light mt-2 ml-1" v-if="nofpPilots.length > 0">NO FLIGHTPLAN</div>
+                <flight-row v-for="p in nofpPilots" :key="p.callsign" :value="p" departure nofp />
                 <div class="text-caption text-grey-darken-2 font-weight-light mt-2 ml-1" v-if="departingPilots.length > 0">DEPARTING</div>
                 <flight-row v-for="p in departingPilots" :key="p.callsign" :value="p" departure />
                 <div class="text-caption text-grey-darken-2 font-weight-light mt-2 ml-1" v-if="departedPilots.length > 0">DEPARTED</div>
@@ -62,8 +61,8 @@
                 <v-row no-gutters class="bg-grey-darken-4 text-grey-lighten-1 pa-1">
                     <v-col sm="7" class=""><v-icon class="mr-1">mdi-airplane-landing</v-icon>Arrivals</v-col>
                     <v-col sm="5" class="text-right">
-                        <span v-if="arrivalPrefiles.length > 0" class="text-grey mr-3">{{ arrivalPrefiles.length }}</span>
-                        <span v-if="arrivingPilots.length > 0" class="text-yellow-lighten-2">{{ arrivingPilots.length }}</span>
+                        <span v-if="arrivalPrefiles.length > 0" class="text-grey ml-3">{{ arrivalPrefiles.length }}</span>
+                        <span v-if="arrivingPilots.length > 0" class="text-yellow-lighten-2 ml-3">{{ arrivingPilots.length }}</span>
                         <span v-if="arrivedPilots.length > 0" class="text-brown-lighten-1 ml-3">{{ arrivedPilots.length }}</span>
                     </v-col>
                 </v-row>
@@ -75,6 +74,10 @@
                 <flight-row v-for="p in arrivedPilots" :key="p.callsign" :value="p" arrival />
             </v-col>
         </v-row>
+        <div v-if="bookings.length > 0" class="mt-5 text-grey">
+            <div class="bg-grey-darken-4 text-grey-lighten-1 pa-1 mb-2">Bookings</div>
+            <Booking v-for="booking in bookings" :key="booking.id" :value="booking" :prefix="id" class="mt-1" />
+        </div>
     </v-container>
 </template>
 
@@ -85,7 +88,7 @@ import { useSettingsStore } from "@/store/settings"
 import { computed, inject } from "vue"
 import constants from "@/constants"
 import { colorForController, compareControllers, labelForController, compareCallsigns } from "@/common"
-import { eta, departureDistance, arrivalDistance, flightplanArrivalTime, flightplanDepartureTime } from "@/calc"
+import { eta, departureDistance, arrivalDistance, flightplanArrivalTime, flightplanDepartureTime, distanceToAirport } from "@/calc"
 import FlightRow from "@/components/FlightRow.vue"
 import Booking from "@/components/Booking.vue"
 import moment from "moment"
@@ -123,6 +126,12 @@ const departingPilots = computed(() => {
                 departureDistance(p) < constants.atAirportDistance
         )
         .sort((a, b) => a.flight_plan.deptime.localeCompare(b.flight_plan.deptime))
+})
+const nofpPilots = computed(() => {
+    if (!vatsim.data || !vatsim.data.pilots) return []
+    return vatsim.data.pilots
+        .filter((p) => !p.flight_plan && distanceToAirport(p, airport.value) < constants.atAirportDistance)
+        .sort((a, b) => a.callsign.localeCompare(b.callsign))
 })
 const departurePrefiles = computed(() => {
     if (!vatsim.data || !vatsim.data.prefiles) return []
@@ -209,7 +218,9 @@ const bookings = computed(() => {
             (b) =>
                 //!controllers.value.find(c => c.callsign == b.callsign) &&
                 moment(b.start) &&
-                moment(b.start).utcOffset(0).isBefore(moment().add(settings.bookingsMaxHours, "hour")) &&
+                moment(b.end) &&
+                moment(b.start).utc().isBefore(moment().add(settings.bookingsMaxHours, "hour")) &&
+                moment(b.end).utc().isAfter(moment()) && 
                 isMatchingCallsign(b.callsign)
         )
         .sort((a, b) => moment(a.start).diff(moment(b.start)) || compareCallsigns(a.callsign, b.callsign))

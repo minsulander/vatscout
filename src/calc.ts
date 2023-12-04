@@ -1,5 +1,5 @@
 import moment from "moment"
-import { FlightPlan, Pilot, useVatsimStore } from "./store/vatsim"
+import { Airport, FlightPlan, Pilot, useVatsimStore } from "./store/vatsim"
 import * as turf from "@turf/turf"
 import constants from "./constants"
 
@@ -14,12 +14,7 @@ export function departureDistance(pilot: Pilot) {
         return Infinity
     const vatsim = useVatsimStore()
     if (!vatsim.spy || !vatsim.spy.airports) return Infinity
-    const airport = vatsim.airportByIcao[pilot.flight_plan.departure]
-    if (!airport) return Infinity
-    const from = turf.point([pilot.longitude, pilot.latitude])
-    const to = turf.point([airport.longitude, airport.latitude])
-    const distance = turf.distance(from, to) / 1.852
-    return distance
+    return distanceToAirport(pilot, vatsim.airportByIcao[pilot.flight_plan.departure])
 }
 
 export function arrivalDistance(pilot: Pilot) {
@@ -33,7 +28,10 @@ export function arrivalDistance(pilot: Pilot) {
         return Infinity
     const vatsim = useVatsimStore()
     if (!vatsim.spy || !vatsim.spy.airports) return Infinity
-    const airport = vatsim.airportByIcao[pilot.flight_plan.arrival]
+    return distanceToAirport(pilot, vatsim.airportByIcao[pilot.flight_plan.arrival])
+}
+
+export function distanceToAirport(pilot: Pilot, airport: Airport) {
     if (!airport) return Infinity
     const from = turf.point([pilot.longitude, pilot.latitude])
     const to = turf.point([airport.longitude, airport.latitude])
@@ -72,8 +70,8 @@ export function flightplanArrivalTime(fp: FlightPlan, adjustDepartureTime = fals
     let depHours = parseInt(fp.deptime.substring(0, 2))
     let depMinutes = parseInt(fp.deptime.substring(2, 4))
     if (adjustDepartureTime && flightplanDepartureTime(fp)?.isBefore(moment())) {
-        depHours = moment().utcOffset(0).get("hour")
-        depMinutes = moment().utcOffset(0).get("minute")
+        depHours = moment().utc().get("hour")
+        depMinutes = moment().utc().get("minute")
     }
     let enrHours = parseInt(fp.enroute_time.substring(0, 2))
     let enrMinutes = parseInt(fp.enroute_time.substring(2, 4))
@@ -84,7 +82,7 @@ export function flightplanArrivalTime(fp: FlightPlan, adjustDepartureTime = fals
         arrMinutes -= 60
     }
     if (arrHours >= 24) arrHours -= 24
-    let time = moment().utcOffset(0).set("hour", arrHours).set("minute", arrMinutes)
+    let time = moment().utc().set("hour", arrHours).set("minute", arrMinutes)
     if (time.isBefore(moment())) time = time.add(1, "day")
     return time
 }
@@ -93,7 +91,7 @@ export function flightplanDepartureTime(fp: FlightPlan) {
     if (!fp.deptime || fp.deptime == "0000" || !fp.enroute_time || fp.enroute_time == "0000") return undefined
     let depHours = parseInt(fp.deptime.substring(0, 2))
     let depMinutes = parseInt(fp.deptime.substring(2, 4))
-    let time = moment().utcOffset(0).set("hour", depHours).set("minute", depMinutes)
+    let time = moment().utc().set("hour", depHours).set("minute", depMinutes)
     if (time.isBefore(moment().subtract(12, "hour"))) time = time.add(1, "day")
     return time
 }

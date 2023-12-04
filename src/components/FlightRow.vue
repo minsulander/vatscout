@@ -1,12 +1,12 @@
 <template>
-    <v-row no-gutters :class="rowclass" @click="click" class="px-1" v-if="value && value.flight_plan">
+    <v-row no-gutters :class="rowclass" @click="click" class="px-1" v-if="value">
         <v-col sm="3" v-if="!hideIcao">
             {{ value.callsign }}
         </v-col>
-        <v-col sm="3">
+        <v-col sm="3" v-if="value.flight_plan">
             {{ value.flight_plan.aircraft_short }}
         </v-col>
-        <v-col sm="3">
+        <v-col sm="3" v-if="value.flight_plan">
             <span v-if="!departure">
                 {{ value.flight_plan.departure }}
             </span>
@@ -15,10 +15,10 @@
                 {{ value.flight_plan.arrival }}
             </span>
         </v-col>
-        <v-col sm="3">
+        <v-col sm="3" v-if="value.flight_plan">
             <!-- TODO for prefiles, show time since last updated -->
             <span v-if="arrival && eta">
-                {{ moment(eta).utcOffset(0).format("HHmm") }}
+                {{ moment(eta).utc().format("HHmm") }}
             </span>
             <span v-else-if="departure && (pending || prefile) && value.flight_plan.deptime && value.flight_plan.deptime != '0000'">
                 {{ value.flight_plan.deptime }}
@@ -47,7 +47,7 @@ import { useRouter } from "vue-router"
 import { flightplanArrivalTime } from "@/calc"
 import moment from "moment"
 const router = useRouter()
-const props = defineProps<{ value: Pilot | Prefile; departure?: boolean; arrival?: boolean; prefile?: boolean; hideIcao?: boolean }>()
+const props = defineProps<{ value: Pilot | Prefile; departure?: boolean; arrival?: boolean; prefile?: boolean; nofp?: boolean, hideIcao?: boolean }>()
 
 const pending = computed(() => {
     const pilot = props.value as Pilot
@@ -61,6 +61,7 @@ const eta = computed(() => calc.eta(props.value as Pilot))
 
 const rowclass = computed(() => {
     if (props.prefile) return "text-grey"
+    if (props.nofp) return "text-grey-lighten-1"
     if (props.departure && !pending.value) return "text-cyan-darken-3"
     if (props.arrival && !pending.value) return "text-brown-lighten-1"
     if (props.departure) return "text-cyan-lighten-2"

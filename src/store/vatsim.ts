@@ -5,7 +5,7 @@ import GeoJSON from "ol/format/GeoJSON"
 import FeatureLike from "ol/Feature"
 import constants from "@/constants"
 import moment from "moment"
-import { arrivalDistance, departureDistance, eta, flightplanArrivalTime, flightplanDepartureTime } from "@/calc"
+import { arrivalDistance, departureDistance, distanceToAirport, eta, flightplanArrivalTime, flightplanDepartureTime } from "@/calc"
 import { useSettingsStore } from "./settings"
 
 const apiBaseUrl = "https://api.vatscout.com"
@@ -173,6 +173,7 @@ export interface Booking {
 
 export class AirportMovements {
     departed: number = 0
+    nofp: number = 0
     departing: number = 0
     prefiledDepartures: number = 0
     arrived: number = 0
@@ -180,7 +181,7 @@ export class AirportMovements {
     prefiledArrivals: number = 0
 
     get departures() {
-        return this.departed + this.departing + this.prefiledDepartures
+        return this.departed + this.departing + this.nofp + this.prefiledDepartures
     }
 
     get arrivals() {
@@ -192,7 +193,7 @@ export class AirportMovements {
     }
 
     get pending() {
-        return this.departing + this.prefiledDepartures + this.arriving + this.prefiledArrivals
+        return this.departing + this.nofp + this.prefiledDepartures + this.arriving + this.prefiledArrivals
     }
 }
 
@@ -237,6 +238,9 @@ export const useVatsimStore = defineStore("vatsim", () => {
                     moves.arriving++
                 else if (p.groundspeed < constants.inflightGroundspeed && arrivalDistance(p) < constants.atAirportDistance) moves.arrived++
             }
+        }
+        for (const p of data.value.pilots.filter((p) => !p.flight_plan)) {
+            if (distanceToAirport(p, airportByIcao.value[airport_icao]) < constants.atAirportDistance) moves.nofp++
         }
         for (const p of data.value.prefiles.filter(
             (p) => p.flight_plan && (p.flight_plan.departure == airport_icao || p.flight_plan.arrival == airport_icao)
