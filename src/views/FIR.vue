@@ -11,9 +11,7 @@
                 </div>
             </v-col>
         </v-row>
-        <div v-if="fir">
-            
-        </div>
+        <div v-if="fir"></div>
         <v-row class="mt-2">
             <v-col sm="3" v-for="controller in controllers">
                 <v-chip variant="flat" elevated label size="small" class="font-weight-bold mb-1" :color="colorForController(controller)"
@@ -68,9 +66,10 @@ const bookings = computed(() => {
     return vatsim.bookings
         .filter(
             (b) =>
-                isMatchingCallsign(b.callsign) /* || isAirportCallsign(b.callsign)*/ &&
                 moment(b.start) &&
-                moment(b.start).utc().isBefore(moment().add(settings.bookingsMaxHours, "hour"))
+                moment(b.start).utc().isBefore(moment().add(settings.bookingsMaxHours, "hour")) &&
+                moment(b.end).utc().isAfter(moment()) &&
+                (isMatchingCallsign(b.callsign) || isAirportCallsign(b.callsign))
         )
         .sort((a, b) => moment(a.start).diff(moment(b.start)))
 })
@@ -84,7 +83,6 @@ function isMatchingCallsign(callsign: string) {
     )
 }
 
-// extracting bookings for airports this way on FIR / country pages takes too long...
 function isAirportCallsign(callsign: string) {
     if (!fir.value) return false
     const airport = vatsim.airportByIcao[callsign.substring(0, 4)]

@@ -1,21 +1,21 @@
 <template>
     <v-app-bar>
-        <v-row align="center">
-            <v-col cols="1">
+        <v-row no-gutters align="center">
+            <v-col cols="2" sm="1">
                 <v-btn icon plain @click="$router.back()" color="grey"><v-icon size="x-large">mdi-chevron-left</v-icon></v-btn>
             </v-col>
-            <v-col cols="9">
+            <v-col cols="6" sm="9">
                 <Search />
             </v-col>
-            <v-col cols="1">
+            <v-col cols="2" sm="1" class="text-right">
                 <v-btn icon plain to="/settings" color="grey-darken-3"><v-icon>mdi-cog</v-icon></v-btn>
             </v-col>
-            <v-col cols="1">
+            <v-col cols="2" sm="1" class="text-right">
                 <v-progress-circular
                     :model-value="progress"
                     :indeterminate="vatsim.refreshing > 0"
                     :color="outdated ? 'red' : vatsim.refreshing > 0 ? 'white' : 'grey'"
-                    class="text-caption"
+                    class="text-caption mr-2"
                     size="45"
                     @click="clickProgress"
                     style="cursor: pointer"

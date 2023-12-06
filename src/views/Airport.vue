@@ -19,8 +19,9 @@
         </v-row>
         <v-row>
             <v-col cols="12" md="6" v-for="atis in atises">
-                <v-chip variant="flat" elevated label size="small" color="yellow-darken-4" class="text-white font-weight-bold mb-1"
-                    >{{ atis.atis_code }}
+                <v-chip variant="flat" elevated label size="small" color="orange-darken-3" class="text-white font-weight-bold mb-1">
+                    <span v-if="extractAtisCode(atis)">{{ extractAtisCode(atis) }}</span>
+                    <span v-else class="text-black">{{ atis.atis_code || '/' }}</span>
                 </v-chip>
                 {{ atis.frequency }} {{ atis.callsign.replace(`${id}_`, "") }}
                 <router-link :to="`/member/${atis.cid}`">{{ atis.name }}</router-link>
@@ -57,6 +58,14 @@
                 <flight-row v-for="p in departingPilots" :key="p.callsign" :value="p" departure />
                 <div class="text-caption text-grey-darken-2 font-weight-light mt-2 ml-1" v-if="departedPilots.length > 0">DEPARTED</div>
                 <flight-row v-for="p in departedPilots" :key="p.callsign" :value="p" departure />
+                <div
+                    v-if="
+                        departurePrefiles.length == 0 && nofpPilots.length == 0 && departingPilots.length == 0 && departedPilots.length == 0
+                    "
+                    class="mt-2 text-caption text-grey-darken-2 font-weight-light text-center"
+                >
+                    - NO DEPARTURES -
+                </div>
             </v-col>
             <v-col cols="12" sm="6">
                 <v-row no-gutters class="bg-grey-darken-4 text-grey-lighten-1 pa-1">
@@ -73,6 +82,12 @@
                 <flight-row v-for="p in arrivingPilots" :key="p.callsign" :value="p" arrival />
                 <div class="text-caption text-grey-darken-2 font-weight-light mt-2 ml-1" v-if="arrivedPilots.length > 0">ARRIVED</div>
                 <flight-row v-for="p in arrivedPilots" :key="p.callsign" :value="p" arrival />
+                <div
+                    v-if="arrivalPrefiles.length == 0 && arrivingPilots.length == 0 && arrivedPilots.length == 0"
+                    class="mt-2 text-caption text-grey-darken-2 font-weight-light text-center"
+                >
+                    - NO ARRIVALS -
+                </div>
             </v-col>
         </v-row>
         <div v-if="bookings.length > 0" class="mt-5 text-grey">
@@ -88,7 +103,7 @@ import { useVatsimStore } from "@/store/vatsim"
 import { useSettingsStore } from "@/store/settings"
 import { computed, watch } from "vue"
 import constants from "@/constants"
-import { colorForController, compareControllers, labelForController, compareCallsigns } from "@/common"
+import { colorForController, compareControllers, labelForController, compareCallsigns, extractAtisCode } from "@/common"
 import { eta, departureDistance, arrivalDistance, flightplanArrivalTime, flightplanDepartureTime, distanceToAirport } from "@/calc"
 import FlightRow from "@/components/FlightRow.vue"
 import Booking from "@/components/Booking.vue"
@@ -266,10 +281,7 @@ let lastArrivals = undefined as string[] | undefined
 watch([arrivalPrefiles, arrivingPilots], () => {
     setTimeout(() => {
         let popup = false
-        const allArrivals = [
-            ...arrivalPrefiles.value.map((p) => p.callsign),
-            ...arrivingPilots.value.map((p) => p.callsign),
-        ]
+        const allArrivals = [...arrivalPrefiles.value.map((p) => p.callsign), ...arrivingPilots.value.map((p) => p.callsign)]
         if (typeof lastArrivals != "undefined") {
             for (const callsign of allArrivals) {
                 if (!lastArrivals.includes(callsign)) {
@@ -285,5 +297,4 @@ watch([arrivalPrefiles, arrivingPilots], () => {
         }
     }, 1000)
 })
-
 </script>

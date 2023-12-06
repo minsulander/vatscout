@@ -35,8 +35,8 @@
         </div>
         <div v-if="firs && firs.length > 0" class="mt-5">
             <div class="bg-grey-darken-4 text-grey-lighten-1 pa-1 mb-2">FIRs</div>
-            <v-row>
-                <v-col cols="12" sm="4" v-for="fir in firs" @click="router.push(`/fir/${fir.icao}`)" class="fir">
+            <v-row no-gutters>
+                <v-col cols="12" sm="4" v-for="fir in firs" @click="router.push(`/fir/${fir.icao}`)" class="fir pa-1">
                     {{ fir.icao }} <span class="text-grey-lighten-1 text-body-2">{{ fir.name }}</span>
                 </v-col>
             </v-row>
@@ -92,7 +92,7 @@ const controllers = computed(() => {
         (c) =>
             c.callsign &&
             c.callsign.endsWith("_CTR") &&
-            (c.callsign.startsWith(id.value) || callsignPrefixes.find((prefix) => c.callsign.startsWith(prefix)))
+            ((c.callsign.startsWith(id.value) && c.callsign[4] == "_") || callsignPrefixes.find((prefix) => c.callsign.startsWith(prefix)))
     )
 })
 
@@ -107,12 +107,20 @@ const bookings = computed(() => {
     return vatsim.bookings
         .filter(
             (b) =>
-                b.callsign &&
-                b.callsign.endsWith("_CTR") &&
-                (b.callsign.startsWith(id.value) || callsignPrefixes.find((prefix) => b.callsign.startsWith(prefix))) &&
                 moment(b.start) &&
-                moment(b.start).utc().isBefore(moment().add(settings.bookingsMaxHours, "hour"))
+                moment(b.start).utc().isBefore(moment().add(settings.bookingsMaxHours, "hour")) &&
+                moment(b.end).utc().isAfter(moment()) &&
+                b.callsign &&
+                ((b.callsign.endsWith("_CTR") &&
+                    ((b.callsign.startsWith(id.value) && b.callsign[4] == "_") || callsignPrefixes.find((prefix) => b.callsign.startsWith(prefix)))) ||
+                    (!b.callsign.endsWith("_CTR") && isAirportCallsign(b.callsign)))
         )
         .sort((a, b) => moment(a.start).diff(moment(b.start)))
 })
+
+function isAirportCallsign(callsign: string) {
+    const airport = vatsim.airportByIcao[callsign.substring(0, 4)]
+    if (airport && airport.fir && airport.fir.startsWith(id.value)) return true
+    return false
+}
 </script>

@@ -1,12 +1,14 @@
 <template>
-    <v-row no-gutters :class="rowclass" @click="click" class="px-1" v-if="value">
+    <v-row no-gutters :class="rowclass" @click="click" class="px-1" v-if="value" style="font-family: monospace">
         <v-col sm="3" v-if="!hideIcao">
             {{ value.callsign }}
         </v-col>
         <v-col sm="3" v-if="value.flight_plan">
             {{ value.flight_plan.aircraft_short }}
+            <v-chip size="small" density="comfortable" class="ml-1" label v-if="typeClass && typeClass == 'H'"><v-icon>mdi-helicopter</v-icon></v-chip>
+            <v-chip size="small" density="comfortable" class="ml-1" label v-else-if="wtc && wtc != 'M'">{{ wtc }}</v-chip>
         </v-col>
-        <v-col sm="3" v-if="value.flight_plan">
+        <v-col sm="2" v-if="value.flight_plan">
             <span v-if="!departure">
                 {{ value.flight_plan.departure }}
             </span>
@@ -15,8 +17,7 @@
                 {{ value.flight_plan.arrival }}
             </span>
         </v-col>
-        <v-col sm="3" v-if="value.flight_plan">
-            <!-- TODO for prefiles, show time since last updated -->
+        <v-col sm="4" v-if="value.flight_plan">
             <span v-if="arrival && eta">
                 {{ moment(eta).utc().format("HHmm") }}
             </span>
@@ -26,7 +27,15 @@
             <span v-else-if="arrival && pending && flightplanArrivalTime(value.flight_plan)" style="opacity: 0.5">
                 {{ flightplanArrivalTime(value.flight_plan)!.format("HHmm") }}
             </span>
-            <v-chip size="small" label class="float-right" v-if="value.flight_plan.flight_rules == 'V'">VFR</v-chip>
+            <div class="float-right" style="white-space: nowrap">
+                <v-chip size="small" density="comfortable" label class="ml-1" v-if="t1">T1</v-chip>
+                <v-chip size="small" density="comfortable" label class="ml-1" v-if="value.flight_plan.flight_rules == 'V'">VFR</v-chip>
+                <v-chip size="small" density="comfortable" label class="ml-1" v-if="newPilot">NEW</v-chip>
+                <v-chip size="small" density="comfortable" label class="ml-1" v-if="streamer"><v-icon>mdi-video</v-icon></v-chip>
+                <v-chip size="small" density="comfortable" label class="ml-1" v-if="textOnly">T</v-chip>
+                <v-chip size="small" density="comfortable" label class="ml-1" v-if="receiveOnly">R</v-chip>
+                <v-chip size="small" density="comfortable" label class="ml-1" color="red" v-if="departure && pending && transponderWarning">{{ transponderWarning }}</v-chip>
+            </div>
         </v-col>
     </v-row>
 </template>
@@ -46,15 +55,31 @@ import * as calc from "@/calc"
 import { useRouter } from "vue-router"
 import { flightplanArrivalTime } from "@/calc"
 import moment from "moment"
+import actypecodes from "@/data/actypecodes.json"
+
 const router = useRouter()
-const props = defineProps<{ value: Pilot | Prefile; departure?: boolean; arrival?: boolean; prefile?: boolean; nofp?: boolean, hideIcao?: boolean }>()
+const props = defineProps<{
+    value: Pilot | Prefile
+    departure?: boolean
+    arrival?: boolean
+    prefile?: boolean
+    nofp?: boolean
+    hideIcao?: boolean
+}>()
+
+const actypeCode = computed(() => props.value.flight_plan && (actypecodes as any)[props.value.flight_plan.aircraft_short])
+const typeClass = computed(() => actypeCode.value && actypeCode.value[1])
+const wtc = computed(() => actypeCode.value && actypeCode.value[0])
 
 const pending = computed(() => {
     const pilot = props.value as Pilot
     if (!pilot) return false
     return (
-        (props.departure && pilot.groundspeed < constants.inflightGroundspeed && calc.departureDistance(pilot) < constants.atAirportDistance) ||
-        (props.arrival && (pilot.groundspeed >= constants.inflightGroundspeed || calc.arrivalDistance(pilot) >= constants.atAirportDistance))
+        (props.departure &&
+            pilot.groundspeed < constants.inflightGroundspeed &&
+            calc.departureDistance(pilot) < constants.atAirportDistance) ||
+        (props.arrival &&
+            (pilot.groundspeed >= constants.inflightGroundspeed || calc.arrivalDistance(pilot) >= constants.atAirportDistance))
     )
 })
 const eta = computed(() => calc.eta(props.value as Pilot))
@@ -67,6 +92,51 @@ const rowclass = computed(() => {
     if (props.departure) return "text-cyan-lighten-2"
     if (props.arrival) return "text-yellow-lighten-2"
     return ""
+})
+
+const transponderWarning = computed(() => {
+    const pilot = props.value as Pilot
+    if (!pilot) return false
+    if (!pilot.flight_plan) return false
+    if (pilot.flight_plan.assigned_transponder == "0000") return false
+    if (pilot.transponder == pilot.flight_plan.assigned_transponder) return false
+    return pilot.flight_plan.assigned_transponder
+})
+
+const newPilot = computed(() => {
+    const flightplan = props.value.flight_plan
+    if (!flightplan) return false
+    if (!flightplan.remarks) return false
+    for (const phrase of constants.newPilotPhrases) if (flightplan.remarks.includes(phrase)) return true
+    return false
+})
+
+const t1 = computed(() => {
+    const flightplan = props.value.flight_plan
+    if (!flightplan) return false
+    if (!flightplan.remarks) return false
+    return !!flightplan.remarks.match(/PBN\/\w+T1/)
+})
+
+const textOnly = computed(() => {
+    const flightplan = props.value.flight_plan
+    if (!flightplan) return false
+    if (!flightplan.remarks) return false
+    return !!flightplan.remarks.includes("/T/")
+})
+
+const receiveOnly = computed(() => {
+    const flightplan = props.value.flight_plan
+    if (!flightplan) return false
+    if (!flightplan.remarks) return false
+    return !!flightplan.remarks.includes("/R/")
+})
+
+const streamer = computed(() => {
+    const flightplan = props.value.flight_plan
+    if (!flightplan) return false
+    if (!flightplan.remarks) return false
+    return !!flightplan.remarks.match(/TWITCH.TV|STREAM(ING?).*TWITCH/)
 })
 
 function click() {

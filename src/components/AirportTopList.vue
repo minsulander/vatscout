@@ -12,15 +12,23 @@
                 <span v-if="vatsim.movements[airport.icao].nofp" class="text-grey-lighten-1 mr-3">{{
                     vatsim.movements[airport.icao].nofp
                 }}</span>
-                <span v-if="vatsim.movements[airport.icao].departing" class="text-cyan-lighten-2">{{ vatsim.movements[airport.icao].departing }}</span>
-                <span v-if="vatsim.movements[airport.icao].departed" class="text-cyan-darken-3 ml-3">{{  vatsim.movements[airport.icao].departed }}</span>
+                <span v-if="vatsim.movements[airport.icao].departing" class="text-cyan-lighten-2">{{
+                    vatsim.movements[airport.icao].departing
+                }}</span>
+                <span v-if="vatsim.movements[airport.icao].departed" class="text-cyan-darken-3 ml-3">{{
+                    vatsim.movements[airport.icao].departed
+                }}</span>
             </v-col>
             <v-col cols="3" sm="1" class="text-center">
                 <span v-if="vatsim.movements[airport.icao].prefiledArrivals" class="text-grey mr-3">{{
                     vatsim.movements[airport.icao].prefiledArrivals
                 }}</span>
-                <span v-if="vatsim.movements[airport.icao].arriving" class="text-yellow-lighten-2">{{ vatsim.movements[airport.icao].arriving }}</span>
-                <span v-if="vatsim.movements[airport.icao].arrived" class="text-brown-lighten-1 ml-3">{{  vatsim.movements[airport.icao].arrived }}</span>
+                <span v-if="vatsim.movements[airport.icao].arriving" class="text-yellow-lighten-2">{{
+                    vatsim.movements[airport.icao].arriving
+                }}</span>
+                <span v-if="vatsim.movements[airport.icao].arrived" class="text-brown-lighten-1 ml-3">{{
+                    vatsim.movements[airport.icao].arrived
+                }}</span>
             </v-col>
             <v-col sm="6" class="d-sm-none text-body-2 text-grey mt-1">{{ airport.name }} </v-col>
             <v-col cols="6" sm="4" class="text-right">
@@ -32,10 +40,12 @@
                                 elevated
                                 label
                                 size="small"
-                                color="yellow-darken-4"
+                                color="orange-darken-3"
                                 class="text-white font-weight-bold"
                                 v-bind="props"
-                                >{{ atis.atis_code }}
+                            >
+                                <span v-if="extractAtisCode(atis)">{{ extractAtisCode(atis) }}</span>
+                                <span v-else class="text-black">{{ atis.atis_code || '/' }}</span>
                             </v-chip>
                         </template>
                     </v-tooltip>
@@ -71,7 +81,7 @@
 <script setup lang="ts">
 import { Airport, Atis, Controller, useVatsimStore } from "@/store/vatsim"
 import { computed, inject } from "vue"
-import { colorForController, labelForController, compareControllers } from "@/common"
+import { colorForController, labelForController, compareControllers, extractAtisCode } from "@/common"
 import { useRouter } from "vue-router"
 const vatsim = useVatsimStore()
 const router = useRouter()

@@ -16,3 +16,33 @@ a {
 a:hover {
     background: #333;
 }
+
+html,
+body {
+    overflow-y: overlay;
+    background-color: #1e2022;
+    min-height: 100%;
+    scrollbar-color: grey #1e2022;
+    scrollbar-width: thin;
+}
+::-webkit-scrollbar {
+    width: 8px;
+}
+::-webkit-scrollbar-track {
+    background: transparent;
+}
+::-webkit-scrollbar-track-piece {
+    background: transparent;
+}
+::-webkit-scrollbar-thumb {
+    background: rgba(100, 100, 100, 0.2);
+    border-radius: 3px;
+}
+::-webkit-scrollbar-thumb:hover {
+    background: rgba(100, 100, 100, 0.7);
+}
+
+.v-theme--dark .v-overlay__scrim {
+    background: black; /* #1e2022; */
+    opacity: 0.4;
+}

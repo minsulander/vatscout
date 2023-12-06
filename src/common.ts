@@ -1,4 +1,4 @@
-import { Controller } from "./store/vatsim"
+import { Atis, Controller } from "./store/vatsim"
 
 export function colorForController(controller: Controller) {
     return colorForControllerCallsign(controller.callsign) || "grey"
@@ -36,4 +36,27 @@ export function compareCallsigns(a: string, b: string) {
         if (b.endsWith(suffixes[i])) bOrder = i
     }
     return aOrder == bOrder ? 0 : aOrder > bOrder ? 1 : -1
+}
+
+export function extractAtisCode(atis: Atis) {
+    if (atis.text_atis && atis.text_atis.length > 0) {
+        const text = atis.text_atis.join(" ").trim()
+        const icao = atis.callsign.substring(0,4)
+        let m = text.match(new RegExp(`${icao}( ARR| DEP|) ATIS( INFO| INFORMATION|) (\\w)[ \\.]`))
+        if (m) return m.at(3)
+        m = text.match(new RegExp(`${icao} INFORMATION (\\w)`))
+        if (m) return m.at(1)
+        m = text.match(new RegExp(`(ATIS|ARRIVAL|DEPARTURE|ARR AND DEP) (INFORMATION|INFO) (\\w)`))
+        if (m) return m.at(3)
+        m = text.match(new RegExp(`THIS IS \\w+ INFORMATION (\\w)`))
+        if (m) return m.at(1)
+        m = text.match(new RegExp(`INFORMATION (\\w) OUT ?\\.?$`))
+        if (m) return m.at(1)
+        m = text.match(new RegExp(`END OF INFORMATION (\\w)\\w* ?\\.?$`))
+        if (m) return m.at(1)
+        m = text.match(new RegExp(`ADV\\w+ YOU HAVE INF\\w+ (\\w)`))
+        if (m) return m.at(1)
+        m = text.match(new RegExp(`ACK\\w+ RECEIPT OF INF\\w+ (\\w)`))
+        if (m) return m.at(1)
+    }
 }

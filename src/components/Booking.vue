@@ -21,7 +21,8 @@
             <router-link :to="`/member/${value.cid}`" class="text-grey">{{ name }}</router-link>
         </v-col>
         <v-col cols="4" md="4" class="text-right">
-            <v-chip variant="flat" size="x-small" label color="green-darken-2" class="mr-2" v-if="value.type == 'event'">Event</v-chip>
+            <v-chip variant="flat" size="x-small" label color="red-darken-2" class="mr-2" v-if="value.type == 'exam'">Exam</v-chip>
+            <v-chip variant="flat" size="x-small" label color="green-darken-2" class="mr-2" v-else-if="value.type == 'event'">Event</v-chip>
             <v-chip variant="flat" size="x-small" label color="blue-darken-2" class="mr-2" v-else-if="value.type == 'training'"
                 >Training</v-chip
             >
