@@ -36,6 +36,7 @@
                     >{{ controller.callsign.replace(`${id}_`, "") }}
                 </v-chip>
                 {{ controller.frequency }}<br /><router-link :to="`/member/${controller.cid}`">{{ controller.name }}</router-link>
+                <v-chip density="comfortable" class="ml-1" color="grey-lighten-1" style="padding: 5px">{{ rating(controller) }}</v-chip>
                 <span class="text-grey ml-1">{{ moment.utc(moment().diff(moment(controller.logon_time))).format("HHmm") }}</span>
             </v-col>
         </v-row>
@@ -99,7 +100,7 @@
 
 <script lang="ts" setup>
 import { useRoute } from "vue-router"
-import { useVatsimStore } from "@/store/vatsim"
+import { Controller, useVatsimStore } from "@/store/vatsim"
 import { useSettingsStore } from "@/store/settings"
 import { computed, watch } from "vue"
 import constants from "@/constants"
@@ -250,6 +251,12 @@ function isMatchingCallsign(callsign: string) {
             (callsign.endsWith("_CTR") && airport.value && callsign.startsWith(`${airport.value.fir}_`)) ||
             (callsign.endsWith("_CTR") && fir.value && fir.value.callsignPrefix && callsign.startsWith(`${fir.value.callsignPrefix}_`)))
     )
+}
+
+function rating(controller: Controller) {
+    if (!vatsim.data || !vatsim.data.ratings) return undefined
+    const rating = vatsim.data.ratings.find(r => r.id == controller.rating)
+    if (rating) return rating.short
 }
 
 let lastDepartures = undefined as string[] | undefined

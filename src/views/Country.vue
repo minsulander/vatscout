@@ -17,7 +17,8 @@
                     >{{ controller.callsign }}
                 </v-chip>
                 {{ controller.frequency }}<br />{{ controller.name }}
-                <span class="text-grey">{{ moment.utc(moment().diff(moment(controller.logon_time))).format("HHmm") }}</span>
+                <v-chip density="comfortable" class="ml-1" color="grey-lighten-1" style="padding: 5px">{{ rating(controller) }}</v-chip>
+                <span class="text-grey ml-1">{{ moment.utc(moment().diff(moment(controller.logon_time))).format("HHmm") }}</span>
             </v-col>
         </v-row>
         <div class="bg-grey-darken-4 text-grey-lighten-1 pa-1 mt-5 mb-2">
@@ -53,7 +54,7 @@
 
 <script lang="ts" setup>
 import { useRoute } from "vue-router"
-import { useVatsimStore } from "@/store/vatsim"
+import { Controller, useVatsimStore } from "@/store/vatsim"
 import { computed, inject } from "vue"
 import { colorForController } from "@/common"
 import { useRouter } from "vue-router"
@@ -123,4 +124,11 @@ function isAirportCallsign(callsign: string) {
     if (airport && airport.fir && airport.fir.startsWith(id.value)) return true
     return false
 }
+
+function rating(controller: Controller) {
+    if (!vatsim.data || !vatsim.data.ratings) return undefined
+    const rating = vatsim.data.ratings.find(r => r.id == controller.rating)
+    if (rating) return rating.short
+}
+
 </script>

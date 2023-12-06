@@ -72,6 +72,8 @@
                     <router-link :to="`/member/${pilot.cid}`">
                         {{ pilot.name }}
                         <span class="text-grey-lighten-1">{{ pilot.cid }}</span>
+                        <v-chip v-if="pilot.pilot_rating" size="small" variant="flat" label class="ml-2" color="grey-darken-2">{{ pilotRating }}</v-chip>
+                        <v-chip v-if="pilot.military_rating" size="small" variant="flat" label class="ml-2" color="grey-darken-2">{{ militaryRating }}</v-chip>
                     </router-link>
                     <!--{{ pilot.pilot_rating }} {{ pilot.military_rating }}-->
                 </v-col>
@@ -274,6 +276,20 @@ const noEngines = computed(() => actypeCode.value && actypeCode.value[2])
 const noEnginesText: any = { "1": "Single", "2": "Twin", "3": "3-Engine", "4": "4-Engine", "5": "5", "6": "6", "7": "7", "8": "8" }
 const engineType = computed(() => actypeCode.value && actypeCode.value[3])
 const engineTypeText: any = { J: "Jet", T: "Turbine", P: "Piston", E: "Electric" }
+const pilotRating = computed(() => {
+    if (!pilot.value) return undefined
+    if (!pilot.value.pilot_rating) return undefined
+    const rating = vatsim.data.pilot_ratings.find(r => r.id == pilot.value.pilot_rating)
+    if (!rating) return undefined
+    return rating.short_name
+})
+const militaryRating = computed(() => {
+    if (!pilot.value) return undefined
+    if (!pilot.value.military_rating) return undefined
+    const rating = vatsim.data.military_ratings.find(r => r.id == pilot.value.military_rating)
+    if (!rating) return undefined
+    return rating.short_name
+})
 
 // TODO this is over-simplified
 const inHgPrefixes = ["K", "C", "M"]

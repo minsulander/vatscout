@@ -45,7 +45,7 @@
                                 v-bind="props"
                             >
                                 <span v-if="extractAtisCode(atis)">{{ extractAtisCode(atis) }}</span>
-                                <span v-else class="text-black">{{ atis.atis_code || '/' }}</span>
+                                <span v-else class="text-black">{{ atis.atis_code || "/" }}</span>
                             </v-chip>
                         </template>
                     </v-tooltip>
@@ -115,7 +115,8 @@ const activeAirports = computed(() => {
         .filter((a) => {
             if (a.pseudo || !firs.value.includes(a.fir)) return false
             if (!(a.icao in vatsim.movements)) vatsim.movements[a.icao] = vatsim.countMovements(a.icao)
-            return vatsim.movements[a.icao].pending > 0
+            if (vatsim.movements[a.icao].pending > 0) return true
+            if (vatsim.data.controllers && vatsim.data.controllers.find(c => isMatchingCallsign(c.callsign, a))) return true
         })
         .sort((a, b) => {
             if (!(a.icao in vatsim.movements)) vatsim.movements[a.icao] = vatsim.countMovements(a.icao)
@@ -125,6 +126,14 @@ const activeAirports = computed(() => {
             return acount >= bcount ? -1 : 1
         })
 })
+
+function isMatchingCallsign(callsign: string, airport: Airport) {
+    return (
+        callsign && airport &&
+        (!callsign.endsWith("_CTR") &&
+            (callsign.startsWith(`${airport.icao}_`) || (airport.icao.startsWith("K") && callsign.startsWith(`${airport.icao.substring(1)}_`))))
+    )
+}
 
 function clickAirport(airport: Airport) {
     router.push(`/airport/${airport.icao}`)
