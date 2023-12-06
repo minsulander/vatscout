@@ -40,7 +40,7 @@
 
 <script lang="ts" setup>
 import { useRoute } from "vue-router"
-import { useVatsimStore } from "@/store/vatsim"
+import { Controller, useVatsimStore } from "@/store/vatsim"
 import { computed, inject } from "vue"
 import { colorForController, compareControllers, labelForController } from "@/common"
 import AirportTopList from "@/components/AirportTopList.vue"

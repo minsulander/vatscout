@@ -279,14 +279,14 @@ const engineTypeText: any = { J: "Jet", T: "Turbine", P: "Piston", E: "Electric"
 const pilotRating = computed(() => {
     if (!pilot.value) return undefined
     if (!pilot.value.pilot_rating) return undefined
-    const rating = vatsim.data.pilot_ratings.find(r => r.id == pilot.value.pilot_rating)
+    const rating = vatsim.data.pilot_ratings.find(r => r.id == (pilot.value && pilot.value.pilot_rating))
     if (!rating) return undefined
     return rating.short_name
 })
 const militaryRating = computed(() => {
     if (!pilot.value) return undefined
     if (!pilot.value.military_rating) return undefined
-    const rating = vatsim.data.military_ratings.find(r => r.id == pilot.value.military_rating)
+    const rating = vatsim.data.military_ratings.find(r => r.id == (pilot.value && pilot.value.military_rating))
     if (!rating) return undefined
     return rating.short_name
 })
