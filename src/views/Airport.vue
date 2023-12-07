@@ -286,8 +286,8 @@ function toggleAtis() {
 import { Howl } from "howler"
 
 const departurePopupSound = new Howl({ src: "/audio/pop.mp3" })
-const arrivalPopupSound = new Howl({ src: "/audio/notification.mp3" })
-const atcPopupSound = new Howl({ src: "/audio/decide.mp3" })
+const arrivalPopupSound = new Howl({ src: "/audio/decide.mp3" })
+const atcPopupSound = new Howl({ src: "/audio/notification.mp3" })
 
 let lastDepartures = undefined as string[] | undefined
 watch([departurePrefiles, departingPilots, nofpPilots], () => {
@@ -310,7 +310,7 @@ watch([departurePrefiles, departingPilots, nofpPilots], () => {
         if (popups.length > 0) {
             if (settings.soundOn) departurePopupSound.play()
             snackbarText.value = popups.length > 1 ? `New departures <b>${popups.join(", ")}</b>` : `New departure <b>${popups[0]}</b>`
-            snackbarColor.value = "yellow"
+            snackbarColor.value = "cyan"
             snackbar.value = true
         }
     }, 500)

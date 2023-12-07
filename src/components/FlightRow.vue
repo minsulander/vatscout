@@ -24,8 +24,8 @@
             <span v-else-if="departure && (pending || prefile) && value.flight_plan.deptime && value.flight_plan.deptime != '0000'">
                 {{ value.flight_plan.deptime }}
             </span>
-            <span v-else-if="arrival && pending && flightplanArrivalTime(value.flight_plan)" style="opacity: 0.5">
-                {{ flightplanArrivalTime(value.flight_plan)!.format("HHmm") }}
+            <span v-else-if="arrival && pending && flightplanArrivalTime(value.flight_plan, true)" style="opacity: 0.5">
+                {{ flightplanArrivalTime(value.flight_plan, true)!.format("HHmm") }}
             </span>
             <div class="float-right" style="white-space: nowrap">
                 <v-chip size="small" density="comfortable" label class="ml-1" v-if="t1">T1</v-chip>

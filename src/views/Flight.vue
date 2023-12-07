@@ -7,12 +7,26 @@
             </v-col>
             <v-col cols="6" md="3" class="text-center">
                 <div v-if="flightplan" class="text-h5 font-weight-light pt-5" style="display: inline">{{ flightplan.aircraft_short }}</div>
-                <v-chip size="small" variant="flat" class="ml-2" style="margin-top: -10px" label color="grey-darken-2" v-if="typeClass && typeClass == 'H'"
+                <v-chip
+                    size="small"
+                    variant="flat"
+                    class="ml-2"
+                    style="margin-top: -10px"
+                    label
+                    color="grey-darken-2"
+                    v-if="typeClass && typeClass == 'H'"
                     ><v-icon>mdi-helicopter</v-icon></v-chip
                 >
-                <v-chip size="small" variant="flat" class="ml-2" style="margin-top: -10px" label color="grey-darken-2" v-else-if="wtc && wtc != 'M'">{{
-                    wtc
-                }}</v-chip>
+                <v-chip
+                    size="small"
+                    variant="flat"
+                    class="ml-2"
+                    style="margin-top: -10px"
+                    label
+                    color="grey-darken-2"
+                    v-else-if="wtc && wtc != 'M'"
+                    >{{ wtc }}</v-chip
+                >
                 <v-chip v-if="prefile" variant="flat" size="small" label color="grey-darken-2" class="ml-2" style="margin-top: -10px"
                     >PREFILE</v-chip
                 >
@@ -72,15 +86,20 @@
                     <router-link :to="`/member/${pilot.cid}`">
                         {{ pilot.name }}
                         <span class="text-grey-lighten-1">{{ pilot.cid }}</span>
-                        <v-chip v-if="pilot.pilot_rating" size="small" variant="flat" label class="ml-2" color="grey-darken-2">{{ pilotRating }}</v-chip>
-                        <v-chip v-if="pilot.military_rating" size="small" variant="flat" label class="ml-2" color="grey-darken-2">{{ militaryRating }}</v-chip>
+                        <v-chip v-if="pilot.pilot_rating" size="small" variant="flat" label class="ml-2" color="grey-darken-2">{{
+                            pilotRating
+                        }}</v-chip>
+                        <v-chip v-if="pilot.military_rating" size="small" variant="flat" label class="ml-2" color="grey-darken-2">{{
+                            militaryRating
+                        }}</v-chip>
                     </router-link>
                     <!--{{ pilot.pilot_rating }} {{ pilot.military_rating }}-->
                 </v-col>
 
                 <v-col cols="2" sm="1" class="text-right pr-2 text-caption text-grey">ETA</v-col>
                 <v-col cols="10" sm="5">
-                    {{ calc.eta(pilot)?.utc().format("HHmm") }}
+                    <span v-if="calc.eta(pilot)"> {{ calc.eta(pilot)?.utc().format("HHmm") }}</span>
+                    <span v-else-if="flightplan" class="text-grey">{{ calc.flightplanArrivalTime(flightplan, true)?.format("HHmm") }}</span>
                 </v-col>
 
                 <v-col cols="2" sm="1" class="text-right pr-2 text-caption text-grey">
@@ -226,8 +245,7 @@
                     </span>
                 </v-col>
                 <v-col cols="2" sm="1" class="text-right pr-2 text-caption text-grey pt-3">Route</v-col>
-                <v-col cols="10" sm="11" lg="5" class="text-grey-lighten-2 text-body-2" v-html="formattedRoute">
-                </v-col>
+                <v-col cols="10" sm="11" lg="5" class="text-grey-lighten-2 text-body-2" v-html="formattedRoute"> </v-col>
                 <v-col cols="2" sm="1" class="text-right pr-2 text-caption text-grey pt-3">Remarks</v-col>
                 <v-col cols="10" sm="11" lg="5" class="text-grey-lighten-2 text-body-2" v-html="formattedRemarks"> </v-col>
                 <v-col cols="2" sm="1" class="text-right pr-2 text-caption text-grey pt-3">Revision</v-col>
@@ -279,14 +297,14 @@ const engineTypeText: any = { J: "Jet", T: "Turbine", P: "Piston", E: "Electric"
 const pilotRating = computed(() => {
     if (!pilot.value) return undefined
     if (!pilot.value.pilot_rating) return undefined
-    const rating = vatsim.data.pilot_ratings.find(r => r.id == (pilot.value && pilot.value.pilot_rating))
+    const rating = vatsim.data.pilot_ratings.find((r) => r.id == (pilot.value && pilot.value.pilot_rating))
     if (!rating) return undefined
     return rating.short_name
 })
 const militaryRating = computed(() => {
     if (!pilot.value) return undefined
     if (!pilot.value.military_rating) return undefined
-    const rating = vatsim.data.military_ratings.find(r => r.id == (pilot.value && pilot.value.military_rating))
+    const rating = vatsim.data.military_ratings.find((r) => r.id == (pilot.value && pilot.value.military_rating))
     if (!rating) return undefined
     return rating.short_name
 })
