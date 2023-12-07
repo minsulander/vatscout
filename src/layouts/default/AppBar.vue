@@ -1,10 +1,10 @@
 <template>
     <v-app-bar>
         <v-row no-gutters align="center">
-            <v-col cols="2" sm="1">
+            <v-col cols="2" sm="2">
                 <v-btn icon plain @click="$router.back()" color="grey"><v-icon size="x-large">mdi-chevron-left</v-icon></v-btn>
             </v-col>
-            <v-col cols="4" sm="8">
+            <v-col cols="4" sm="7">
                 <Search />
             </v-col>
             <v-col cols="6" sm="3" class="text-right">

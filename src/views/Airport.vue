@@ -18,7 +18,7 @@
             </v-col>
         </v-row>
         <v-row>
-            <v-col cols="12" md="6" v-for="atis in atises">
+            <v-col cols="12" md="6" v-for="atis in atises" style="cursor: pointer" :style="settings.expandAtis ? '' : 'max-height: 80px; overflow: hidden;'" @click="toggleAtis">
                 <v-chip variant="flat" elevated label size="small" color="orange-darken-3" class="text-white font-weight-bold mb-1">
                     <span v-if="extractAtisCode(atis)">{{ extractAtisCode(atis) }}</span>
                     <span v-else class="text-black">{{ atis.atis_code || '/' }}</span>
@@ -259,10 +259,16 @@ function rating(controller: Controller) {
     if (rating) return rating.short
 }
 
+function toggleAtis() {
+    settings.expandAtis = !settings.expandAtis
+    settings.save()
+}
+
 import { Howl } from "howler"
 
 const departurePopupSound = new Howl({ src: "/audio/pop.mp3" })
-const arrivalPopupSound = new Howl({ src: "/audio/decide.mp3" })
+const arrivalPopupSound = new Howl({ src: "/audio/notification.mp3" })
+const atcPopupSound = new Howl({ src: "/audio/decide.mp3" })
 
 let lastDepartures = undefined as string[] | undefined
 watch([departurePrefiles, departingPilots, nofpPilots], () => {
@@ -283,11 +289,9 @@ watch([departurePrefiles, departingPilots, nofpPilots], () => {
         }
         lastDepartures = allDepartures
         if (popup) {
-            console.log("Gotta popup departure")
-            // TODO notify
             if (settings.soundOn) departurePopupSound.play()
         }
-    }, 1000)
+    }, 500)
 })
 
 let lastArrivals = undefined as string[] | undefined
@@ -305,10 +309,33 @@ watch([arrivalPrefiles, arrivingPilots], () => {
         }
         lastArrivals = allArrivals
         if (popup) {
-            console.log("Gotta popup arrival")
-            // TODO notify
             if (settings.soundOn) arrivalPopupSound.play()
         }
-    }, 1000)
+    }, 500)
+})
+
+let lastAtc = undefined as string[] | undefined
+watch([atises, controllers], () => {
+    setTimeout(() => {
+        let popup = false
+        const allAtc = [...atises.value.map((a) => a.callsign), ...controllers.value.map((c) => c.callsign)]
+        if (typeof lastAtc != "undefined") {
+            for (const callsign of allAtc) {
+                if (!lastAtc.includes(callsign)) {
+                    popup = true
+                    console.log(`Popup ATC ${callsign}`)
+                }
+            }
+        }
+        lastAtc = allAtc
+        if (popup) {
+            if (settings.soundOn) atcPopupSound.play()
+        }
+    }, 500)
+})
+
+watch(id, () => {
+    console.log("ID changed")
+    lastDepartures = lastArrivals = lastAtc = undefined
 })
 </script>

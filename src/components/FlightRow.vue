@@ -1,12 +1,12 @@
 <template>
     <v-row no-gutters :class="rowclass" @click="click" class="px-1" v-if="value" style="font-family: monospace">
         <v-col sm="3" v-if="!hideIcao">
-            {{ value.callsign }}
+            <span>{{ value.callsign }}</span>
         </v-col>
         <v-col sm="3" v-if="value.flight_plan">
-            {{ value.flight_plan.aircraft_short }}
-            <v-chip size="small" density="comfortable" class="ml-1" label v-if="typeClass && typeClass == 'H'"><v-icon>mdi-helicopter</v-icon></v-chip>
-            <v-chip size="small" density="comfortable" class="ml-1" label v-else-if="wtc && wtc != 'M'">{{ wtc }}</v-chip>
+            <span>{{ value.flight_plan.aircraft_short }}</span>
+            <v-chip size="small" density="comfortable" label class="ml-1" v-if="typeClass && typeClass == 'H'"><v-icon>mdi-helicopter</v-icon></v-chip>
+            <v-chip size="small" density="comfortable" label class="ml-1" v-else-if="wtc && wtc != 'M'">{{ wtc }}</v-chip>
         </v-col>
         <v-col sm="2" v-if="value.flight_plan">
             <span v-if="!departure">

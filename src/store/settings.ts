@@ -9,6 +9,7 @@ export const useSettingsStore = defineStore("settings", () => {
     const prefileDepartureMaxMinutes = ref(120)
     const prefileMaxTardinessMinutes = ref(60)
     const bookingsMaxHours = ref(6)
+    const expandAtis = ref(false)
 
     function save() {
         console.log("save settings")
@@ -18,6 +19,7 @@ export const useSettingsStore = defineStore("settings", () => {
         localStorage.settings_prefileDepartureMaxMinutes = prefileDepartureMaxMinutes.value
         localStorage.settings_prefileMaxTardinessMinutes = prefileMaxTardinessMinutes.value
         localStorage.settings_bookingsMaxHours = bookingsMaxHours.value
+        localStorage.settings_expandAtis = expandAtis.value
     }
 
     function load() {
@@ -28,6 +30,7 @@ export const useSettingsStore = defineStore("settings", () => {
             if ("settings_prefileDepartureMaxMinutes" in localStorage) prefileDepartureMaxMinutes.value = parseInt(localStorage.settings_prefileDepartureMaxMinutes)
             if ("settings_prefileMaxTardinessMinutes" in localStorage) prefileMaxTardinessMinutes.value = parseInt(localStorage.settings_prefileMaxTardinessMinutes)
             if ("settings_bookingsMaxHours" in localStorage) bookingsMaxHours.value = parseInt(localStorage.settings_bookingsMaxHours)
+            if ("settings_expandAtis" in localStorage) expandAtis.value = localStorage.settings_expandAtis == "true"
         } catch (err: any) {
             console.error("Failed to load settings", err)
         }
@@ -41,6 +44,7 @@ export const useSettingsStore = defineStore("settings", () => {
         prefileDepartureMaxMinutes,
         prefileMaxTardinessMinutes,
         bookingsMaxHours,
+        expandAtis,
         save
     }
 })
