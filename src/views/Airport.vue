@@ -259,6 +259,11 @@ function rating(controller: Controller) {
     if (rating) return rating.short
 }
 
+import { Howl } from "howler"
+
+const departurePopupSound = new Howl({ src: "/audio/pop.mp3" })
+const arrivalPopupSound = new Howl({ src: "/audio/decide.mp3" })
+
 let lastDepartures = undefined as string[] | undefined
 watch([departurePrefiles, departingPilots, nofpPilots], () => {
     setTimeout(() => {
@@ -280,6 +285,7 @@ watch([departurePrefiles, departingPilots, nofpPilots], () => {
         if (popup) {
             console.log("Gotta popup departure")
             // TODO notify
+            if (settings.soundOn) departurePopupSound.play()
         }
     }, 1000)
 })
@@ -301,6 +307,7 @@ watch([arrivalPrefiles, arrivingPilots], () => {
         if (popup) {
             console.log("Gotta popup arrival")
             // TODO notify
+            if (settings.soundOn) arrivalPopupSound.play()
         }
     }, 1000)
 })

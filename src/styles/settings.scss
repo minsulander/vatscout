@@ -13,7 +13,7 @@ a {
     text-decoration: none;
     color: white;
 }
-a:hover {
+a:hover:not(.v-btn) {
     background: #333;
 }
 

@@ -3,6 +3,7 @@ import { ref } from "vue"
 
 export const useSettingsStore = defineStore("settings", () => {
 
+    const soundOn = ref(false)
     const departedMaxRange = ref(150)
     const arrivingMaxMinutes = ref(120)
     const prefileDepartureMaxMinutes = ref(120)
@@ -11,6 +12,7 @@ export const useSettingsStore = defineStore("settings", () => {
 
     function save() {
         console.log("save settings")
+        localStorage.settings_soundOn = soundOn.value
         localStorage.settings_departedMaxRange = departedMaxRange.value
         localStorage.settings_arrivingMaxMinutes = arrivingMaxMinutes.value
         localStorage.settings_prefileDepartureMaxMinutes = prefileDepartureMaxMinutes.value
@@ -20,6 +22,7 @@ export const useSettingsStore = defineStore("settings", () => {
 
     function load() {
         try {
+            if ("settings_soundOn" in localStorage) soundOn.value = localStorage.settings_soundOn == "true"
             if ("settings_departedMaxRange" in localStorage) departedMaxRange.value = parseInt(localStorage.settings_departedMaxRange)
             if ("settings_arrivingMaxMinutes" in localStorage) arrivingMaxMinutes.value = parseInt(localStorage.settings_arrivingMaxMinutes)
             if ("settings_prefileDepartureMaxMinutes" in localStorage) prefileDepartureMaxMinutes.value = parseInt(localStorage.settings_prefileDepartureMaxMinutes)
@@ -32,6 +35,7 @@ export const useSettingsStore = defineStore("settings", () => {
     load()
 
     return {
+        soundOn,
         departedMaxRange,
         arrivingMaxMinutes,
         prefileDepartureMaxMinutes,

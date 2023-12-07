@@ -4,18 +4,17 @@
             <v-col cols="2" sm="1">
                 <v-btn icon plain @click="$router.back()" color="grey"><v-icon size="x-large">mdi-chevron-left</v-icon></v-btn>
             </v-col>
-            <v-col cols="6" sm="9">
+            <v-col cols="4" sm="8">
                 <Search />
             </v-col>
-            <v-col cols="2" sm="1" class="text-right">
+            <v-col cols="6" sm="3" class="text-right">
                 <v-btn icon plain to="/settings" color="grey-darken-3"><v-icon>mdi-cog</v-icon></v-btn>
-            </v-col>
-            <v-col cols="2" sm="1" class="text-right">
+                <v-btn icon plain :color="settings.soundOn ? 'grey-darken-1' : 'grey-darken-3'" @click="clickBell"><v-icon>{{settings.soundOn ? 'mdi-bell-ring' : 'mdi-bell-off'}}</v-icon></v-btn>
                 <v-progress-circular
                     :model-value="progress"
                     :indeterminate="vatsim.refreshing > 0"
                     :color="outdated ? 'red' : vatsim.refreshing > 0 ? 'white' : 'grey'"
-                    class="text-caption mr-2"
+                    class="text-caption mx-2"
                     size="45"
                     @click="clickProgress"
                     style="cursor: pointer"
@@ -40,7 +39,11 @@ import { useVatsimStore } from "@/store/vatsim"
 import { inject } from "vue"
 import { computed } from "vue"
 import moment from "moment"
+import { useSettingsStore } from "@/store/settings"
+import { Howl } from "howler"
+
 const vatsim = useVatsimStore()
+const settings = useSettingsStore()
 
 const progress = computed(() => (vatsim.timeUntilRefresh * 100) / constants.refreshInterval)
 
@@ -48,6 +51,14 @@ const outdated = computed(() => {
     if (!vatsim.data || !vatsim.data.general) return true
     return moment(vatsim.data.general.update_timestamp).isBefore(moment().add(-constants.refreshInterval * 2.5, "millisecond"))
 })
+
+const sound = new Howl({ src: "/audio/notification.mp3" })
+
+function clickBell() {
+    settings.soundOn = !settings.soundOn
+    settings.save()
+    if (settings.soundOn) sound.play()
+}
 
 function clickProgress() {
     vatsim.timeUntilRefresh = 0
