@@ -18,10 +18,17 @@
             </v-col>
         </v-row>
         <v-row>
-            <v-col cols="12" md="6" v-for="atis in atises" style="cursor: pointer" :style="settings.expandAtis ? '' : 'max-height: 80px; overflow: hidden;'" @click="toggleAtis">
+            <v-col
+                cols="12"
+                md="6"
+                v-for="atis in atises"
+                style="cursor: pointer"
+                :style="settings.expandAtis ? '' : 'max-height: 80px; overflow: hidden;'"
+                @click="toggleAtis"
+            >
                 <v-chip variant="flat" elevated label size="small" color="orange-darken-3" class="text-white font-weight-bold mb-1">
                     <span v-if="extractAtisCode(atis)">{{ extractAtisCode(atis) }}</span>
-                    <span v-else class="text-black">{{ atis.atis_code || '/' }}</span>
+                    <span v-else class="text-black">{{ atis.atis_code || "/" }}</span>
                 </v-chip>
                 {{ atis.frequency }} {{ atis.callsign.replace(`${id}_`, "") }}
                 <router-link :to="`/member/${atis.cid}`">{{ atis.name }}</router-link>
@@ -95,6 +102,13 @@
             <div class="bg-grey-darken-4 text-grey-lighten-1 pa-1 mb-2">Bookings</div>
             <Booking v-for="booking in bookings" :key="booking.id" :value="booking" :prefix="id" class="mt-1" />
         </div>
+        <v-snackbar v-model="snackbar" timeout="5000" :color="snackbarColor" class="mb-3">
+            <span v-html="snackbarText"/>
+
+            <template v-slot:actions>
+                <v-btn icon size="small" @click="snackbar = false"><v-icon>mdi-close</v-icon></v-btn>
+            </template>
+        </v-snackbar>
     </v-container>
 </template>
 
@@ -102,7 +116,7 @@
 import { useRoute } from "vue-router"
 import { Controller, useVatsimStore } from "@/store/vatsim"
 import { useSettingsStore } from "@/store/settings"
-import { computed, watch } from "vue"
+import { computed, ref, watch } from "vue"
 import constants from "@/constants"
 import { colorForController, compareControllers, labelForController, compareCallsigns, extractAtisCode } from "@/common"
 import { eta, departureDistance, arrivalDistance, flightplanArrivalTime, flightplanDepartureTime, distanceToAirport } from "@/calc"
@@ -115,6 +129,10 @@ const vatsim = useVatsimStore()
 const settings = useSettingsStore()
 
 const id = computed(() => (route.params.id as string)?.toUpperCase())
+
+const snackbar = ref(false)
+const snackbarText = ref("")
+const snackbarColor = ref("")
 
 const airport = computed(() => {
     return vatsim.airportByIcao[id.value]
@@ -246,6 +264,7 @@ const bookings = computed(() => {
 function isMatchingCallsign(callsign: string) {
     return (
         callsign &&
+        id.value &&
         ((!callsign.endsWith("_CTR") &&
             (callsign.startsWith(`${id.value}_`) || (id.value.startsWith("K") && callsign.startsWith(`${id.value.substring(1)}_`)))) ||
             (callsign.endsWith("_CTR") && airport.value && callsign.startsWith(`${airport.value.fir}_`)) ||
@@ -255,7 +274,7 @@ function isMatchingCallsign(callsign: string) {
 
 function rating(controller: Controller) {
     if (!vatsim.data || !vatsim.data.ratings) return undefined
-    const rating = vatsim.data.ratings.find(r => r.id == controller.rating)
+    const rating = vatsim.data.ratings.find((r) => r.id == controller.rating)
     if (rating) return rating.short
 }
 
@@ -273,7 +292,7 @@ const atcPopupSound = new Howl({ src: "/audio/decide.mp3" })
 let lastDepartures = undefined as string[] | undefined
 watch([departurePrefiles, departingPilots, nofpPilots], () => {
     setTimeout(() => {
-        let popup = false
+        let popups = []
         const allDepartures = [
             ...departurePrefiles.value.map((p) => p.callsign),
             ...departingPilots.value.map((p) => p.callsign),
@@ -282,14 +301,17 @@ watch([departurePrefiles, departingPilots, nofpPilots], () => {
         if (typeof lastDepartures != "undefined") {
             for (const callsign of allDepartures) {
                 if (!lastDepartures.includes(callsign)) {
-                    popup = true
                     console.log(`Popup departure ${callsign}`)
+                    popups.push(callsign)
                 }
             }
         }
         lastDepartures = allDepartures
-        if (popup) {
+        if (popups.length > 0) {
             if (settings.soundOn) departurePopupSound.play()
+            snackbarText.value = popups.length > 1 ? `New departures <b>${popups.join(", ")}</b>` : `New departure <b>${popups[0]}</b>`
+            snackbarColor.value = "yellow"
+            snackbar.value = true
         }
     }, 500)
 })
@@ -297,19 +319,22 @@ watch([departurePrefiles, departingPilots, nofpPilots], () => {
 let lastArrivals = undefined as string[] | undefined
 watch([arrivalPrefiles, arrivingPilots], () => {
     setTimeout(() => {
-        let popup = false
+        let popups = []
         const allArrivals = [...arrivalPrefiles.value.map((p) => p.callsign), ...arrivingPilots.value.map((p) => p.callsign)]
         if (typeof lastArrivals != "undefined") {
             for (const callsign of allArrivals) {
                 if (!lastArrivals.includes(callsign)) {
-                    popup = true
                     console.log(`Popup arrival ${callsign}`)
+                    popups.push(callsign)
                 }
             }
         }
         lastArrivals = allArrivals
-        if (popup) {
+        if (popups.length > 0) {
             if (settings.soundOn) arrivalPopupSound.play()
+            snackbarText.value = popups.length > 1 ? `New arrivals <b>${popups.join(", ")}</b>` : `New arrival <b>${popups[0]}</b>`
+            snackbarColor.value = "yellow"
+            snackbar.value = true
         }
     }, 500)
 })
@@ -317,19 +342,22 @@ watch([arrivalPrefiles, arrivingPilots], () => {
 let lastAtc = undefined as string[] | undefined
 watch([atises, controllers], () => {
     setTimeout(() => {
-        let popup = false
+        let popups = []
         const allAtc = [...atises.value.map((a) => a.callsign), ...controllers.value.map((c) => c.callsign)]
         if (typeof lastAtc != "undefined") {
             for (const callsign of allAtc) {
                 if (!lastAtc.includes(callsign)) {
-                    popup = true
                     console.log(`Popup ATC ${callsign}`)
+                    popups.push(callsign)
                 }
             }
         }
         lastAtc = allAtc
-        if (popup) {
+        if (popups.length > 0) {
             if (settings.soundOn) atcPopupSound.play()
+            snackbarText.value = popups.length > 1 ? `New controllers <b>${popups.join(", ")}</b>` : `New controller <b>${popups[0]}</b>`
+            snackbarColor.value = "grey-darken-3"
+            snackbar.value = true
         }
     }, 500)
 })

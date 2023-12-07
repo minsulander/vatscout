@@ -23,6 +23,13 @@
                 </v-progress-circular>
             </v-col>
         </v-row>
+        <v-snackbar v-model="snackbar" timeout="5000" color="grey-darken-3" class="mb-3">
+            <span v-html="snackbarText"/>
+
+            <template v-slot:actions>
+                <v-btn icon size="small" @click="snackbar = false"><v-icon>mdi-close</v-icon></v-btn>
+            </template>
+        </v-snackbar>
     </v-app-bar>
 </template>
 
@@ -36,14 +43,15 @@
 import Search from "@/components/Search.vue"
 import constants from "@/constants"
 import { useVatsimStore } from "@/store/vatsim"
-import { inject } from "vue"
-import { computed } from "vue"
+import { computed, ref } from "vue"
 import moment from "moment"
 import { useSettingsStore } from "@/store/settings"
 import { Howl } from "howler"
-
 const vatsim = useVatsimStore()
 const settings = useSettingsStore()
+
+const snackbar = ref(false)
+const snackbarText = ref("")
 
 const progress = computed(() => (vatsim.timeUntilRefresh * 100) / constants.refreshInterval)
 
@@ -57,7 +65,15 @@ const sound = new Howl({ src: "/audio/notification.mp3" })
 function clickBell() {
     settings.soundOn = !settings.soundOn
     settings.save()
-    if (settings.soundOn) sound.play()
+    if (settings.soundOn) {
+        sound.play()
+        snackbarText.value = "Notification sounds will be played, e.g. when new flights pop up"
+        snackbar.value = true
+    } else {
+        snackbarText.value = "Notification sounds are muted"
+        snackbar.value = true
+
+    }
 }
 
 function clickProgress() {
