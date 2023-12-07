@@ -371,7 +371,7 @@ watch([atises, controllers], () => {
                 if (!lastAtc.includes(callsign)) popups.push(callsign)
             }
             for (const callsign of lastAtc) {
-                if (!allAtc) popoffs.push(callsign)
+                if (!allAtc.includes(callsign)) popoffs.push(callsign)
             }
         }
         lastAtc = allAtc
