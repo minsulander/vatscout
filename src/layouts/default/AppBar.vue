@@ -66,6 +66,7 @@ function clickBell() {
     settings.soundOn = !settings.soundOn
     settings.save()
     if (settings.soundOn) {
+        sound.volume(settings.soundVolume / 100)
         sound.play()
         snackbarText.value = "Notification sounds will be played, e.g. when new flights pop up"
         snackbar.value = true

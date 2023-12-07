@@ -308,7 +308,10 @@ watch([departurePrefiles, departingPilots, nofpPilots], () => {
         }
         lastDepartures = allDepartures
         if (popups.length > 0) {
-            if (settings.soundOn) departurePopupSound.play()
+            if (settings.soundOn) {
+                departurePopupSound.volume(settings.soundVolume / 100)
+                departurePopupSound.play()
+            }
             snackbarText.value = popups.length > 1 ? `New departures <b>${popups.join(", ")}</b>` : `New departure <b>${popups[0]}</b>`
             snackbarColor.value = "cyan"
             snackbar.value = true
@@ -331,7 +334,10 @@ watch([arrivalPrefiles, arrivingPilots], () => {
         }
         lastArrivals = allArrivals
         if (popups.length > 0) {
-            if (settings.soundOn) arrivalPopupSound.play()
+            if (settings.soundOn) {
+                arrivalPopupSound.volume(settings.soundVolume / 100)
+                arrivalPopupSound.play()
+            }
             snackbarText.value = popups.length > 1 ? `New arrivals <b>${popups.join(", ")}</b>` : `New arrival <b>${popups[0]}</b>`
             snackbarColor.value = "yellow"
             snackbar.value = true
@@ -354,7 +360,10 @@ watch([atises, controllers], () => {
         }
         lastAtc = allAtc
         if (popups.length > 0) {
-            if (settings.soundOn) atcPopupSound.play()
+            if (settings.soundOn) {
+                atcPopupSound.volume(settings.soundVolume / 100)
+                atcPopupSound.play()
+            }
             snackbarText.value = popups.length > 1 ? `New controllers <b>${popups.join(", ")}</b>` : `New controller <b>${popups[0]}</b>`
             snackbarColor.value = "grey-darken-3"
             snackbar.value = true
