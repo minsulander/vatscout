@@ -59,11 +59,11 @@
                     </v-col>
                 </v-row>
                 <div class="text-caption text-grey-darken-2 font-weight-light mt-2 ml-1" v-if="departurePrefiles.length > 0">PREFILED</div>
-                <flight-row v-for="p in departurePrefiles" :key="p.callsign" :value="p" departure prefile />
+                <flight-row v-for="p in departurePrefiles" :key="p.callsign" :value="p" departure prefile :class="newDepartures.includes(p.callsign) ? 'bg-blue-grey-darken-4' : ''" />
                 <div class="text-caption text-grey-darken-2 font-weight-light mt-2 ml-1" v-if="nofpPilots.length > 0">NO FLIGHTPLAN</div>
-                <flight-row v-for="p in nofpPilots" :key="p.callsign" :value="p" departure nofp />
+                <flight-row v-for="p in nofpPilots" :key="p.callsign" :value="p" departure nofp :class="newDepartures.includes(p.callsign) ? 'bg-blue-grey-darken-4' : ''" />
                 <div class="text-caption text-grey-darken-2 font-weight-light mt-2 ml-1" v-if="departingPilots.length > 0">DEPARTING</div>
-                <flight-row v-for="p in departingPilots" :key="p.callsign" :value="p" departure />
+                <flight-row v-for="p in departingPilots" :key="p.callsign" :value="p" departure :class="newDepartures.includes(p.callsign) ? 'bg-blue-grey-darken-4' : ''" />
                 <div class="text-caption text-grey-darken-2 font-weight-light mt-2 ml-1" v-if="departedPilots.length > 0">DEPARTED</div>
                 <flight-row v-for="p in departedPilots" :key="p.callsign" :value="p" departure />
                 <div
@@ -85,9 +85,9 @@
                     </v-col>
                 </v-row>
                 <div class="text-caption text-grey-darken-2 font-weight-light mt-2 ml-1" v-if="arrivalPrefiles.length > 0">PREFILED</div>
-                <flight-row v-for="p in arrivalPrefiles" :key="p.callsign" :value="p" arrival prefile />
+                <flight-row v-for="p in arrivalPrefiles" :key="p.callsign" :value="p" arrival prefile :class="newArrivals.includes(p.callsign) ? 'bg-brown-darken-3' : ''"/>
                 <div class="text-caption text-grey-darken-2 font-weight-light mt-2 ml-1" v-if="arrivingPilots.length > 0">ARRIVING</div>
-                <flight-row v-for="p in arrivingPilots" :key="p.callsign" :value="p" arrival />
+                <flight-row v-for="p in arrivingPilots" :key="p.callsign" :value="p" arrival :class="newArrivals.includes(p.callsign) ? 'bg-brown-darken-3' : ''"/>
                 <div class="text-caption text-grey-darken-2 font-weight-light mt-2 ml-1" v-if="arrivedPilots.length > 0">ARRIVED</div>
                 <flight-row v-for="p in arrivedPilots" :key="p.callsign" :value="p" arrival />
                 <div
@@ -102,13 +102,16 @@
             <div class="bg-grey-darken-4 text-grey-lighten-1 pa-1 mb-2">Bookings</div>
             <Booking v-for="booking in bookings" :key="booking.id" :value="booking" :prefix="id" class="mt-1" />
         </div>
-        <v-snackbar v-model="snackbar" timeout="5000" :color="snackbarColor" class="mb-3">
-            <span v-html="snackbarText"/>
+        <v-snackbar v-model="snackbar" timeout="10000" color="grey-darken-4" class="mb-3">
+            <span v-html="snackbarText" :class="'text-body-1 text-' + snackbarColor" />
 
             <template v-slot:actions>
-                <v-btn icon size="small" @click="snackbar = false"><v-icon>mdi-close</v-icon></v-btn>
+                <v-btn icon size="small" @click="closeSnackbar"><v-icon>mdi-close</v-icon></v-btn>
             </template>
         </v-snackbar>
+        <!--
+        <v-btn @click="snackbar=true; snackbarColor='cyan'; snackbarText='New departure <b style=\'font-family: monospace\'>ABC123</b>'">Test snackbar</v-btn>
+        -->
     </v-container>
 </template>
 
@@ -283,13 +286,49 @@ function toggleAtis() {
     settings.save()
 }
 
+function closeSnackbar() {
+    snackbar.value = false
+    newDepartures.value = []
+    newArrivals.value = []
+}
+
 import { Howl } from "howler"
 
 const departurePopupSound = new Howl({ src: "/audio/pop.mp3" })
 const arrivalPopupSound = new Howl({ src: "/audio/decide.mp3" })
 const atcPopupSound = new Howl({ src: "/audio/notification.mp3" })
 
+let lastArrivals = undefined as string[] | undefined
+const newArrivals = ref([] as string[])
+watch([arrivalPrefiles, arrivingPilots], () => {
+    setTimeout(() => {
+        let popups = []
+        const allArrivals = [...arrivalPrefiles.value.map((p) => p.callsign), ...arrivingPilots.value.map((p) => p.callsign)]
+        if (typeof lastArrivals != "undefined") {
+            for (const callsign of allArrivals) {
+                if (!lastArrivals.includes(callsign)) popups.push(callsign)
+            }
+        }
+        lastArrivals = allArrivals
+        newArrivals.value = popups
+        if (popups.length > 0) {
+            if (settings.soundOn) {
+                arrivalPopupSound.volume(settings.soundVolume / 100)
+                arrivalPopupSound.play()
+            }
+            snackbarText.value =
+                popups.length > 1
+                    ? `New arrivals <b style=\'font-family: monospace\'>${popups.join(", ")}</b>.`
+                    : `New arrival <b style=\'font-family: monospace\'>${popups[0]}</b>.`
+            snackbarColor.value = "yellow"
+            snackbar.value = true
+            setTimeout(() => newArrivals.value = [], 10000)
+        }
+    }, 500)
+})
+
 let lastDepartures = undefined as string[] | undefined
+const newDepartures = ref([] as string[])
 watch([departurePrefiles, departingPilots, nofpPilots], () => {
     setTimeout(() => {
         let popups = []
@@ -300,75 +339,54 @@ watch([departurePrefiles, departingPilots, nofpPilots], () => {
         ]
         if (typeof lastDepartures != "undefined") {
             for (const callsign of allDepartures) {
-                if (!lastDepartures.includes(callsign)) {
-                    console.log(`Popup departure ${callsign}`)
-                    popups.push(callsign)
-                }
+                if (!lastDepartures.includes(callsign)) popups.push(callsign)
             }
         }
         lastDepartures = allDepartures
+        newDepartures.value = popups
         if (popups.length > 0) {
             if (settings.soundOn) {
                 departurePopupSound.volume(settings.soundVolume / 100)
                 departurePopupSound.play()
             }
-            snackbarText.value = popups.length > 1 ? `New departures <b>${popups.join(", ")}</b>` : `New departure <b>${popups[0]}</b>`
+            snackbarText.value =
+                popups.length > 1
+                    ? `New departures <b style=\'font-family: monospace\'>${popups.join(", ")}</b>.`
+                    : `New departure <b style=\'font-family: monospace\'>${popups[0]}</b>.`
             snackbarColor.value = "cyan"
             snackbar.value = true
+            setTimeout(() => newDepartures.value = [], 10000)
         }
-    }, 500)
-})
-
-let lastArrivals = undefined as string[] | undefined
-watch([arrivalPrefiles, arrivingPilots], () => {
-    setTimeout(() => {
-        let popups = []
-        const allArrivals = [...arrivalPrefiles.value.map((p) => p.callsign), ...arrivingPilots.value.map((p) => p.callsign)]
-        if (typeof lastArrivals != "undefined") {
-            for (const callsign of allArrivals) {
-                if (!lastArrivals.includes(callsign)) {
-                    console.log(`Popup arrival ${callsign}`)
-                    popups.push(callsign)
-                }
-            }
-        }
-        lastArrivals = allArrivals
-        if (popups.length > 0) {
-            if (settings.soundOn) {
-                arrivalPopupSound.volume(settings.soundVolume / 100)
-                arrivalPopupSound.play()
-            }
-            snackbarText.value = popups.length > 1 ? `New arrivals <b>${popups.join(", ")}</b>` : `New arrival <b>${popups[0]}</b>`
-            snackbarColor.value = "yellow"
-            snackbar.value = true
-        }
-    }, 500)
+    }, 1000)
 })
 
 let lastAtc = undefined as string[] | undefined
 watch([atises, controllers], () => {
     setTimeout(() => {
         let popups = []
+        let popoffs = []
         const allAtc = [...atises.value.map((a) => a.callsign), ...controllers.value.map((c) => c.callsign)]
         if (typeof lastAtc != "undefined") {
             for (const callsign of allAtc) {
-                if (!lastAtc.includes(callsign)) {
-                    console.log(`Popup ATC ${callsign}`)
-                    popups.push(callsign)
-                }
+                if (!lastAtc.includes(callsign)) popups.push(callsign)
+            }
+            for (const callsign of lastAtc) {
+                if (!allAtc) popoffs.push(callsign)
             }
         }
         lastAtc = allAtc
-        if (popups.length > 0) {
+        if (popups.length > 0 || popoffs.length > 0) {
             if (settings.soundOn) {
                 atcPopupSound.volume(settings.soundVolume / 100)
                 atcPopupSound.play()
             }
-            snackbarText.value = popups.length > 1 ? `New controllers <b>${popups.join(", ")}</b>` : `New controller <b>${popups[0]}</b>`
-            snackbarColor.value = "grey-darken-3"
+            snackbarText.value = ""
+            if (popups.length > 0) snackbarText.value += `<b style=\'font-family: monospace\'>${popups.join(", ")}</b> online. `
+            if (popoffs.length > 0) snackbarText.value += `<b style=\'font-family: monospace\'>${popups.join(", ")}</b> offline. `
+            snackbarColor.value = "white"
             snackbar.value = true
         }
-    }, 500)
+    }, 1500)
 })
 
 watch(id, () => {
