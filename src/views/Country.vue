@@ -12,14 +12,7 @@
             </v-col>
         </v-row>
         <v-row class="mt-2">
-            <v-col sm="3" v-for="controller in controllers">
-                <v-chip variant="flat" elevated label size="small" class="font-weight-bold mb-1" :color="colorForController(controller)"
-                    >{{ controller.callsign }}
-                </v-chip>
-                {{ controller.frequency }}<br />{{ controller.name }}
-                <v-chip density="comfortable" class="ml-1" color="grey-lighten-1" style="padding: 5px">{{ rating(controller) }}</v-chip>
-                <span class="text-grey ml-1">{{ moment.utc(moment().diff(moment(controller.logon_time))).format("HHmm") }}</span>
-            </v-col>
+            <Controller v-for="controller in controllers" :value="controller" />
         </v-row>
         <div class="bg-grey-darken-4 text-grey-lighten-1 pa-1 mt-5 mb-2">
             <v-row>
@@ -37,7 +30,7 @@
         <div v-if="firs && firs.length > 0" class="mt-5">
             <div class="bg-grey-darken-4 text-grey-lighten-1 pa-1 mb-2">FIRs</div>
             <v-row no-gutters>
-                <v-col cols="12" sm="4" v-for="fir in firs" @click="router.push(`/fir/${fir.icao}`)" class="fir pa-1">
+                <v-col cols="12" sm="4" v-for="fir in firs" @click="router.push(`/fir/${fir.icao}`)" class="fir pa-1 text-truncate">
                     {{ fir.icao }} <span class="text-grey-lighten-1 text-body-2">{{ fir.name }}</span>
                 </v-col>
             </v-row>
@@ -54,12 +47,13 @@
 
 <script lang="ts" setup>
 import { useRoute } from "vue-router"
-import { Controller, useVatsimStore } from "@/store/vatsim"
+import { useVatsimStore } from "@/store/vatsim"
 import { computed, inject } from "vue"
 import { colorForController } from "@/common"
 import { useRouter } from "vue-router"
 import AirportTopList from "@/components/AirportTopList.vue"
 import Booking from "@/components/Booking.vue"
+import Controller from "@/components/Controller.vue"
 import moment from "moment"
 import { useSettingsStore } from "@/store/settings"
 const route = useRoute()
@@ -77,7 +71,9 @@ const firs = computed(() => {
     return (
         vatsim.spy &&
         vatsim.spy.firs &&
-        vatsim.spy.firs.filter((f) => f.icao.startsWith(id.value)).sort((a, b) => a.icao.localeCompare(b.icao))
+        vatsim.spy.firs
+            .filter((f) => f.icao.startsWith(id.value) && vatsim.spy.airports.find((a) => a.fir == f.icao))
+            .sort((a, b) => a.icao.localeCompare(b.icao))
     )
 })
 
@@ -113,7 +109,8 @@ const bookings = computed(() => {
                 moment(b.end).utc().isAfter(moment()) &&
                 b.callsign &&
                 ((b.callsign.endsWith("_CTR") &&
-                    ((b.callsign.startsWith(id.value) && b.callsign[4] == "_") || callsignPrefixes.find((prefix) => b.callsign.startsWith(prefix)))) ||
+                    ((b.callsign.startsWith(id.value) && b.callsign[4] == "_") ||
+                        callsignPrefixes.find((prefix) => b.callsign.startsWith(prefix)))) ||
                     (!b.callsign.endsWith("_CTR") && isAirportCallsign(b.callsign)))
         )
         .sort((a, b) => moment(a.start).diff(moment(b.start)))
@@ -124,11 +121,4 @@ function isAirportCallsign(callsign: string) {
     if (airport && airport.fir && airport.fir.startsWith(id.value)) return true
     return false
 }
-
-function rating(controller: Controller) {
-    if (!vatsim.data || !vatsim.data.ratings) return undefined
-    const rating = vatsim.data.ratings.find(r => r.id == controller.rating)
-    if (rating) return rating.short
-}
-
 </script>

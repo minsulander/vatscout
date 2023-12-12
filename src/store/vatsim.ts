@@ -226,8 +226,7 @@ export const useVatsimStore = defineStore("vatsim", () => {
                     moves.departed++
                 else if (p.groundspeed < constants.inflightGroundspeed && departureDistance(p) < constants.atAirportDistance)
                     moves.departing++
-            }
-            if (p.flight_plan.arrival == airport_icao) {
+            } else if (p.flight_plan.arrival == airport_icao) {
                 const departed = p.groundspeed >= constants.inflightGroundspeed || departureDistance(p) >= constants.atAirportDistance
                 const etaOrArrivalTime = eta(p) || flightplanArrivalTime(p.flight_plan, !departed)
                 if (
@@ -251,8 +250,7 @@ export const useVatsimStore = defineStore("vatsim", () => {
                         flightplanDepartureTime(p.flight_plan)?.isBefore(moment().add(settings.prefileDepartureMaxMinutes, "minute"))))
             ) {
                 moves.prefiledDepartures++
-            }
-            if (
+            } else if (
                 p.flight_plan.arrival == airport_icao &&
                 (!flightplanArrivalTime(p.flight_plan) ||
                     flightplanArrivalTime(p.flight_plan)?.isBefore(moment().add(settings.arrivingMaxMinutes, "minute"))) &&
@@ -411,6 +409,9 @@ export const useVatsimStore = defineStore("vatsim", () => {
 
     async function fetchEvents() {}
 
+    let lastBookingsRefresh = 0
+    let lastStaticDataRefresh = 0
+
     if (!(window as any).refreshInterval) {
         ;(window as any).refreshInterval = setInterval(() => {
             timeUntilRefresh.value -= 500
@@ -419,11 +420,16 @@ export const useVatsimStore = defineStore("vatsim", () => {
                 if (document.visibilityState == "visible") {
                     fetchData()
                     fetchTransceivers()
-                    // TODO get spy, boundaries, traconboundaries at lower interval
-                    if (!spy.value.countries) setTimeout(() => fetchSpy(), 200)
-                    if (boundaries.value.length == 0) setTimeout(() => fetchBoundaries(), 400)
-                    if (traconBoundaries.value.length == 0) setTimeout(() => fetchTraconBoundaries(), 600)
-                    if (bookings.value.length == 0) setTimeout(() => fetchBookings(), 800)
+                    if (bookings.value.length == 0 || new Date().getTime() - lastBookingsRefresh > constants.bookingsRefreshInterval) {
+                        setTimeout(() => fetchBookings(), 800)
+                        lastBookingsRefresh = new Date().getTime()
+                    }
+                    if (!spy.value.countries || boundaries.value.length == 0 || traconBoundaries.value.length == 0 || new Date().getTime() - lastStaticDataRefresh > constants.staticDataRefreshInterval) {
+                        if (!spy.value.countries) setTimeout(() => fetchSpy(), 200)
+                        if (boundaries.value.length == 0) setTimeout(() => fetchBoundaries(), 400)
+                        if (traconBoundaries.value.length == 0) setTimeout(() => fetchTraconBoundaries(), 600)
+                        lastStaticDataRefresh = new Date().getTime()
+                    }
                 } else {
                     console.log("Not refreshing - not visible")
                 }

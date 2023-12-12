@@ -6,21 +6,19 @@
             </v-col>
             <v-col cols="8" class="text-right text-grey-lighten-1 text-h6 font-weight-light">
                 <div v-if="fir" class="mt-3">
-                    {{ fir.name }}<span v-if="fir.callsignPrefix"> | {{ fir.callsignPrefix }}</span> |
+                    <span class="d-none d-sm-inline"
+                        >{{ fir.name }}<span v-if="fir.callsignPrefix"> | {{ fir.callsignPrefix }}</span> |</span
+                    >
                     <router-link :to="`/country/${id.substring(0, 2)}`" class="pa-1">{{ id.substring(0, 2) }}</router-link>
                 </div>
             </v-col>
         </v-row>
+        <div v-if="fir" class="d-sm-none text-grey-lighten-1 text-h6 font-weight-light">
+            {{ fir.name }}<span v-if="fir.callsignPrefix"> | {{ fir.callsignPrefix }}</span>
+        </div>
         <div v-if="fir"></div>
         <v-row class="mt-2">
-            <v-col sm="3" v-for="controller in controllers">
-                <v-chip variant="flat" elevated label size="small" class="font-weight-bold mb-1" :color="colorForController(controller)"
-                    >{{ controller.callsign }}
-                </v-chip>
-                {{ controller.frequency }}<br />{{ controller.name }}
-                <v-chip density="comfortable" class="ml-1" color="grey-lighten-1" style="padding: 5px">{{ rating(controller) }}</v-chip>
-                <span class="text-grey ml-1">{{ moment.utc(moment().diff(moment(controller.logon_time))).format("HHmm") }}</span>
-            </v-col>
+            <Controller v-for="controller in controllers" :value="controller" :prefix="id" />
         </v-row>
         <div class="bg-grey-darken-4 text-grey-lighten-1 pa-1 mt-5 mb-2">
             <v-row>
@@ -40,11 +38,12 @@
 
 <script lang="ts" setup>
 import { useRoute } from "vue-router"
-import { Controller, useVatsimStore } from "@/store/vatsim"
+import { useVatsimStore } from "@/store/vatsim"
 import { computed, inject } from "vue"
 import { colorForController, compareControllers, labelForController } from "@/common"
 import AirportTopList from "@/components/AirportTopList.vue"
 import Booking from "@/components/Booking.vue"
+import Controller from "@/components/Controller.vue"
 import moment from "moment"
 import { useSettingsStore } from "@/store/settings"
 const route = useRoute()
@@ -90,11 +89,4 @@ function isAirportCallsign(callsign: string) {
     if (airport && airport.fir == fir.value.icao) return true
     return false
 }
-
-function rating(controller: Controller) {
-    if (!vatsim.data || !vatsim.data.ratings) return undefined
-    const rating = vatsim.data.ratings.find(r => r.id == controller.rating)
-    if (rating) return rating.short
-}
-
 </script>

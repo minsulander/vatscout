@@ -43,18 +43,20 @@
             </v-col>
             <v-col cols="12" md="6" style="white-space: nowrap">
                 <span v-if="flightplan">
-                    <div class="float-right mb-1">
-                        <router-link :to="`/airport/${flightplan.arrival}`" class="pa-1">
-                            <span v-if="arrivalAirport" class="text-body-2 text-grey-lighten-1">{{ arrivalAirport.name }}</span>
-                            {{ flightplan.arrival }}
-                        </router-link>
-                    </div>
-                    <div class="float-left">
-                        <router-link :to="`/airport/${flightplan.departure}`" class="pa-1">
+                    <v-row>
+                        <v-col cols="6" class="text-truncate">
+                            <router-link :to="`/airport/${flightplan.departure}`" class="pa-1">
                             {{ flightplan.departure }}
                             <span v-if="departureAirport" class="text-body-2 text-grey-lighten-1">{{ departureAirport.name }}</span>
                         </router-link>
-                    </div>
+                        </v-col>
+                        <v-col cols="6" class="text-right text-truncate" style="direction: rtl;">
+                            <router-link :to="`/airport/${flightplan.arrival}`" class="pa-1">
+                            <span v-if="arrivalAirport" class="text-body-2 text-grey-lighten-1">{{ arrivalAirport.name }}</span>
+                            {{ flightplan.arrival }}
+                        </router-link>
+                        </v-col>
+                    </v-row>
                 </span>
                 <div v-if="pilot">
                     <v-progress-linear
@@ -65,10 +67,10 @@
                     ></v-progress-linear>
                     <div v-else style="height: 20px"></div>
                     <div class="float-right px-1" v-if="isFinite(calc.arrivalDistance(pilot))">
-                        {{ calc.arrivalDistance(pilot).toFixed(0) }} <span class="text-caption text-grey">nm to go</span>
+                        <span class="text-caption text-grey">to go</span> {{ calc.arrivalDistance(pilot).toFixed(0) }}
                     </div>
                     <div class="float-left px-1" v-if="isFinite(calc.departureDistance(pilot))">
-                        {{ calc.departureDistance(pilot).toFixed(0) }} <span class="text-caption text-grey">nm covered</span>
+                        {{ calc.departureDistance(pilot).toFixed(0) }} <span class="text-caption text-grey">nm</span>
                     </div>
                     <div class="text-center text-body-2 text-grey pt-1">
                         <span class="mr-3">{{ pilot.heading }}°</span>

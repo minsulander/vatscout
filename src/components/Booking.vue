@@ -1,6 +1,6 @@
 <template>
     <v-row no-gutters>
-        <v-col cols="3" md="3">
+        <v-col cols="6" sm="3">
             <v-chip
                 variant="flat"
                 elevated
@@ -17,10 +17,10 @@
                 </span>
             </v-chip>
         </v-col>
-        <v-col cols="5" md="5">
+        <v-col cols="5" sm="5" class="d-none d-sm-block">
             <router-link :to="`/member/${value.cid}`" class="text-grey">{{ name }}</router-link>
         </v-col>
-        <v-col cols="4" md="4" class="text-right">
+        <v-col cols="6" sm="4" class="text-right">
             <v-chip variant="flat" size="x-small" label color="red-darken-2" class="mr-2" v-if="value.type == 'exam'">Exam</v-chip>
             <v-chip variant="flat" size="x-small" label color="green-darken-2" class="mr-2" v-else-if="value.type == 'event'">Event</v-chip>
             <v-chip variant="flat" size="x-small" label color="blue-darken-2" class="mr-2" v-else-if="value.type == 'training'"
@@ -34,11 +34,14 @@
                 {{ moment(value.start).utc().format("HHmm") }} - {{ moment(value.end).utc().format("HHmm") }}
             </span>
         </v-col>
+        <v-col cols="12" class="d-sm-none">
+            <router-link :to="`/member/${value.cid}`" class="text-grey">{{ name }}</router-link>
+        </v-col>
     </v-row>
 </template>
 
 <script setup lang="ts">
-import { colorForControllerCallsign, labelForControllerCallsign } from "@/common"
+import { colorForControllerCallsign } from "@/common"
 import { Booking, useVatsimStore } from "@/store/vatsim"
 import moment from "moment"
 import { computed } from "vue"

@@ -5,8 +5,8 @@
         </v-col>
         <v-col sm="3" v-if="value.flight_plan">
             <span>{{ value.flight_plan.aircraft_short }}</span>
-            <v-chip size="small" density="comfortable" label class="ml-1" v-if="typeClass && typeClass == 'H'"><v-icon>mdi-helicopter</v-icon></v-chip>
-            <v-chip size="small" density="comfortable" label class="ml-1" v-else-if="wtc && wtc != 'M'">{{ wtc }}</v-chip>
+            <v-chip size="small" density="comfortable" label class="ml-1 px-1" v-if="typeClass && typeClass == 'H'"><v-icon>mdi-helicopter</v-icon></v-chip>
+            <v-chip size="small" density="comfortable" label class="ml-1 px-1" v-else-if="wtc && wtc != 'M'">{{ wtc }}</v-chip>
         </v-col>
         <v-col sm="2" v-if="value.flight_plan">
             <span v-if="!departure">
@@ -27,14 +27,14 @@
             <span v-else-if="arrival && pending && flightplanArrivalTime(value.flight_plan, true)" style="opacity: 0.5">
                 {{ flightplanArrivalTime(value.flight_plan, true)!.format("HHmm") }}
             </span>
-            <div class="float-right" style="white-space: nowrap">
-                <v-chip size="small" density="comfortable" label class="ml-1" v-if="t1">T1</v-chip>
-                <v-chip size="small" density="comfortable" label class="ml-1" v-if="value.flight_plan.flight_rules == 'V'">VFR</v-chip>
-                <v-chip size="small" density="comfortable" label class="ml-1" v-if="newPilot">NEW</v-chip>
-                <v-chip size="small" density="comfortable" label class="ml-1" v-if="streamer"><v-icon>mdi-video</v-icon></v-chip>
-                <v-chip size="small" density="comfortable" label class="ml-1" v-if="textOnly">T</v-chip>
-                <v-chip size="small" density="comfortable" label class="ml-1" v-if="receiveOnly">R</v-chip>
-                <v-chip size="small" density="comfortable" label class="ml-1" color="red" v-if="departure && pending && transponderWarning">{{ transponderWarning }}</v-chip>
+            <div class="float-right text-nowrap">
+                <v-chip size="small" density="comfortable" label class="ml-1 px-1" v-if="t1">T1</v-chip>
+                <v-chip size="small" density="comfortable" label class="ml-1 px-1" v-if="value.flight_plan.flight_rules == 'V'">VFR</v-chip>
+                <v-chip size="small" density="comfortable" label class="ml-1 px-1" v-if="newPilot">NEW</v-chip>
+                <v-chip size="small" density="comfortable" label class="ml-1 px-1" v-if="streamer"><v-icon>mdi-video</v-icon></v-chip>
+                <v-chip size="small" density="comfortable" label class="ml-1 px-1" v-if="textOnly">T</v-chip>
+                <v-chip size="small" density="comfortable" label class="ml-1 px-1" v-if="receiveOnly">R</v-chip>
+                <v-chip size="small" density="comfortable" label class="ml-1 px-1" color="red" v-if="departure && pending && transponderWarning">{{ transponderWarning }}</v-chip>
             </div>
         </v-col>
     </v-row>
@@ -98,8 +98,8 @@ const transponderWarning = computed(() => {
     const pilot = props.value as Pilot
     if (!pilot) return false
     if (!pilot.flight_plan) return false
-    if (pilot.flight_plan.assigned_transponder == "0000") return false
     if (pilot.transponder == pilot.flight_plan.assigned_transponder) return false
+    if (["0000", "1000", "1200"].includes(pilot.flight_plan.assigned_transponder)) return false
     return pilot.flight_plan.assigned_transponder
 })
 
@@ -122,21 +122,21 @@ const textOnly = computed(() => {
     const flightplan = props.value.flight_plan
     if (!flightplan) return false
     if (!flightplan.remarks) return false
-    return !!flightplan.remarks.includes("/T/")
+    return !!flightplan.remarks.toUpperCase().includes("/T/")
 })
 
 const receiveOnly = computed(() => {
     const flightplan = props.value.flight_plan
     if (!flightplan) return false
     if (!flightplan.remarks) return false
-    return !!flightplan.remarks.includes("/R/")
+    return !!flightplan.remarks.toUpperCase().includes("/R/")
 })
 
 const streamer = computed(() => {
     const flightplan = props.value.flight_plan
     if (!flightplan) return false
     if (!flightplan.remarks) return false
-    return !!flightplan.remarks.match(/TWITCH.TV|STREAM(ING?).*TWITCH/)
+    return !!flightplan.remarks.toUpperCase().match(/TWITCH.TV|STREAM(ING?).*TWITCH/)
 })
 
 function click() {

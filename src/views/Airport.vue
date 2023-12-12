@@ -6,10 +6,12 @@
             </v-col>
             <v-col cols="8" class="text-right text-grey-lighten-1 text-h6 font-weight-light">
                 <div v-if="airport" class="mt-3">
-                    <span v-if="airport.iata"
-                        ><span class="pa-1">{{ airport.iata }}</span> |
+                    <span class="d-none d-sm-inline">
+                        <span v-if="airport.iata"
+                            ><span class="pa-1">{{ airport.iata }}</span> |
+                        </span>
+                        <span class="pa-1">{{ airport.name }}</span> |
                     </span>
-                    <span class="pa-1">{{ airport.name }}</span> |
                     <router-link :to="`/fir/${airport.fir}`" class="pa-1">{{ airport.fir }}</router-link> |
                     <router-link :to="`/country/${airport.fir.substring(0, 2)}`" class="pa-1">{{
                         airport.fir.substring(0, 2)
@@ -17,10 +19,17 @@
                 </div>
             </v-col>
         </v-row>
+        <div class="d-sm-none text-grey-lighten-1 text-h6 font-weight-light mb-3">
+            <span v-if="airport.iata"
+                ><span class="pa-1">{{ airport.iata }}</span> |
+            </span>
+            <span class="pa-1">{{ airport.name }}</span>
+        </div>
         <v-row>
             <v-col
                 cols="12"
-                md="6"
+                lg="6"
+                xl="2"
                 v-for="atis in atises"
                 style="cursor: pointer"
                 :style="settings.expandAtis ? '' : 'max-height: 80px; overflow: hidden;'"
@@ -30,7 +39,7 @@
                     <span v-if="extractAtisCode(atis)">{{ extractAtisCode(atis) }}</span>
                     <span v-else class="text-black">{{ atis.atis_code || "/" }}</span>
                 </v-chip>
-                {{ atis.frequency }} {{ atis.callsign.replace(`${id}_`, "") }}
+                {{ atis.frequency }} {{ atis.callsign.replace(`${id}_`, "").replace("_ATIS", "").replace("ATIS", "") }}
                 <router-link :to="`/member/${atis.cid}`">{{ atis.name }}</router-link>
                 <span class="text-grey ml-1">{{ moment.utc(moment().diff(moment(atis.logon_time))).format("HHmm") }}</span>
                 <br />
@@ -38,14 +47,7 @@
                     {{ atis.text_atis?.join("\n") }}
                 </div>
             </v-col>
-            <v-col cols="6" sm="3" lg="2" v-for="controller in controllers">
-                <v-chip variant="flat" elevated label size="small" class="font-weight-bold mb-1" :color="colorForController(controller)"
-                    >{{ controller.callsign.replace(`${id}_`, "") }}
-                </v-chip>
-                {{ controller.frequency }}<br /><router-link :to="`/member/${controller.cid}`">{{ controller.name }}</router-link>
-                <v-chip density="comfortable" class="ml-1" color="grey-lighten-1" style="padding: 5px">{{ rating(controller) }}</v-chip>
-                <span class="text-grey ml-1">{{ moment.utc(moment().diff(moment(controller.logon_time))).format("HHmm") }}</span>
-            </v-col>
+            <Controller v-for="controller in controllers" :value="controller" :prefix="id" />
         </v-row>
         <v-row class="mt-3">
             <v-col cols="12" sm="6">
@@ -59,11 +61,31 @@
                     </v-col>
                 </v-row>
                 <div class="text-caption text-grey-darken-2 font-weight-light mt-2 ml-1" v-if="departurePrefiles.length > 0">PREFILED</div>
-                <flight-row v-for="p in departurePrefiles" :key="p.callsign" :value="p" departure prefile :class="newDepartures.includes(p.callsign) ? 'bg-blue-grey-darken-4' : ''" />
+                <flight-row
+                    v-for="p in departurePrefiles"
+                    :key="p.callsign"
+                    :value="p"
+                    departure
+                    prefile
+                    :class="newDepartures.includes(p.callsign) ? 'bg-blue-grey-darken-4' : ''"
+                />
                 <div class="text-caption text-grey-darken-2 font-weight-light mt-2 ml-1" v-if="nofpPilots.length > 0">NO FLIGHTPLAN</div>
-                <flight-row v-for="p in nofpPilots" :key="p.callsign" :value="p" departure nofp :class="newDepartures.includes(p.callsign) ? 'bg-blue-grey-darken-4' : ''" />
+                <flight-row
+                    v-for="p in nofpPilots"
+                    :key="p.callsign"
+                    :value="p"
+                    departure
+                    nofp
+                    :class="newDepartures.includes(p.callsign) ? 'bg-blue-grey-darken-4' : ''"
+                />
                 <div class="text-caption text-grey-darken-2 font-weight-light mt-2 ml-1" v-if="departingPilots.length > 0">DEPARTING</div>
-                <flight-row v-for="p in departingPilots" :key="p.callsign" :value="p" departure :class="newDepartures.includes(p.callsign) ? 'bg-blue-grey-darken-4' : ''" />
+                <flight-row
+                    v-for="p in departingPilots"
+                    :key="p.callsign"
+                    :value="p"
+                    departure
+                    :class="newDepartures.includes(p.callsign) ? 'bg-blue-grey-darken-4' : ''"
+                />
                 <div class="text-caption text-grey-darken-2 font-weight-light mt-2 ml-1" v-if="departedPilots.length > 0">DEPARTED</div>
                 <flight-row v-for="p in departedPilots" :key="p.callsign" :value="p" departure />
                 <div
@@ -85,9 +107,22 @@
                     </v-col>
                 </v-row>
                 <div class="text-caption text-grey-darken-2 font-weight-light mt-2 ml-1" v-if="arrivalPrefiles.length > 0">PREFILED</div>
-                <flight-row v-for="p in arrivalPrefiles" :key="p.callsign" :value="p" arrival prefile :class="newArrivals.includes(p.callsign) ? 'bg-brown-darken-3' : ''"/>
+                <flight-row
+                    v-for="p in arrivalPrefiles"
+                    :key="p.callsign"
+                    :value="p"
+                    arrival
+                    prefile
+                    :class="newArrivals.includes(p.callsign) ? 'bg-brown-darken-3' : ''"
+                />
                 <div class="text-caption text-grey-darken-2 font-weight-light mt-2 ml-1" v-if="arrivingPilots.length > 0">ARRIVING</div>
-                <flight-row v-for="p in arrivingPilots" :key="p.callsign" :value="p" arrival :class="newArrivals.includes(p.callsign) ? 'bg-brown-darken-3' : ''"/>
+                <flight-row
+                    v-for="p in arrivingPilots"
+                    :key="p.callsign"
+                    :value="p"
+                    arrival
+                    :class="newArrivals.includes(p.callsign) ? 'bg-brown-darken-3' : ''"
+                />
                 <div class="text-caption text-grey-darken-2 font-weight-light mt-2 ml-1" v-if="arrivedPilots.length > 0">ARRIVED</div>
                 <flight-row v-for="p in arrivedPilots" :key="p.callsign" :value="p" arrival />
                 <div
@@ -117,7 +152,7 @@
 
 <script lang="ts" setup>
 import { useRoute } from "vue-router"
-import { Controller, useVatsimStore } from "@/store/vatsim"
+import { useVatsimStore } from "@/store/vatsim"
 import { useSettingsStore } from "@/store/settings"
 import { computed, ref, watch } from "vue"
 import constants from "@/constants"
@@ -125,6 +160,7 @@ import { colorForController, compareControllers, labelForController, compareCall
 import { eta, departureDistance, arrivalDistance, flightplanArrivalTime, flightplanDepartureTime, distanceToAirport } from "@/calc"
 import FlightRow from "@/components/FlightRow.vue"
 import Booking from "@/components/Booking.vue"
+import Controller from "@/components/Controller.vue"
 import moment from "moment"
 
 const route = useRoute()
@@ -188,7 +224,7 @@ const arrivingPilots = computed(() => {
     if (!vatsim.data || !vatsim.data.pilots) return []
     return vatsim.data.pilots
         .filter((p) => {
-            if (!p.flight_plan || p.flight_plan.arrival != id.value) return false
+            if (!p.flight_plan || p.flight_plan.arrival != id.value || p.flight_plan.departure == id.value) return false
             const departed = p.groundspeed >= constants.inflightGroundspeed || departureDistance(p) >= constants.atAirportDistance
             const etaOrArrivalTime = eta(p) || flightplanArrivalTime(p.flight_plan, !departed)
             return (
@@ -211,6 +247,7 @@ const arrivedPilots = computed(() => {
         (p) =>
             p.flight_plan &&
             p.flight_plan.arrival == id.value &&
+            p.flight_plan.departure != id.value &&
             p.groundspeed < constants.inflightGroundspeed &&
             arrivalDistance(p) < constants.atAirportDistance
     )
@@ -222,6 +259,7 @@ const arrivalPrefiles = computed(() => {
             (p) =>
                 p.flight_plan &&
                 p.flight_plan.arrival == id.value &&
+                p.flight_plan.departure != id.value &&
                 (!flightplanArrivalTime(p.flight_plan) ||
                     flightplanArrivalTime(p.flight_plan)?.isBefore(moment().add(settings.arrivingMaxMinutes, "minute"))) &&
                 (!flightplanDepartureTime(p.flight_plan) ||
@@ -275,12 +313,6 @@ function isMatchingCallsign(callsign: string) {
     )
 }
 
-function rating(controller: Controller) {
-    if (!vatsim.data || !vatsim.data.ratings) return undefined
-    const rating = vatsim.data.ratings.find((r) => r.id == controller.rating)
-    if (rating) return rating.short
-}
-
 function toggleAtis() {
     settings.expandAtis = !settings.expandAtis
     settings.save()
@@ -322,7 +354,7 @@ watch([arrivalPrefiles, arrivingPilots], () => {
                     : `New arrival <b style=\'font-family: monospace\'>${popups[0]}</b>.`
             snackbarColor.value = "yellow"
             snackbar.value = true
-            setTimeout(() => newArrivals.value = [], 10000)
+            setTimeout(() => (newArrivals.value = []), 10000)
         }
     }, 500)
 })
@@ -355,7 +387,7 @@ watch([departurePrefiles, departingPilots, nofpPilots], () => {
                     : `New departure <b style=\'font-family: monospace\'>${popups[0]}</b>.`
             snackbarColor.value = "cyan"
             snackbar.value = true
-            setTimeout(() => newDepartures.value = [], 10000)
+            setTimeout(() => (newDepartures.value = []), 10000)
         }
     }, 1000)
 })
