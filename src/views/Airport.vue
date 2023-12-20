@@ -19,7 +19,7 @@
                 </div>
             </v-col>
         </v-row>
-        <div class="d-sm-none text-grey-lighten-1 text-h6 font-weight-light mb-3">
+        <div class="d-sm-none text-grey-lighten-1 text-h6 font-weight-light mb-3" v-if="airport">
             <span v-if="airport.iata"
                 ><span class="pa-1">{{ airport.iata }}</span> |
             </span>
@@ -56,6 +56,7 @@
                     <v-col sm="5" class="text-right">
                         <span v-if="departurePrefiles.length > 0" class="text-grey ml-3">{{ departurePrefiles.length }}</span>
                         <span v-if="nofpPilots.length > 0" class="text-grey-lighten-1 ml-3">{{ nofpPilots.length }}</span>
+                        <span v-if="invalidfpPilots.length > 0" class="text-error ml-3">{{ invalidfpPilots.length }}</span>
                         <span v-if="departingPilots.length > 0" class="text-cyan-lighten-2 ml-3">{{ departingPilots.length }}</span>
                         <span v-if="departedPilots.length > 0" class="text-cyan-darken-3 ml-3">{{ departedPilots.length }}</span>
                     </v-col>
@@ -78,6 +79,15 @@
                     nofp
                     :class="newDepartures.includes(p.callsign) ? 'bg-blue-grey-darken-4' : ''"
                 />
+                <div class="text-caption text-grey-darken-2 font-weight-light mt-2 ml-1" v-if="invalidfpPilots.length > 0">INVALID FLIGHTPLAN</div>
+                <flight-row
+                    v-for="p in invalidfpPilots"
+                    :key="p.callsign"
+                    :value="p"
+                    departure
+                    invalid
+                    :class="newDepartures.includes(p.callsign) ? 'bg-blue-grey-darken-4' : ''"
+                />
                 <div class="text-caption text-grey-darken-2 font-weight-light mt-2 ml-1" v-if="departingPilots.length > 0">DEPARTING</div>
                 <flight-row
                     v-for="p in departingPilots"
@@ -90,7 +100,7 @@
                 <flight-row v-for="p in departedPilots" :key="p.callsign" :value="p" departure />
                 <div
                     v-if="
-                        departurePrefiles.length == 0 && nofpPilots.length == 0 && departingPilots.length == 0 && departedPilots.length == 0
+                        departurePrefiles.length == 0 && nofpPilots.length == 0 && invalidfpPilots.length == 0 && departingPilots.length == 0 && departedPilots.length == 0
                     "
                     class="mt-2 text-caption text-grey-darken-2 font-weight-light text-center"
                 >
@@ -205,6 +215,12 @@ const nofpPilots = computed(() => {
     if (!vatsim.data || !vatsim.data.pilots) return []
     return vatsim.data.pilots
         .filter((p) => !p.flight_plan && distanceToAirport(p, airport.value) < constants.atAirportDistance)
+        .sort((a, b) => a.callsign.localeCompare(b.callsign))
+})
+const invalidfpPilots = computed(() => {
+    if (!vatsim.data || !vatsim.data.pilots) return []
+    return vatsim.data.pilots
+        .filter((p) => p.flight_plan && p.flight_plan.departure != id.value && distanceToAirport(p, airport.value) < constants.atAirportDistance && p.groundspeed < constants.inflightGroundspeed)
         .sort((a, b) => a.callsign.localeCompare(b.callsign))
 })
 const departurePrefiles = computed(() => {
@@ -330,12 +346,13 @@ const departurePopupSound = new Howl({ src: "/audio/pop.mp3" })
 const arrivalPopupSound = new Howl({ src: "/audio/decide.mp3" })
 const atcPopupSound = new Howl({ src: "/audio/notification.mp3" })
 
-let lastArrivals = undefined as string[] | undefined
+const arrivalCallsigns = () => [...arrivalPrefiles.value.map((p) => p.callsign), ...arrivingPilots.value.map((p) => p.callsign)]
+let lastArrivals = vatsim.data.pilots ? arrivalCallsigns() : undefined
 const newArrivals = ref([] as string[])
 watch([arrivalPrefiles, arrivingPilots], () => {
     setTimeout(() => {
         let popups = []
-        const allArrivals = [...arrivalPrefiles.value.map((p) => p.callsign), ...arrivingPilots.value.map((p) => p.callsign)]
+        const allArrivals = arrivalCallsigns()
         if (typeof lastArrivals != "undefined") {
             for (const callsign of allArrivals) {
                 if (!lastArrivals.includes(callsign)) popups.push(callsign)
@@ -359,16 +376,17 @@ watch([arrivalPrefiles, arrivingPilots], () => {
     }, 500)
 })
 
-let lastDepartures = undefined as string[] | undefined
+const departureCallsigns = () => [
+    ...departurePrefiles.value.map((p) => p.callsign),
+    ...departingPilots.value.map((p) => p.callsign),
+    ...nofpPilots.value.map((p) => p.callsign),
+]
+let lastDepartures = vatsim.data.pilots ? departureCallsigns() : undefined
 const newDepartures = ref([] as string[])
 watch([departurePrefiles, departingPilots, nofpPilots], () => {
     setTimeout(() => {
         let popups = []
-        const allDepartures = [
-            ...departurePrefiles.value.map((p) => p.callsign),
-            ...departingPilots.value.map((p) => p.callsign),
-            ...nofpPilots.value.map((p) => p.callsign),
-        ]
+        const allDepartures = departureCallsigns()
         if (typeof lastDepartures != "undefined") {
             for (const callsign of allDepartures) {
                 if (!lastDepartures.includes(callsign)) popups.push(callsign)
@@ -392,12 +410,13 @@ watch([departurePrefiles, departingPilots, nofpPilots], () => {
     }, 1000)
 })
 
-let lastAtc = undefined as string[] | undefined
+const atcCallsigns = () => [...atises.value.map((a) => a.callsign), ...controllers.value.map((c) => c.callsign)]
+let lastAtc = vatsim.data.controllers ? atcCallsigns() : undefined
 watch([atises, controllers], () => {
     setTimeout(() => {
         let popups = []
         let popoffs = []
-        const allAtc = [...atises.value.map((a) => a.callsign), ...controllers.value.map((c) => c.callsign)]
+        const allAtc = atcCallsigns()
         if (typeof lastAtc != "undefined") {
             for (const callsign of allAtc) {
                 if (!lastAtc.includes(callsign)) popups.push(callsign)
@@ -414,7 +433,7 @@ watch([atises, controllers], () => {
             }
             snackbarText.value = ""
             if (popups.length > 0) snackbarText.value += `<b style=\'font-family: monospace\'>${popups.join(", ")}</b> online. `
-            if (popoffs.length > 0) snackbarText.value += `<b style=\'font-family: monospace\'>${popups.join(", ")}</b> offline. `
+            if (popoffs.length > 0) snackbarText.value += `<b style=\'font-family: monospace\'>${popoffs.join(", ")}</b> offline. `
             snackbarColor.value = "white"
             snackbar.value = true
         }
@@ -422,7 +441,12 @@ watch([atises, controllers], () => {
 })
 
 watch(id, () => {
-    console.log("ID changed")
-    lastDepartures = lastArrivals = lastAtc = undefined
+    if (id.value) {
+        lastDepartures = lastArrivals = lastAtc = []
+    } else {
+        lastDepartures = departureCallsigns()
+        lastArrivals = arrivalCallsigns()
+        lastAtc = atcCallsigns()
+    }
 })
 </script>

@@ -12,6 +12,9 @@
                 <span v-if="vatsim.movements[airport.icao].nofp" class="text-grey-lighten-1 mr-3">{{
                     vatsim.movements[airport.icao].nofp
                 }}</span>
+                <span v-if="vatsim.movements[airport.icao].invalidfp" class="text-error mr-3">{{
+                    vatsim.movements[airport.icao].invalidfp
+                }}</span>
                 <span v-if="vatsim.movements[airport.icao].departing" class="text-cyan-lighten-2">{{
                     vatsim.movements[airport.icao].departing
                 }}</span>

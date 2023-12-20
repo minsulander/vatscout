@@ -64,6 +64,7 @@ const props = defineProps<{
     arrival?: boolean
     prefile?: boolean
     nofp?: boolean
+    invalid?: boolean
     hideIcao?: boolean
 }>()
 
@@ -87,6 +88,7 @@ const eta = computed(() => calc.eta(props.value as Pilot))
 const rowclass = computed(() => {
     if (props.prefile) return "text-grey"
     if (props.nofp) return "text-grey-lighten-1"
+    if (props.invalid) return "text-error"
     if (props.departure && !pending.value) return "text-cyan-darken-3"
     if (props.arrival && !pending.value) return "text-brown-lighten-1"
     if (props.departure) return "text-cyan-lighten-2"

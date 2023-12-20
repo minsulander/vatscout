@@ -174,6 +174,7 @@ export interface Booking {
 export class AirportMovements {
     departed: number = 0
     nofp: number = 0
+    invalidfp: number = 0
     departing: number = 0
     prefiledDepartures: number = 0
     arrived: number = 0
@@ -239,6 +240,9 @@ export const useVatsimStore = defineStore("vatsim", () => {
         }
         for (const p of data.value.pilots.filter((p) => !p.flight_plan)) {
             if (distanceToAirport(p, airportByIcao.value[airport_icao]) < constants.atAirportDistance) moves.nofp++
+        }
+        for (const p of data.value.pilots.filter((p) => p.flight_plan && p.flight_plan.departure != airport_icao)) {
+            if (distanceToAirport(p, airportByIcao.value[airport_icao]) < constants.atAirportDistance && p.groundspeed < constants.inflightGroundspeed) moves.invalidfp++
         }
         for (const p of data.value.prefiles.filter(
             (p) => p.flight_plan && (p.flight_plan.departure == airport_icao || p.flight_plan.arrival == airport_icao)

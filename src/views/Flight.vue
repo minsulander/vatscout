@@ -46,15 +46,15 @@
                     <v-row>
                         <v-col cols="6" class="text-truncate">
                             <router-link :to="`/airport/${flightplan.departure}`" class="pa-1">
-                            {{ flightplan.departure }}
-                            <span v-if="departureAirport" class="text-body-2 text-grey-lighten-1">{{ departureAirport.name }}</span>
-                        </router-link>
+                                {{ flightplan.departure }}
+                                <span v-if="departureAirport" class="text-body-2 text-grey-lighten-1">{{ departureAirport.name }}</span>
+                            </router-link>
                         </v-col>
-                        <v-col cols="6" class="text-right text-truncate" style="direction: rtl;">
+                        <v-col cols="6" class="text-right text-truncate" style="direction: rtl">
                             <router-link :to="`/airport/${flightplan.arrival}`" class="pa-1">
-                            <span v-if="arrivalAirport" class="text-body-2 text-grey-lighten-1">{{ arrivalAirport.name }}</span>
-                            {{ flightplan.arrival }}
-                        </router-link>
+                                <span v-if="arrivalAirport" class="text-body-2 text-grey-lighten-1">{{ arrivalAirport.name }}</span>
+                                {{ flightplan.arrival }}
+                            </router-link>
                         </v-col>
                     </v-row>
                 </span>
@@ -118,7 +118,7 @@
                         v-if="
                             flightplan && flightplan.assigned_transponder != '0000' && pilot.transponder != flightplan.assigned_transponder
                         "
-                        class="text-yellow"
+                        class="text-warning"
                     >
                         {{ pilot.transponder }}
                     </span>
@@ -175,7 +175,7 @@
                 <v-col cols="2" sm="1" class="text-right pr-2 text-caption text-grey">Rules</v-col>
                 <v-col cols="10" sm="5">
                     <span v-if="flightplan.flight_rules == 'I'" class="text-grey">IFR</span>
-                    <span v-else-if="flightplan.flight_rules == 'V'" class="text-yellow">VFR</span>
+                    <span v-else-if="flightplan.flight_rules == 'V'" class="text-warning">VFR</span>
                     <span v-else>{{ flightplan.flight_rules }}</span>
                 </v-col>
                 <v-col cols="2" sm="1" class="text-right pr-2 text-caption text-grey">Altitude</v-col>
@@ -190,8 +190,8 @@
                     <span v-if="actypeCode" class="text-body-2 text-grey">
                         -
                         <span style="white-space: nowrap">
-                            <span v-if="wtc" :class="wtc != 'M' ? 'text-yellow' : ''">{{ wtcText[wtc] }}</span>
-                            <span v-if="typeClass" :class="typeClass != 'L' ? 'text-yellow' : ''" class="ml-1">{{
+                            <span v-if="wtc" :class="wtc != 'M' ? 'text-warning' : ''">{{ wtcText[wtc] }}</span>
+                            <span v-if="typeClass" :class="typeClass != 'L' ? 'text-warning' : ''" class="ml-1">{{
                                 typeClassText[typeClass]
                             }}</span>
                             <span v-if="noEngines" class="ml-1">{{ noEnginesText[noEngines] }}</span>
@@ -206,7 +206,13 @@
                 </v-col>
                 <v-col cols="2" sm="1" class="text-right pr-2 text-caption text-grey">Departure</v-col>
                 <v-col cols="10" sm="5">
-                    <router-link :to="`/airport/${flightplan.departure}`">
+                    <span v-if="!(flightplan.departure in vatsim.airportByIcao)">
+                        <span class="bg-red-darken-3 pa-1">
+                            {{ flightplan.departure }}
+                        </span>
+                        {{ flightplan.deptime }}
+                    </span>
+                    <router-link v-else :to="`/airport/${flightplan.departure}`">
                         {{ flightplan.departure }} {{ flightplan.deptime }}
                         <span v-if="departureAirport" class="text-body-2 text-grey"> - {{ departureAirport.name }}</span>
                     </router-link>
@@ -280,9 +286,9 @@ const vatsim = useVatsimStore()
 
 const id = computed(() => (route.params.id as string).toUpperCase())
 const callsign = computed(() => {
-    if (flightplan.value && flightplan.value.remarks.includes("CALLSIGN")) {
-        const m = flightplan.value.remarks.match(/CALLSIGN[\/ ](.*?)(\/|$)/)
-        if (m) return m.at(1)
+    if (flightplan.value && (flightplan.value.remarks.includes("CALLSIGN") || flightplan.value.remarks.includes("CS/"))) {
+        const m = flightplan.value.remarks.match(/(CALLSIGN[\/=_ ]|CALLSIGN IS |CS\/)([\w\s-_"]+?)(TCAS|SIMBRIEF|\s\w+\/|\/|\(|$)/)
+        if (m) return m.at(2)?.replaceAll('"', '')
     }
     return id.value.length > 3 && isFinite(parseInt(id.value.substring(3, 4))) && (callsigns as any)[id.value.substring(0, 3)]
 })
@@ -381,21 +387,21 @@ const formattedRoute = computed(() => {
 
 const formattedRemarks = computed(() => {
     if (!flightplan.value || !flightplan.value.remarks) return ""
-    let rmk = flightplan.value.remarks
-    rmk = rmk.replace(/(PBN\/\w+)T1/, '$1<span class="text-yellow font-weight-bold">T1</span>')
+    let rmk = flightplan.value.remarks.toUpperCase()
+    rmk = rmk.replace(/(PBN\/\w+)T1/, '$1<span class="text-warning font-weight-bold">T1</span>')
     for (const phrase of constants.newPilotPhrases) {
         if (rmk.includes(phrase)) {
-            rmk = rmk.replace(phrase, `<span class="text-yellow font-weight-bold">${phrase}</span>`)
+            rmk = rmk.replace(phrase, `<span class="text-warning font-weight-bold">${phrase}</span>`)
             break
         }
     }
     if (rmk.includes("CALLSIGN/")) {
         rmk = rmk.replace("CALLSIGN/", '<span class="text-grey">CALLSIGN/</span>')
     } else if (rmk.includes("CALLSIGN")) {
-        rmk = rmk.replace("CALLSIGN", '<span class="text-yellow font-weight-bold">CALLSIGN</span>')
+        rmk = rmk.replace("CALLSIGN", '<span class="text-warning font-weight-bold">CALLSIGN</span>')
     }
-    rmk = rmk.replace("/T/", `<span class="text-yellow font-weight-bold">/T/</span>`)
-    rmk = rmk.replace("/R/", `<span class="text-yellow font-weight-bold">/R/</span>`)
+    rmk = rmk.replace("/T/", `<span class="text-warning font-weight-bold">/T/</span>`)
+    rmk = rmk.replace("/R/", `<span class="text-warning font-weight-bold">/R/</span>`)
     for (const dim of [
         "PBN/",
         "NAV/",
@@ -409,7 +415,17 @@ const formattedRemarks = computed(() => {
         "RMK/",
         "EET/",
         "PER/",
+        "SUR/",
+        "DEP/",
+        "DEST/",
+        "ALTN/",
+        "RALT/",
         "TALT/",
+        "ORGN/",
+        "TYP/",
+        "DLE/",
+        "RIF/",
+        "RFP/",
         "SIMBRIEF",
         "/V/",
         "//",
