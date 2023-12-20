@@ -204,7 +204,7 @@ export const useVatsimStore = defineStore("vatsim", () => {
     const data = ref({} as VatsimData)
     const transceivers = ref({} as { [key: string]: Transceiver[] })
     const spy = ref({} as VatspyData)
-    const airportByIcao = ref({} as { [key: string]: Airport})
+    const airportByIcao = ref({} as { [key: string]: Airport })
     const boundaries = ref([] as FeatureLike[])
     const traconBoundaries = ref([] as FeatureLike[])
     const bookings = ref([] as Booking[])
@@ -241,8 +241,14 @@ export const useVatsimStore = defineStore("vatsim", () => {
         for (const p of data.value.pilots.filter((p) => !p.flight_plan)) {
             if (distanceToAirport(p, airportByIcao.value[airport_icao]) < constants.atAirportDistance) moves.nofp++
         }
-        for (const p of data.value.pilots.filter((p) => p.flight_plan && p.flight_plan.departure != airport_icao)) {
-            if (distanceToAirport(p, airportByIcao.value[airport_icao]) < constants.atAirportDistance && p.groundspeed < constants.inflightGroundspeed) moves.invalidfp++
+        for (const p of data.value.pilots.filter(
+            (p) => p.flight_plan && p.flight_plan.departure != airport_icao && p.flight_plan.arrival != airport_icao && p.flight_plan.alternate != airport_icao
+        )) {
+            if (
+                distanceToAirport(p, airportByIcao.value[airport_icao]) < constants.defAtAirportDistance &&
+                p.groundspeed < constants.defInflightGroundspeed
+            )
+                moves.invalidfp++
         }
         for (const p of data.value.prefiles.filter(
             (p) => p.flight_plan && (p.flight_plan.departure == airport_icao || p.flight_plan.arrival == airport_icao)
@@ -428,7 +434,12 @@ export const useVatsimStore = defineStore("vatsim", () => {
                         setTimeout(() => fetchBookings(), 800)
                         lastBookingsRefresh = new Date().getTime()
                     }
-                    if (!spy.value.countries || boundaries.value.length == 0 || traconBoundaries.value.length == 0 || new Date().getTime() - lastStaticDataRefresh > constants.staticDataRefreshInterval) {
+                    if (
+                        !spy.value.countries ||
+                        boundaries.value.length == 0 ||
+                        traconBoundaries.value.length == 0 ||
+                        new Date().getTime() - lastStaticDataRefresh > constants.staticDataRefreshInterval
+                    ) {
                         if (!spy.value.countries) setTimeout(() => fetchSpy(), 200)
                         if (boundaries.value.length == 0) setTimeout(() => fetchBoundaries(), 400)
                         if (traconBoundaries.value.length == 0) setTimeout(() => fetchTraconBoundaries(), 600)

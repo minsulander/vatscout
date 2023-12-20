@@ -79,7 +79,9 @@
                     nofp
                     :class="newDepartures.includes(p.callsign) ? 'bg-blue-grey-darken-4' : ''"
                 />
-                <div class="text-caption text-grey-darken-2 font-weight-light mt-2 ml-1" v-if="invalidfpPilots.length > 0">INVALID FLIGHTPLAN</div>
+                <div class="text-caption text-grey-darken-2 font-weight-light mt-2 ml-1" v-if="invalidfpPilots.length > 0">
+                    INVALID FLIGHTPLAN
+                </div>
                 <flight-row
                     v-for="p in invalidfpPilots"
                     :key="p.callsign"
@@ -100,7 +102,11 @@
                 <flight-row v-for="p in departedPilots" :key="p.callsign" :value="p" departure />
                 <div
                     v-if="
-                        departurePrefiles.length == 0 && nofpPilots.length == 0 && invalidfpPilots.length == 0 && departingPilots.length == 0 && departedPilots.length == 0
+                        departurePrefiles.length == 0 &&
+                        nofpPilots.length == 0 &&
+                        invalidfpPilots.length == 0 &&
+                        departingPilots.length == 0 &&
+                        departedPilots.length == 0
                     "
                     class="mt-2 text-caption text-grey-darken-2 font-weight-light text-center"
                 >
@@ -220,7 +226,15 @@ const nofpPilots = computed(() => {
 const invalidfpPilots = computed(() => {
     if (!vatsim.data || !vatsim.data.pilots) return []
     return vatsim.data.pilots
-        .filter((p) => p.flight_plan && p.flight_plan.departure != id.value && distanceToAirport(p, airport.value) < constants.atAirportDistance && p.groundspeed < constants.inflightGroundspeed)
+        .filter(
+            (p) =>
+                p.flight_plan &&
+                p.flight_plan.departure != id.value &&
+                p.flight_plan.arrival != id.value &&
+                p.flight_plan.alternate != id.value &&
+                distanceToAirport(p, airport.value) < constants.defAtAirportDistance &&
+                p.groundspeed < constants.defInflightGroundspeed
+        )
         .sort((a, b) => a.callsign.localeCompare(b.callsign))
 })
 const departurePrefiles = computed(() => {
