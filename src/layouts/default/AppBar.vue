@@ -8,7 +8,7 @@
                 <Search class="app-bar-search" />
             </v-col>
             <v-col cols="6" sm="3" class="text-right">
-                <v-btn icon plain to="/settings" color="grey-darken-3"><v-icon>mdi-cog</v-icon></v-btn>
+                <v-btn icon plain color="grey-darken-3" @click="clickSettings"><v-icon>mdi-cog</v-icon></v-btn>
                 <v-btn icon plain :color="settings.soundOn ? 'grey-darken-1' : 'grey-darken-3'" @click="clickBell"><v-icon>{{settings.soundOn ? 'mdi-bell-ring' : 'mdi-bell-off'}}</v-icon></v-btn>
                 <v-progress-circular
                     :model-value="progress"
@@ -30,6 +30,13 @@
                 <v-btn icon size="small" @click="snackbar = false"><v-icon>mdi-close</v-icon></v-btn>
             </template>
         </v-snackbar>
+        <v-dialog v-model="showSettings" width="90%">
+            <v-card>
+                <v-card-text>
+                    <Settings/>
+                </v-card-text>
+            </v-card>
+        </v-dialog>
     </v-app-bar>
 </template>
 
@@ -48,15 +55,20 @@
 
 <script lang="ts" setup>
 import Search from "@/components/Search.vue"
+import Settings from "@/views/Settings.vue"
 import constants from "@/constants"
 import { useVatsimStore } from "@/store/vatsim"
 import { computed, ref } from "vue"
-import moment from "moment"
 import { useSettingsStore } from "@/store/settings"
+import { useDisplay } from "vuetify"
+import moment from "moment"
 import { Howl } from "howler"
+import router from "@/router"
 const vatsim = useVatsimStore()
 const settings = useSettingsStore()
+const display = useDisplay()
 
+const showSettings = ref(false)
 const snackbar = ref(false)
 const snackbarText = ref("")
 
@@ -68,6 +80,14 @@ const outdated = computed(() => {
 })
 
 const sound = new Howl({ src: "/audio/notification.mp3" })
+
+function clickSettings() {
+    if (display.xs.value) {
+        router.push("/settings")
+    } else {
+        showSettings.value = true
+    }
+}
 
 function clickBell() {
     settings.soundOn = !settings.soundOn

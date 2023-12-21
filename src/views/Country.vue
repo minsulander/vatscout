@@ -2,7 +2,7 @@
     <v-container>
         <v-row>
             <v-col cols="4">
-                <div class="text-h3">{{ id }}</div>
+                <div class="text-h4">{{ id }}</div>
             </v-col>
             <v-col cols="8" class="text-right text-grey-lighten-1 text-h6 font-weight-light">
                 <div v-if="country" class="mt-3">
@@ -89,7 +89,7 @@ const controllers = computed(() => {
         (c) =>
             c.callsign &&
             c.callsign.endsWith("_CTR") &&
-            !c.callsign.endsWith("_OBS") && 
+            !c.callsign.endsWith("_OBS") &&
             ((c.callsign.startsWith(id.value) && c.callsign[4] == "_") || callsignPrefixes.find((prefix) => c.callsign.startsWith(prefix)))
     )
 })

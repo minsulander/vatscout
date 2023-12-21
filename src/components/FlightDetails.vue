@@ -2,7 +2,7 @@
     <div>
         <v-row align="center">
             <v-col cols="6" md="3">
-                <div class="text-h3">{{ id }}</div>
+                <div class="text-h4">{{ id }}</div>
                 <div class="text-grey-lighten-1" v-if="callsign">{{ callsign }} {{ id.substring(3) }}</div>
             </v-col>
             <v-col cols="6" md="3" class="text-center">

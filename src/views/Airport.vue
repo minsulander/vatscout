@@ -2,7 +2,7 @@
     <v-container>
         <v-row>
             <v-col cols="4">
-                <div class="text-h3">{{ id }}</div>
+                <div class="text-h4">{{ id }}</div>
             </v-col>
             <v-col cols="8" class="text-right text-grey-lighten-1 text-h6 font-weight-light">
                 <div v-if="airport" class="mt-3">
@@ -169,14 +169,12 @@
         <!--
         <v-btn @click="snackbar=true; snackbarColor='cyan'; snackbarText='New departure <b style=\'font-family: monospace\'>ABC123</b>'">Test snackbar</v-btn>
         -->
-        <v-dialog v-model="showFlightDialog">
-            <v-container>
-                <v-card>
-                    <v-card-text>
-                        <flight-details :id="flightCallsign" />
-                    </v-card-text>
-                </v-card>
-            </v-container>
+        <v-dialog v-model="showFlightDialog" width="90%">
+            <v-card>
+                <v-card-text>
+                    <flight-details :id="flightCallsign" />
+                </v-card-text>
+            </v-card>
         </v-dialog>
     </v-container>
 </template>

@@ -1,6 +1,6 @@
 <template>
     <v-container>
-        <div class="text-h3">{{ id }}</div>
+        <div class="text-h4">{{ id }}</div>
         <div v-if="uir">
             {{ uir.name }} |
             {{ uir.firBoundaries }}

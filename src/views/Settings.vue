@@ -1,5 +1,6 @@
 <template>
     <v-container class="mt-5">
+        <div class="text-h4 mb-5">Settings</div>
         <v-slider label="Notification sounds volume" v-model="settings.soundVolume" @end="endVolumeAdjustment"></v-slider>
         <v-text-field label="Departed max range" suffix="nm" variant="underlined" v-model="settings.departedMaxRange" @change="settings.save()"></v-text-field>
         <v-text-field label="Arriving max time (from now to ETA)" suffix="HHMM" variant="underlined" v-model="arrivingMaxTime" @change="settings.save()"></v-text-field>

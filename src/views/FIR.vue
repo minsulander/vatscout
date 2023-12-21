@@ -2,7 +2,7 @@
     <v-container>
         <v-row>
             <v-col cols="4">
-                <div class="text-h3">{{ id }}</div>
+                <div class="text-h4">{{ id }}</div>
             </v-col>
             <v-col cols="8" class="text-right text-grey-lighten-1 text-h6 font-weight-light">
                 <div v-if="fir" class="mt-3">
@@ -77,7 +77,7 @@ const bookings = computed(() => {
 function isMatchingCallsign(callsign: string) {
     return (
         callsign &&
-        !callsign.endsWith("_OBS") && 
+        !callsign.endsWith("_OBS") &&
         (callsign.startsWith(`${id.value}_`) ||
             (fir.value && fir.value.callsignPrefix && callsign.startsWith(fir.value.callsignPrefix)) ||
             (id.value.startsWith("K") && callsign.startsWith(`${id.value.substring(1)}_`)))
