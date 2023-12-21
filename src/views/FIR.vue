@@ -77,6 +77,7 @@ const bookings = computed(() => {
 function isMatchingCallsign(callsign: string) {
     return (
         callsign &&
+        !callsign.endsWith("_OBS") && 
         (callsign.startsWith(`${id.value}_`) ||
             (fir.value && fir.value.callsignPrefix && callsign.startsWith(fir.value.callsignPrefix)) ||
             (id.value.startsWith("K") && callsign.startsWith(`${id.value.substring(1)}_`)))

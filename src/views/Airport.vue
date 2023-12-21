@@ -69,6 +69,7 @@
                     departure
                     prefile
                     :class="newDepartures.includes(p.callsign) ? 'bg-blue-grey-darken-4' : ''"
+                    @click="clickFlight(p.callsign)"
                 />
                 <div class="text-caption text-grey-darken-2 font-weight-light mt-2 ml-1" v-if="nofpPilots.length > 0">NO FLIGHTPLAN</div>
                 <flight-row
@@ -78,6 +79,7 @@
                     departure
                     nofp
                     :class="newDepartures.includes(p.callsign) ? 'bg-blue-grey-darken-4' : ''"
+                    @click="clickFlight(p.callsign)"
                 />
                 <div class="text-caption text-grey-darken-2 font-weight-light mt-2 ml-1" v-if="invalidfpPilots.length > 0">
                     INVALID FLIGHTPLAN
@@ -89,6 +91,7 @@
                     departure
                     invalid
                     :class="newDepartures.includes(p.callsign) ? 'bg-blue-grey-darken-4' : ''"
+                    @click="clickFlight(p.callsign)"
                 />
                 <div class="text-caption text-grey-darken-2 font-weight-light mt-2 ml-1" v-if="departingPilots.length > 0">DEPARTING</div>
                 <flight-row
@@ -97,9 +100,10 @@
                     :value="p"
                     departure
                     :class="newDepartures.includes(p.callsign) ? 'bg-blue-grey-darken-4' : ''"
+                    @click="clickFlight(p.callsign)"
                 />
                 <div class="text-caption text-grey-darken-2 font-weight-light mt-2 ml-1" v-if="departedPilots.length > 0">DEPARTED</div>
-                <flight-row v-for="p in departedPilots" :key="p.callsign" :value="p" departure />
+                <flight-row v-for="p in departedPilots" :key="p.callsign" :value="p" departure @click="clickFlight(p.callsign)" />
                 <div
                     v-if="
                         departurePrefiles.length == 0 &&
@@ -130,6 +134,7 @@
                     arrival
                     prefile
                     :class="newArrivals.includes(p.callsign) ? 'bg-brown-darken-3' : ''"
+                    @click="clickFlight(p.callsign)"
                 />
                 <div class="text-caption text-grey-darken-2 font-weight-light mt-2 ml-1" v-if="arrivingPilots.length > 0">ARRIVING</div>
                 <flight-row
@@ -138,9 +143,10 @@
                     :value="p"
                     arrival
                     :class="newArrivals.includes(p.callsign) ? 'bg-brown-darken-3' : ''"
+                    @click="clickFlight(p.callsign)"
                 />
                 <div class="text-caption text-grey-darken-2 font-weight-light mt-2 ml-1" v-if="arrivedPilots.length > 0">ARRIVED</div>
-                <flight-row v-for="p in arrivedPilots" :key="p.callsign" :value="p" arrival />
+                <flight-row v-for="p in arrivedPilots" :key="p.callsign" :value="p" arrival @click="clickFlight(p.callsign)" />
                 <div
                     v-if="arrivalPrefiles.length == 0 && arrivingPilots.length == 0 && arrivedPilots.length == 0"
                     class="mt-2 text-caption text-grey-darken-2 font-weight-light text-center"
@@ -163,13 +169,23 @@
         <!--
         <v-btn @click="snackbar=true; snackbarColor='cyan'; snackbarText='New departure <b style=\'font-family: monospace\'>ABC123</b>'">Test snackbar</v-btn>
         -->
+        <v-dialog v-model="showFlightDialog">
+            <v-container>
+                <v-card>
+                    <v-card-text>
+                        <flight-details :id="flightCallsign" />
+                    </v-card-text>
+                </v-card>
+            </v-container>
+        </v-dialog>
     </v-container>
 </template>
 
 <script lang="ts" setup>
-import { useRoute } from "vue-router"
+import { useRoute, useRouter } from "vue-router"
 import { useVatsimStore } from "@/store/vatsim"
 import { useSettingsStore } from "@/store/settings"
+import { useDisplay } from "vuetify"
 import { computed, ref, watch } from "vue"
 import constants from "@/constants"
 import { colorForController, compareControllers, labelForController, compareCallsigns, extractAtisCode } from "@/common"
@@ -177,14 +193,18 @@ import { eta, departureDistance, arrivalDistance, flightplanArrivalTime, flightp
 import FlightRow from "@/components/FlightRow.vue"
 import Booking from "@/components/Booking.vue"
 import Controller from "@/components/Controller.vue"
+import FlightDetails from "@/components/FlightDetails.vue"
 import moment from "moment"
 
 const route = useRoute()
+const router = useRouter()
 const vatsim = useVatsimStore()
 const settings = useSettingsStore()
+const display = useDisplay()
 
 const id = computed(() => (route.params.id as string)?.toUpperCase())
-
+const showFlightDialog = ref(false)
+const flightCallsign = ref("")
 const snackbar = ref(false)
 const snackbarText = ref("")
 const snackbarColor = ref("")
@@ -354,6 +374,15 @@ function closeSnackbar() {
     newArrivals.value = []
 }
 
+function clickFlight(callsign: string) {
+    if (display.xs.value) {
+        router.push(`/flight/${callsign}`)
+    } else {
+        flightCallsign.value = callsign
+        showFlightDialog.value = true
+    }
+}
+
 import { Howl } from "howler"
 
 const departurePopupSound = new Howl({ src: "/audio/pop.mp3" })
@@ -455,7 +484,7 @@ watch([atises, controllers], () => {
 })
 
 watch(id, () => {
-    if (id.value) {
+    if (!id.value || !airport.value) {
         lastDepartures = lastArrivals = lastAtc = []
     } else {
         lastDepartures = departureCallsigns()

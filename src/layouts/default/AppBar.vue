@@ -5,7 +5,7 @@
                 <v-btn icon plain @click="$router.back()" color="grey"><v-icon size="x-large">mdi-chevron-left</v-icon></v-btn>
             </v-col>
             <v-col cols="4" sm="7">
-                <Search />
+                <Search class="app-bar-search" />
             </v-col>
             <v-col cols="6" sm="3" class="text-right">
                 <v-btn icon plain to="/settings" color="grey-darken-3"><v-icon>mdi-cog</v-icon></v-btn>
@@ -37,6 +37,13 @@
 .v-progress-circular {
     opacity: 0.7;
 }
+</style>
+<style>
+.app-bar-search .v-messages__message {
+    margin-left: -16px;
+    margin-top: -5px;
+}
+
 </style>
 
 <script lang="ts" setup>

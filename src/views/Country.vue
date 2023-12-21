@@ -89,6 +89,7 @@ const controllers = computed(() => {
         (c) =>
             c.callsign &&
             c.callsign.endsWith("_CTR") &&
+            !c.callsign.endsWith("_OBS") && 
             ((c.callsign.startsWith(id.value) && c.callsign[4] == "_") || callsignPrefixes.find((prefix) => c.callsign.startsWith(prefix)))
     )
 })

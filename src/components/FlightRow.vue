@@ -52,12 +52,10 @@ import constants from "@/constants"
 import { Pilot, Prefile } from "@/store/vatsim"
 import { computed, inject } from "vue"
 import * as calc from "@/calc"
-import { useRouter } from "vue-router"
 import { flightplanArrivalTime } from "@/calc"
 import moment from "moment"
 import actypecodes from "@/data/actypecodes.json"
 
-const router = useRouter()
 const props = defineProps<{
     value: Pilot | Prefile
     departure?: boolean
@@ -67,6 +65,7 @@ const props = defineProps<{
     invalid?: boolean
     hideIcao?: boolean
 }>()
+const emit = defineEmits(["click"])
 
 const actypeCode = computed(() => props.value.flight_plan && (actypecodes as any)[props.value.flight_plan.aircraft_short])
 const typeClass = computed(() => actypeCode.value && actypeCode.value[1])
@@ -142,6 +141,7 @@ const streamer = computed(() => {
 })
 
 function click() {
-    router.push(`/flight/${props.value.callsign}`)
+    //router.push(`/flight/${props.value.callsign}`)
+    emit("click", props.value.callsign)
 }
 </script>
