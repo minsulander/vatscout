@@ -28,7 +28,7 @@
                 {{ flightplanArrivalTime(value.flight_plan, true)!.format("HHmm") }}
             </span>
             <div class="float-right text-nowrap">
-                <v-chip size="small" density="comfortable" label class="ml-1 px-1" v-if="t1">T1</v-chip>
+                <!--<v-chip size="small" density="comfortable" label class="ml-1 px-1" v-if="t1">T1</v-chip>-->
                 <v-chip size="small" density="comfortable" label class="ml-1 px-1" v-if="value.flight_plan.flight_rules == 'V'">VFR</v-chip>
                 <v-chip size="small" density="comfortable" label class="ml-1 px-1" v-if="newPilot">NEW</v-chip>
                 <v-chip size="small" density="comfortable" label class="ml-1 px-1" v-if="streamer"><v-icon>mdi-video</v-icon></v-chip>
@@ -112,12 +112,14 @@ const newPilot = computed(() => {
     return false
 })
 
+/*
 const t1 = computed(() => {
     const flightplan = props.value.flight_plan
     if (!flightplan) return false
     if (!flightplan.remarks) return false
     return !!flightplan.remarks.match(/PBN\/\w+T1/)
 })
+*/
 
 const textOnly = computed(() => {
     const flightplan = props.value.flight_plan

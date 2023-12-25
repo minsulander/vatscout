@@ -6,6 +6,7 @@
             </v-col>
             <v-col sm="5" class="d-none d-sm-block text-grey-lighten-1">{{ airport.name }} </v-col>
             <v-col cols="3" sm="1" class="text-center">
+                <!--
                 <span v-if="vatsim.movements[airport.icao].prefiledDepartures" class="text-grey mr-3">{{
                     vatsim.movements[airport.icao].prefiledDepartures
                 }}</span>
@@ -21,8 +22,16 @@
                 <span v-if="vatsim.movements[airport.icao].departed" class="text-cyan-darken-3 ml-3">{{
                     vatsim.movements[airport.icao].departed
                 }}</span>
+                -->
+                <span v-if="vatsim.movements[airport.icao].pendingDepartures" class="text-cyan-lighten-2">{{
+                    vatsim.movements[airport.icao].pendingDepartures
+                }}</span>
             </v-col>
             <v-col cols="3" sm="1" class="text-center">
+                <span v-if="vatsim.movements[airport.icao].pendingArrivals" class="text-yellow-lighten-2">{{
+                    vatsim.movements[airport.icao].pendingArrivals
+                }}</span>
+                <!--
                 <span v-if="vatsim.movements[airport.icao].prefiledArrivals" class="text-grey mr-3">{{
                     vatsim.movements[airport.icao].prefiledArrivals
                 }}</span>
@@ -32,6 +41,7 @@
                 <span v-if="vatsim.movements[airport.icao].arrived" class="text-brown-lighten-1 ml-3">{{
                     vatsim.movements[airport.icao].arrived
                 }}</span>
+                -->
             </v-col>
             <v-col sm="6" class="d-sm-none text-body-2 text-grey mt-1">{{ airport.name }} </v-col>
             <v-col cols="6" sm="4" class="text-right">

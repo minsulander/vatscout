@@ -193,8 +193,16 @@ export class AirportMovements {
         return this.departures + this.arrivals
     }
 
+    get pendingDepartures() {
+        return this.departing + this.nofp + this.prefiledDepartures
+    }
+
+    get pendingArrivals() {
+        return this.arriving + this.prefiledArrivals
+    }
+
     get pending() {
-        return this.departing + this.nofp + this.prefiledDepartures + this.arriving + this.prefiledArrivals
+        return this.pendingDepartures + this.pendingArrivals
     }
 }
 

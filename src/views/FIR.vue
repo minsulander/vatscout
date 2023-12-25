@@ -13,26 +13,28 @@
                 </div>
             </v-col>
         </v-row>
-        <div v-if="fir" class="d-sm-none text-grey-lighten-1 text-h6 font-weight-light">
-            {{ fir.name }}<span v-if="fir.callsignPrefix"> | {{ fir.callsignPrefix }}</span>
-        </div>
-        <div v-if="fir"></div>
-        <v-row class="mt-2">
-            <Controller v-for="controller in controllers" :value="controller" :prefix="id" />
-        </v-row>
-        <div class="bg-grey-darken-4 text-grey-lighten-1 pa-1 mt-5 mb-2">
-            <v-row>
-                <v-col cols="6" sm="6">Active airports </v-col>
-                <v-col cols="3" sm="1" class="text-center"><v-icon>mdi-airplane-takeoff</v-icon></v-col>
-                <v-col cols="3" sm="1" class="text-center"><v-icon>mdi-airplane-landing</v-icon></v-col>
-                <v-col cols="3" sm="4" class="text-right d-none d-sm-block"><v-icon>mdi-antenna</v-icon></v-col>
+        <div v-if="fir">
+            <div class="d-sm-none text-grey-lighten-1 text-h6 font-weight-light">
+                {{ fir.name }}<span v-if="fir.callsignPrefix"> | {{ fir.callsignPrefix }}</span>
+            </div>
+            <v-row class="mt-2">
+                <Controller v-for="controller in controllers" :value="controller" :prefix="id" />
             </v-row>
+            <div class="bg-grey-darken-4 text-grey-lighten-1 pa-1 mt-5 mb-2">
+                <v-row>
+                    <v-col cols="6" sm="6">Active airports </v-col>
+                    <v-col cols="3" sm="1" class="text-center"><v-icon>mdi-airplane-takeoff</v-icon></v-col>
+                    <v-col cols="3" sm="1" class="text-center"><v-icon>mdi-airplane-landing</v-icon></v-col>
+                    <v-col cols="3" sm="4" class="text-right d-none d-sm-block"><v-icon>mdi-antenna</v-icon></v-col>
+                </v-row>
+            </div>
+            <airport-top-list :fir="id" class="mt-2" />
+            <div v-if="bookings.length > 0" class="mt-5 text-grey">
+                <div class="bg-grey-darken-4 text-grey-lighten-1 pa-1 mb-2">Bookings</div>
+                <Booking v-for="booking in bookings" :key="booking.id" :value="booking" class="mt-1" />
+            </div>
         </div>
-        <airport-top-list :fir="id" class="mt-2" />
-        <div v-if="bookings.length > 0" class="mt-5 text-grey">
-            <div class="bg-grey-darken-4 text-grey-lighten-1 pa-1 mb-2">Bookings</div>
-            <Booking v-for="booking in bookings" :key="booking.id" :value="booking" class="mt-1" />
-        </div>
+        <div v-if="!fir && vatsim.spy.firs" class="text-h5 font-weight-light text-grey mt-5">No FIR known by that ID.</div>
     </v-container>
 </template>
 

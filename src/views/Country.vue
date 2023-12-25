@@ -14,7 +14,7 @@
         <v-row class="mt-2">
             <Controller v-for="controller in controllers" :value="controller" />
         </v-row>
-        <div class="bg-grey-darken-4 text-grey-lighten-1 pa-1 mt-5 mb-2">
+        <div v-if="country && firs" class="bg-grey-darken-4 text-grey-lighten-1 pa-1 mt-5 mb-2">
             <v-row>
                 <v-col cols="6" sm="6">Active airports </v-col>
                 <v-col cols="3" sm="1" class="text-center"><v-icon>mdi-airplane-takeoff</v-icon></v-col>
@@ -35,6 +35,7 @@
                 </v-col>
             </v-row>
         </div>
+        <div v-if="!country && vatsim.spy.countries" class="text-h5 font-weight-light text-grey mt-5">No country known by that ID.</div>
     </v-container>
 </template>
 

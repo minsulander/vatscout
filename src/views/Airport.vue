@@ -266,7 +266,7 @@ const departurePrefiles = computed(() => {
                     (flightplanDepartureTime(p.flight_plan)?.isAfter(moment().subtract(settings.prefileMaxTardinessMinutes, "minute")) &&
                         flightplanDepartureTime(p.flight_plan)?.isBefore(moment().add(settings.prefileDepartureMaxMinutes, "minute"))))
         )
-        .sort((a, b) => a.flight_plan.deptime.localeCompare(b.flight_plan.deptime))
+        .sort((a, b) => (flightplanArrivalTime(a.flight_plan)?.diff(flightplanArrivalTime(b.flight_plan)) || 0))
 })
 const arrivingPilots = computed(() => {
     if (!vatsim.data || !vatsim.data.pilots) return []
