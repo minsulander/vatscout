@@ -2,10 +2,14 @@
     <v-app-bar>
         <v-row no-gutters align="center">
             <v-col cols="2" sm="2">
-                <v-btn icon plain @click="clickBack" color="grey"><v-icon size="x-large">mdi-chevron-left</v-icon></v-btn>
+                <span v-if="$route.path.length > 1">
+                    <v-btn icon plain @click="clickBack" color="grey"><v-icon size="x-large">mdi-chevron-left</v-icon></v-btn>
+                </span>
             </v-col>
             <v-col cols="4" sm="7">
-                <Search class="app-bar-search" />
+                <span v-if="$route.path.length > 1">
+                    <Search class="app-bar-search" />
+                </span>
             </v-col>
             <v-col cols="6" sm="3" class="text-right">
                 <v-btn icon plain color="grey-darken-3" @click="clickSettings"
