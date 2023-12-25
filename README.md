@@ -11,7 +11,7 @@ Contributions of any kind are most welcome.
 
 ### For developers
 
-It's a fairly straight-forward [Vue3](vuejs.org) + [Vuetify](vuetifyjs.com) project.
+It's a fairly straight-forward [Vue3](https://vuejs.org) + [Vuetify](https://vuetifyjs.com) project.
 
 ```sh
 npm install
