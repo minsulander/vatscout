@@ -382,6 +382,10 @@ const formattedRoute = computed(() => {
     if (!flightplan.value || !flightplan.value.route) return ""
     let route = flightplan.value.route
     route = route.replaceAll(" DCT ", ' <span class="text-grey">DCT</span> ')
+    route = route.replaceAll(/([A-Z][A-Z]+\/?.*?)\s+([A-Z]+[0-9]+)\s+([A-Z][A-Z]+\/?.*?)/g, '$1 <span class="text-grey">$2</span> $3')
+    route = route.replaceAll(/([A-Z][A-Z]+\/?.*?)\s+([A-Z]+[0-9]+)\s+([A-Z][A-Z]+\/?.*?)/g, '$1 <span class="text-grey">$2</span> $3')
+    route = route.replace(/^([A-Z]+\d[A-Z](\/\w+)?)\s+/, '<span class="text-grey">$1</span> ')
+    route = route.replace(/([A-Z]+\d[A-Z](\/\w+)?)\s?$/, '<span class="text-grey">$1</span>')
     return route
 })
 

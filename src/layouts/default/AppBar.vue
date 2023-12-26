@@ -118,17 +118,7 @@ function clickProgress() {
 }
 
 function clickBack() {
-    const current = router.currentRoute.value
-    if (current.path.startsWith("/airport") && current.params.id) {
-        const airport = vatsim.spy.airports.find((a) => a.icao == current.params.id)
-        if (airport && airport.fir) return router.replace(`/fir/${airport.fir}`)
-    } else if (current.path.startsWith("/fir") && current.params.id) {
-        const country = vatsim.spy.countries.find((c) => c.prefix == `${current.params.id}`.substring(0, 2))
-        if (country && country.prefix) return router.replace(`/country/${country.prefix}`)
-    } else if (current.path.startsWith("/country")) {
-        return router.replace("/")
-    }
-    console.log("back from", router.currentRoute.value)
-    return router.back()
+    if (!history.state.back) router.replace("/")
+    else return router.back()
 }
 </script>

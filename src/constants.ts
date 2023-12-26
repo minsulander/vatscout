@@ -9,7 +9,9 @@ export default {
     newPilotPhrases: [
         "NEW PILOT",
         "NEW TO VATSIM",
+        "NEW ON VATSIM",
         "NEW VATSIM PILOT",
+        "BEGINNER",
         "NEWBIE",
         "FIRST FLIGHT",
         "FIRST TIME",
