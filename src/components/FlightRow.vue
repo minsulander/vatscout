@@ -139,7 +139,7 @@ const streamer = computed(() => {
     const flightplan = props.value.flight_plan
     if (!flightplan) return false
     if (!flightplan.remarks) return false
-    return !!flightplan.remarks.toUpperCase().match(/TWITCH.TV|STREAM(ING?).*TWITCH/)
+    return !!flightplan.remarks.toUpperCase().match(/TWITCH.TV|STREAM(ING?).*TWITCH|LIVE( ON?).*TWITCH/)
 })
 
 function click() {

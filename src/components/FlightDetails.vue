@@ -441,6 +441,10 @@ const formattedRemarks = computed(() => {
         /(STREAM(ING)? ON TWITCH.(\w+))/,
         '<a class="text-purple-lighten-2 font-weight-bold" href="https://twitch.tv/$3" target="_blank">$1</a>'
     )
+    rmk = rmk.replace(
+        /(LIVE( ON)? TWITCH.(\w+))/,
+        '<a class="text-purple-lighten-2 font-weight-bold" href="https://twitch.tv/$3" target="_blank">$1</a>'
+    )
     return rmk
 })
 </script>
