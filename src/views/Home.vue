@@ -8,9 +8,9 @@
                 </p>
             </div>
             <div class="mt-5" v-if="vatsim.data.general">
-                <span v-if="vatsim.data.general">{{ vatsim.data.pilots.length }}</span>
+                <span>{{ pilotsOnlineCount }}</span>
                 <span class="text-grey"> pilots, </span>
-                <span v-if="vatsim.data.general"> {{ vatsim.data.controllers.length }}</span>
+                <span> {{ controllersOnlineCount }}</span>
                 <span class="text-grey"> controllers online</span>
             </div>
             <div
@@ -30,7 +30,11 @@
 </template>
 
 <script lang="ts" setup>
+import { computed } from "vue"
 import Search from "@/components/Search.vue"
 import { useVatsimStore } from "@/store/vatsim"
 const vatsim = useVatsimStore()
+
+const pilotsOnlineCount = computed(() => vatsim.data.pilots.length)
+const controllersOnlineCount = computed(() => vatsim.data.controllers.filter(c => c.facility > 0 && c.callsign && !c.callsign.endsWith("_SUP")).length)
 </script>

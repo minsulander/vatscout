@@ -238,7 +238,12 @@ const departingPilots = computed(() => {
 const nofpPilots = computed(() => {
     if (!vatsim.data || !vatsim.data.pilots) return []
     return vatsim.data.pilots
-        .filter((p) => !p.flight_plan && distanceToAirport(p, airport.value) < constants.atAirportDistance)
+        .filter(
+            (p) =>
+                !p.flight_plan &&
+                distanceToAirport(p, airport.value) < constants.atAirportDistance &&
+                p.groundspeed < constants.motionGroundspeed
+        )
         .sort((a, b) => a.callsign.localeCompare(b.callsign))
 })
 const invalidfpPilots = computed(() => {
@@ -250,8 +255,8 @@ const invalidfpPilots = computed(() => {
                 p.flight_plan.departure != id.value &&
                 p.flight_plan.arrival != id.value &&
                 p.flight_plan.alternate != id.value &&
-                distanceToAirport(p, airport.value) < constants.defAtAirportDistance &&
-                p.groundspeed < constants.defInflightGroundspeed
+                distanceToAirport(p, airport.value) < constants.atAirportDistance &&
+                p.groundspeed < constants.motionGroundspeed
         )
         .sort((a, b) => a.callsign.localeCompare(b.callsign))
 })
@@ -266,7 +271,7 @@ const departurePrefiles = computed(() => {
                     (flightplanDepartureTime(p.flight_plan)?.isAfter(moment().subtract(settings.prefileMaxTardinessMinutes, "minute")) &&
                         flightplanDepartureTime(p.flight_plan)?.isBefore(moment().add(settings.prefileDepartureMaxMinutes, "minute"))))
         )
-        .sort((a, b) => (flightplanArrivalTime(a.flight_plan)?.diff(flightplanArrivalTime(b.flight_plan)) || 0))
+        .sort((a, b) => flightplanArrivalTime(a.flight_plan)?.diff(flightplanArrivalTime(b.flight_plan)) || 0)
 })
 const arrivingPilots = computed(() => {
     if (!vatsim.data || !vatsim.data.pilots) return []

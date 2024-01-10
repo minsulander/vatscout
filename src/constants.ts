@@ -3,9 +3,8 @@ export default {
     bookingsRefreshInterval: 600000,
     staticDataRefreshInterval: 3600000,
     inflightGroundspeed: 40,
-    defInflightGroundspeed: 10,
-    atAirportDistance: 10,
-    defAtAirportDistance: 3,
+    motionGroundspeed: 10,
+    atAirportDistance: 5,
     newPilotPhrases: [
         "NEW PILOT",
         "NEW TO VATSIM",

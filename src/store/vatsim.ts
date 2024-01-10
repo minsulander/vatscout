@@ -247,14 +247,22 @@ export const useVatsimStore = defineStore("vatsim", () => {
             }
         }
         for (const p of data.value.pilots.filter((p) => !p.flight_plan)) {
-            if (distanceToAirport(p, airportByIcao.value[airport_icao]) < constants.atAirportDistance) moves.nofp++
+            if (
+                distanceToAirport(p, airportByIcao.value[airport_icao]) < constants.atAirportDistance &&
+                p.groundspeed < constants.motionGroundspeed
+            )
+                moves.nofp++
         }
         for (const p of data.value.pilots.filter(
-            (p) => p.flight_plan && p.flight_plan.departure != airport_icao && p.flight_plan.arrival != airport_icao && p.flight_plan.alternate != airport_icao
+            (p) =>
+                p.flight_plan &&
+                p.flight_plan.departure != airport_icao &&
+                p.flight_plan.arrival != airport_icao &&
+                p.flight_plan.alternate != airport_icao
         )) {
             if (
-                distanceToAirport(p, airportByIcao.value[airport_icao]) < constants.defAtAirportDistance &&
-                p.groundspeed < constants.defInflightGroundspeed
+                distanceToAirport(p, airportByIcao.value[airport_icao]) < constants.atAirportDistance &&
+                p.groundspeed < constants.motionGroundspeed
             )
                 moves.invalidfp++
         }
