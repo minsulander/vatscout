@@ -32,7 +32,7 @@
     "eslint": "^8.37.0",
     "eslint-plugin-vue": "^9.3.0",
     "sass": "^1.60.0",
-    "typescript": "^5.0.0",
+    "typescript": "^5.3.3",
     "unplugin-fonts": "^1.0.3",
     "vite": "^4.2.0",
     "vite-plugin-pwa": "^0.17.4",
