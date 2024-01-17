@@ -60,3 +60,7 @@ export function extractAtisCode(atis: Atis) {
         if (m) return m.at(1)
     }
 }
+
+export function isStandaloneApp() {
+    return (navigator as any).standalone || window.matchMedia("(display-mode: standalone)").matches
+}

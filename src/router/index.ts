@@ -1,13 +1,5 @@
 // Composables
-import { createRouter, createWebHistory } from "vue-router"
-
-import Settings from "@/views/Settings.vue"
-import Flight from "@/views/Flight.vue"
-import Airport from "@/views/Airport.vue"
-import FIR from "@/views/FIR.vue"
-import UIR from "@/views/UIR.vue"
-import Country from "@/views/Country.vue"
-import Member from "@/views/Member.vue"
+import { createRouter, createWebHistory, isNavigationFailure } from "vue-router"
 
 const routes = [
     {
@@ -24,31 +16,31 @@ const routes = [
             },
             {
                 path: "settings",
-                component: Settings,
+                component: () => import("@/views/Settings.vue"),
             },
             {
                 path: "flight/:id",
-                component: Flight,
+                component: () => import("@/views/Flight.vue"),
             },
             {
                 path: "airport/:id",
-                component: Airport,
+                component: () => import("@/views/Airport.vue"),
             },
             {
                 path: "fir/:id",
-                component: FIR,
+                component: () => import("@/views/FIR.vue"),
             },
             {
                 path: "uir/:id",
-                component: UIR,
+                component: () => import("@/views/UIR.vue"),
             },
             {
                 path: "country/:id",
-                component: Country,
+                component: () => import("@/views/Country.vue"),
             },
             {
                 path: "member/:id",
-                component: Member,
+                component: () => import("@/views/Member.vue"),
             }
         ],
     }
@@ -58,5 +50,26 @@ const router = createRouter({
     history: createWebHistory(process.env.BASE_URL),
     routes,
 })
+
+import { isStandaloneApp } from "@/common"
+if (isStandaloneApp()) {
+    // Remember last visited path and start there on next app launch
+    let firstNavigation = true
+    router.beforeEach((to, from, next) => {
+        if (firstNavigation && to.path == "/" && "lastVisitedPath" in localStorage) {
+            console.log("Navigating to last visited path", localStorage.lastVisitedPath)
+            next(localStorage.lastVisitedPath)
+        }
+        firstNavigation = false
+        next()
+    })
+    router.afterEach((to, from, failure) => {
+        if (isNavigationFailure(failure)) {
+            console.warn("Navigation failure", failure)
+        } else {
+            localStorage.lastVisitedPath = to.path
+        }
+    })
+}
 
 export default router
