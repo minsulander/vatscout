@@ -180,7 +180,7 @@
                 <v-col cols="2" sm="1" class="text-right pr-2 text-caption text-grey">Altitude</v-col>
                 <v-col cols="10" sm="5">
                     {{ flightplan.altitude }}
-                    <span class="text-caption text-grey">ft</span>
+                    <span class="text-caption text-grey" v-if="isFinite(parseInt(flightplan.altitude))">ft</span>
                 </v-col>
                 <v-col cols="2" sm="1" class="text-right pr-2 text-caption text-grey">Aircraft</v-col>
                 <v-col cols="10" sm="5">
