@@ -1,5 +1,5 @@
 build:
-  image: node20-slim
+  image: node:20-slim
   script:
     - npm install
     - npm run build
@@ -13,7 +13,7 @@ build:
       - node_modules
 
 test:
-  image: node20-slim
+  image: node:20-slim
   script:
     - npm install
     - npx vitest run --reporter=junit --outputFile=./test-result.xml
