@@ -50,7 +50,7 @@ export function extractAtisCode(atis: Atis) {
         if (m) return m.at(3)
         m = text.match(new RegExp(`THIS IS \\w+ INFORMATION (\\w)`))
         if (m) return m.at(1)
-        m = text.match(new RegExp(`INFORMATION (\\w) OUT ?\\.?$`))
+        m = text.match(new RegExp(`INFORMATION (\\w) OUT([ \.]|$)`))
         if (m) return m.at(1)
         m = text.match(new RegExp(`END OF INFORMATION (\\w)\\w* ?\\.?$`))
         if (m) return m.at(1)

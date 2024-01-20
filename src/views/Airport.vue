@@ -28,12 +28,13 @@
         <v-row>
             <v-col
                 cols="12"
-                lg="6"
+                sm="6"
+                md="4"
+                lg="3"
                 xl="2"
                 v-for="atis in atises"
-                style="cursor: pointer"
-                :style="settings.expandAtis ? '' : 'max-height: 80px; overflow: hidden;'"
-                @click="toggleAtis"
+                style="cursor: pointer; max-height: 65px; overflow: hidden;"
+                @click="clickAtis(atis)"
             >
                 <v-chip variant="flat" elevated label size="small" color="orange-darken-3" class="text-white font-weight-bold mb-1">
                     <span v-if="extractAtisCode(atis)">{{ extractAtisCode(atis) }}</span>
@@ -176,12 +177,19 @@
                 </v-card-text>
             </v-card>
         </v-dialog>
+        <v-dialog v-model="showAtisDialog" width="600">
+            <v-card v-if="atis">
+                <v-card-text>
+                    {{ atis.text_atis?.join("\n") }}
+                </v-card-text>
+            </v-card>
+        </v-dialog>
     </v-container>
 </template>
 
 <script lang="ts" setup>
 import { useRoute, useRouter } from "vue-router"
-import { useVatsimStore } from "@/store/vatsim"
+import { Atis, useVatsimStore } from "@/store/vatsim"
 import { useSettingsStore } from "@/store/settings"
 import { useDisplay } from "vuetify"
 import { computed, ref, watch } from "vue"
@@ -210,6 +218,9 @@ const snackbarColor = ref("")
 const airport = computed(() => {
     return vatsim.airportByIcao[id.value]
 })
+
+const atis = ref(undefined as Atis | undefined)
+const showAtisDialog = ref(false)
 
 const departedPilots = computed(() => {
     if (!vatsim.data || !vatsim.data.pilots) return []
@@ -366,11 +377,6 @@ function isMatchingCallsign(callsign: string) {
     )
 }
 
-function toggleAtis() {
-    settings.expandAtis = !settings.expandAtis
-    settings.save()
-}
-
 function closeSnackbar() {
     snackbar.value = false
     newDepartures.value = []
@@ -384,6 +390,11 @@ function clickFlight(callsign: string) {
         flightCallsign.value = callsign
         showFlightDialog.value = true
     }
+}
+
+function clickAtis(atisClicked: Atis) {
+    atis.value = atisClicked
+    showAtisDialog.value = true
 }
 
 import { Howl } from "howler"
