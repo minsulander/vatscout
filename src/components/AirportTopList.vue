@@ -95,8 +95,8 @@
 </style>
 
 <script setup lang="ts">
-import { Airport, Atis, Controller, useVatsimStore } from "@/store/vatsim"
-import { computed, inject } from "vue"
+import { Airport, useVatsimStore } from "@/store/vatsim"
+import { computed } from "vue"
 import { colorForController, labelForController, compareControllers, extractAtisCode } from "@/common"
 import { useRouter } from "vue-router"
 const vatsim = useVatsimStore()

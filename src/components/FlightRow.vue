@@ -48,13 +48,13 @@
 </style>
 
 <script setup lang="ts">
-import constants from "@/constants"
-import { Pilot, Prefile } from "@/store/vatsim"
-import { computed, inject } from "vue"
 import * as calc from "@/calc"
 import { flightplanArrivalTime } from "@/calc"
-import moment from "moment"
+import constants from "@/constants"
 import actypecodes from "@/data/actypecodes.json"
+import { Pilot, Prefile } from "@/store/vatsim"
+import moment from "moment"
+import { computed } from "vue"
 
 const props = defineProps<{
     value: Pilot | Prefile

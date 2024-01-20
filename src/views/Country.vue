@@ -12,7 +12,7 @@
             </v-col>
         </v-row>
         <v-row class="mt-2">
-            <Controller v-for="controller in controllers" :value="controller" />
+            <Controller v-for="controller in controllers" :key="controller.cid" :value="controller" />
         </v-row>
         <div v-if="country && firs" class="bg-grey-darken-4 text-grey-lighten-1 pa-1 mt-5 mb-2">
             <v-row>
@@ -30,7 +30,7 @@
         <div v-if="firs && firs.length > 0" class="mt-5">
             <div class="bg-grey-darken-4 text-grey-lighten-1 pa-1 mb-2">FIRs</div>
             <v-row no-gutters>
-                <v-col cols="12" sm="4" v-for="fir in firs" @click="router.push(`/fir/${fir.icao}`)" class="fir pa-1 text-truncate">
+                <v-col cols="12" sm="4" v-for="fir in firs" :key="fir.icao" @click="router.push(`/fir/${fir.icao}`)" class="fir pa-1 text-truncate">
                     {{ fir.icao }} <span class="text-grey-lighten-1 text-body-2">{{ fir.name }}</span>
                 </v-col>
             </v-row>
@@ -47,16 +47,14 @@
 </style>
 
 <script lang="ts" setup>
-import { useRoute } from "vue-router"
-import { useVatsimStore } from "@/store/vatsim"
-import { computed, inject } from "vue"
-import { colorForController } from "@/common"
-import { useRouter } from "vue-router"
 import AirportTopList from "@/components/AirportTopList.vue"
 import Booking from "@/components/Booking.vue"
 import Controller from "@/components/Controller.vue"
-import moment from "moment"
 import { useSettingsStore } from "@/store/settings"
+import { useVatsimStore } from "@/store/vatsim"
+import moment from "moment"
+import { computed } from "vue"
+import { useRoute, useRouter } from "vue-router"
 const route = useRoute()
 const router = useRouter()
 const vatsim = useVatsimStore()

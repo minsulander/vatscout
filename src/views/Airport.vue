@@ -33,6 +33,7 @@
                 lg="3"
                 xl="2"
                 v-for="atis in atises"
+                :key="atis.callsign"
                 style="cursor: pointer; max-height: 65px; overflow: hidden;"
                 @click="clickAtis(atis)"
             >
@@ -48,7 +49,7 @@
                     {{ atis.text_atis?.join("\n") }}
                 </div>
             </v-col>
-            <Controller v-for="controller in controllers" :value="controller" :prefix="id" />
+            <Controller v-for="controller in controllers" :key="controller.cid" :value="controller" :prefix="id" />
         </v-row>
         <v-row class="mt-3">
             <v-col cols="12" sm="6">
@@ -188,19 +189,19 @@
 </template>
 
 <script lang="ts" setup>
-import { useRoute, useRouter } from "vue-router"
-import { Atis, useVatsimStore } from "@/store/vatsim"
-import { useSettingsStore } from "@/store/settings"
-import { useDisplay } from "vuetify"
-import { computed, ref, watch } from "vue"
-import constants from "@/constants"
-import { colorForController, compareControllers, labelForController, compareCallsigns, extractAtisCode } from "@/common"
-import { eta, departureDistance, arrivalDistance, flightplanArrivalTime, flightplanDepartureTime, distanceToAirport } from "@/calc"
-import FlightRow from "@/components/FlightRow.vue"
+import { arrivalDistance, departureDistance, distanceToAirport, eta, flightplanArrivalTime, flightplanDepartureTime } from "@/calc"
+import { compareCallsigns, compareControllers, extractAtisCode } from "@/common"
 import Booking from "@/components/Booking.vue"
 import Controller from "@/components/Controller.vue"
 import FlightDetails from "@/components/FlightDetails.vue"
+import FlightRow from "@/components/FlightRow.vue"
+import constants from "@/constants"
+import { useSettingsStore } from "@/store/settings"
+import { Atis, useVatsimStore } from "@/store/vatsim"
 import moment from "moment"
+import { computed, ref, watch } from "vue"
+import { useRoute, useRouter } from "vue-router"
+import { useDisplay } from "vuetify"
 
 const route = useRoute()
 const router = useRouter()
@@ -424,8 +425,8 @@ watch([arrivalPrefiles, arrivingPilots], () => {
             }
             snackbarText.value =
                 popups.length > 1
-                    ? `New arrivals <b style=\'font-family: monospace\'>${popups.join(", ")}</b>.`
-                    : `New arrival <b style=\'font-family: monospace\'>${popups[0]}</b>.`
+                    ? `New arrivals <b style='font-family: monospace'>${popups.join(", ")}</b>.`
+                    : `New arrival <b style='font-family: monospace'>${popups[0]}</b>.`
             snackbarColor.value = "yellow"
             snackbar.value = true
             setTimeout(() => (newArrivals.value = []), 10000)
@@ -458,8 +459,8 @@ watch([departurePrefiles, departingPilots, nofpPilots], () => {
             }
             snackbarText.value =
                 popups.length > 1
-                    ? `New departures <b style=\'font-family: monospace\'>${popups.join(", ")}</b>.`
-                    : `New departure <b style=\'font-family: monospace\'>${popups[0]}</b>.`
+                    ? `New departures <b style='font-family: monospace'>${popups.join(", ")}</b>.`
+                    : `New departure <b style='font-family: monospace'>${popups[0]}</b>.`
             snackbarColor.value = "cyan"
             snackbar.value = true
             setTimeout(() => (newDepartures.value = []), 10000)
@@ -489,8 +490,8 @@ watch([atises, controllers], () => {
                 atcPopupSound.play()
             }
             snackbarText.value = ""
-            if (popups.length > 0) snackbarText.value += `<b style=\'font-family: monospace\'>${popups.join(", ")}</b> online. `
-            if (popoffs.length > 0) snackbarText.value += `<b style=\'font-family: monospace\'>${popoffs.join(", ")}</b> offline. `
+            if (popups.length > 0) snackbarText.value += `<b style='font-family: monospace'>${popups.join(", ")}</b> online. `
+            if (popoffs.length > 0) snackbarText.value += `<b style='font-family: monospace'>${popoffs.join(", ")}</b> offline. `
             snackbarColor.value = "white"
             snackbar.value = true
         }

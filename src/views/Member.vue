@@ -31,6 +31,7 @@ const name = computed({
         if (controller && controller.name != id.value) return controller.name
         const pilot = vatsim.data.pilots.find((p) => p.cid == parseInt(id.value))
         if (pilot && pilot.name != id.value) return pilot.name
+        return ""
     },
     set(value: string) {
         const key = `name_cid_${id.value}`

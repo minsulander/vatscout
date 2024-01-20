@@ -3,7 +3,7 @@
         <v-row align="center">
             <v-col cols="6" md="3">
                 <div class="text-h4">{{ id }}</div>
-                <div class="text-grey-lighten-1" v-if="callsign">{{ callsign }} {{ id.substring(3) }}</div>
+                <div class="text-grey-lighten-1" v-if="callsign && callsign != id">{{ callsign }}</div>
             </v-col>
             <v-col cols="6" md="3" class="text-center">
                 <div v-if="flightplan" class="text-h5 font-weight-light pt-5" style="display: inline">{{ flightplan.aircraft_short }}</div>
@@ -50,7 +50,12 @@
                                 <span v-if="departureAirport" class="text-body-2 text-grey-lighten-1">{{ departureAirport.name }}</span>
                             </router-link>
                         </v-col>
-                        <v-col cols="6" class="text-right text-truncate" style="direction: rtl" v-if="flightplan.arrival != flightplan.departure">
+                        <v-col
+                            cols="6"
+                            class="text-right text-truncate"
+                            style="direction: rtl"
+                            v-if="flightplan.arrival != flightplan.departure"
+                        >
                             <router-link :to="`/airport/${flightplan.arrival}`" class="pa-1">
                                 <span v-if="arrivalAirport" class="text-body-2 text-grey-lighten-1">{{ arrivalAirport.name }}</span>
                                 {{ flightplan.arrival }}
@@ -65,7 +70,10 @@
                         class="ma-1"
                         v-if="flightplan.arrival != flightplan.departure && typeof progress !== 'undefined'"
                     ></v-progress-linear>
-                    <div class="float-right px-1" v-if="flightplan.arrival != flightplan.departure && isFinite(calc.arrivalDistance(pilot))">
+                    <div
+                        class="float-right px-1"
+                        v-if="flightplan.arrival != flightplan.departure && isFinite(calc.arrivalDistance(pilot))"
+                    >
                         <span class="text-caption text-grey">to go</span> {{ calc.arrivalDistance(pilot).toFixed(0) }}
                     </div>
                     <div class="float-left px-1" v-if="isFinite(calc.departureDistance(pilot))">
@@ -141,7 +149,7 @@
                 </v-col>
                 <v-col cols="2" sm="1" class="text-right pr-2 text-caption text-grey">Within</v-col>
                 <v-col cols="10" class="text-body-2 text-grey-lighten-1">
-                    <span v-for="boundary in within" class="mr-3">
+                    <span v-for="boundary in within" :key="boundary.getProperties().id" class="mr-3">
                         <span v-if="vatsim.spy.firs && vatsim.spy.firs.find((f) => f.icao == boundary.getProperties().id)">
                             <router-link :to="`/fir/${boundary.getProperties().id}`">{{ boundary.getProperties().id }}</router-link>
                         </span>
@@ -252,9 +260,9 @@
                     </span>
                 </v-col>
                 <v-col cols="2" sm="1" class="text-right pr-2 text-caption text-grey pt-3">Route</v-col>
-                <v-col cols="10" sm="11" lg="5" class="text-grey-lighten-2 text-body-2" v-html="formattedRoute"> </v-col>
+                <v-col cols="10" sm="11" lg="5" class="text-grey-lighten-2 text-body-2"><span v-html="formattedRoute"></span></v-col>
                 <v-col cols="2" sm="1" class="text-right pr-2 text-caption text-grey pt-3">Remarks</v-col>
-                <v-col cols="10" sm="11" lg="5" class="text-grey-lighten-2 text-body-2" v-html="formattedRemarks"> </v-col>
+                <v-col cols="10" sm="11" lg="5" class="text-grey-lighten-2 text-body-2"><span v-html="formattedRemarks"></span></v-col>
                 <v-col cols="2" sm="1" class="text-right pr-2 text-caption text-grey pt-3">Revision</v-col>
                 <v-col cols="10" sm="5" class="text-grey text-body-2">
                     {{ flightplan.revision_id }}
@@ -269,28 +277,23 @@
 </template>
 
 <script setup lang="ts">
-import { useRoute } from "vue-router"
-import { Pilot, useVatsimStore } from "@/store/vatsim"
-import { computed } from "vue"
 import * as calc from "@/calc"
+import { useVatsimStore } from "@/store/vatsim"
+import { computed } from "vue"
 
-import moment from "moment"
-import callsigns from "@/data/callsigns.json"
+import { extractCallsign } from "@/common"
+import constants from "@/constants"
 import actypecodes from "@/data/actypecodes.json"
 import actypenames from "@/data/actypenames.json"
-import constants from "@/constants"
+import moment from "moment"
 
 const props = defineProps<{ id: string }>()
 const vatsim = useVatsimStore()
 
 const id = computed(() => props.id)
-
 const callsign = computed(() => {
-    if (flightplan.value && (flightplan.value.remarks.includes("CALLSIGN") || flightplan.value.remarks.includes("CS/"))) {
-        const m = flightplan.value.remarks.match(/(CALLSIGN[\/=_ ]|CALLSIGN IS |CS\/)([\w\s-_"]+?)(TCAS|SIMBRIEF|\s\w+\/|\/|\(|$)/)
-        if (m) return m.at(2)?.replaceAll('"', '')
-    }
-    return id.value.length > 3 && isFinite(parseInt(id.value.substring(3, 4))) && (callsigns as any)[id.value.substring(0, 3)]
+    const pp = pilot.value || prefile.value
+    return pp ? extractCallsign(pp) : ""
 })
 const actypeName = computed(() => flightplan.value && (actypenames as any)[flightplan.value.aircraft_short])
 const actypeCode = computed(() => flightplan.value && (actypecodes as any)[flightplan.value.aircraft_short])
@@ -341,6 +344,7 @@ const prefile = computed(() => {
 const flightplan = computed(() => {
     if (pilot.value) return pilot.value.flight_plan
     if (prefile.value) return prefile.value.flight_plan
+    return undefined
 })
 const transceivers = computed(() => {
     return vatsim.transceivers[id.value]

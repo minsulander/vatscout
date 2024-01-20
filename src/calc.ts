@@ -73,8 +73,8 @@ export function flightplanArrivalTime(fp: FlightPlan, adjustDepartureTime = fals
         depHours = moment().utc().get("hour")
         depMinutes = moment().utc().get("minute")
     }
-    let enrHours = parseInt(fp.enroute_time.substring(0, 2))
-    let enrMinutes = parseInt(fp.enroute_time.substring(2, 4))
+    const enrHours = parseInt(fp.enroute_time.substring(0, 2))
+    const enrMinutes = parseInt(fp.enroute_time.substring(2, 4))
     let arrHours = depHours + enrHours
     let arrMinutes = depMinutes + enrMinutes
     while (arrMinutes >= 60) {
@@ -89,8 +89,8 @@ export function flightplanArrivalTime(fp: FlightPlan, adjustDepartureTime = fals
 
 export function flightplanDepartureTime(fp: FlightPlan) {
     if (!fp.deptime || fp.deptime == "0000" || !fp.enroute_time || fp.enroute_time == "0000") return undefined
-    let depHours = parseInt(fp.deptime.substring(0, 2))
-    let depMinutes = parseInt(fp.deptime.substring(2, 4))
+    const depHours = parseInt(fp.deptime.substring(0, 2))
+    const depMinutes = parseInt(fp.deptime.substring(2, 4))
     let time = moment().utc().set("hour", depHours).set("minute", depMinutes)
     if (time.isBefore(moment().subtract(12, "hour"))) time = time.add(1, "day")
     return time

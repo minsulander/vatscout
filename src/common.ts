@@ -1,4 +1,5 @@
-import { Atis, Controller } from "./store/vatsim"
+import callsigns from "@/data/callsigns.json"
+import { Atis, Controller, Pilot, Prefile } from "./store/vatsim"
 
 export function colorForController(controller: Controller) {
     return colorForControllerCallsign(controller.callsign) || "grey"
@@ -29,8 +30,9 @@ export function compareControllers(a: Controller, b: Controller) {
 }
 
 export function compareCallsigns(a: string, b: string) {
-    let aOrder = 999, bOrder = 999
-    const suffixes = [ "DEL", "GND", "TWR", "DEP", "APP", "CTR" ]
+    let aOrder = 999,
+        bOrder = 999
+    const suffixes = ["DEL", "GND", "TWR", "DEP", "APP", "CTR"]
     for (let i = 0; i < suffixes.length; i++) {
         if (a.endsWith(suffixes[i])) aOrder = i
         if (b.endsWith(suffixes[i])) bOrder = i
@@ -41,7 +43,7 @@ export function compareCallsigns(a: string, b: string) {
 export function extractAtisCode(atis: Atis) {
     if (atis.text_atis && atis.text_atis.length > 0) {
         const text = atis.text_atis.join(" ").trim()
-        const icao = atis.callsign.substring(0,4)
+        const icao = atis.callsign.substring(0, 4)
         let m = text.match(new RegExp(`${icao}( ARR| DEP|) ATIS( INFO| INFORMATION|) (\\w)[ \\.]`))
         if (m) return m.at(3)
         m = text.match(new RegExp(`${icao} INFORMATION (\\w)`))
@@ -50,7 +52,7 @@ export function extractAtisCode(atis: Atis) {
         if (m) return m.at(3)
         m = text.match(new RegExp(`THIS IS \\w+ INFORMATION (\\w)`))
         if (m) return m.at(1)
-        m = text.match(new RegExp(`INFORMATION (\\w) OUT([ \.]|$)`))
+        m = text.match(new RegExp(`INFORMATION (\\w) OUT([ .]|$)`))
         if (m) return m.at(1)
         m = text.match(new RegExp(`END OF INFORMATION (\\w)\\w* ?\\.?$`))
         if (m) return m.at(1)
@@ -59,6 +61,31 @@ export function extractAtisCode(atis: Atis) {
         m = text.match(new RegExp(`ACK\\w+ RECEIPT OF INF\\w+ (\\w)`))
         if (m) return m.at(1)
     }
+}
+
+export function extractCallsign(p: Pilot | Prefile) {
+    const flightplan = p.flight_plan
+    if (flightplan && (flightplan.remarks.includes("CALLSIGN") || flightplan.remarks.includes("CS/"))) {
+        const m = flightplan.remarks.match(/(CALLSIGN IS |CALLSIGN[/=_ ]+|CS\/)([\w\s-_"]+?)(TCAS|SIMBRIEF|\s\w+\/|\/|\(|$)/)
+        if (m && m.at(2)) {
+            const remarkCallsign = m.at(2)?.replaceAll('"', "").trim()
+            if (remarkCallsign) {
+                if (p.callsign.length > 3 && isFinite(parseInt(p.callsign.substring(3, 4)))) {
+                    const numbers = p.callsign.substring(3)
+                    if (remarkCallsign.endsWith(" " + numbers)) return remarkCallsign
+                    else if (remarkCallsign.endsWith(numbers)) return remarkCallsign.replace(numbers, "") + " " + numbers
+                    else return `${remarkCallsign} ${numbers}`
+                }
+                return remarkCallsign
+            }
+        }
+    }
+    if (p.callsign.length > 3 && isFinite(parseInt(p.callsign.substring(3, 4)))) {
+        const longCallsign = (callsigns as any)[p.callsign.substring(0, 3)]
+        const numbers = p.callsign.substring(3)
+        if (longCallsign && numbers) return `${longCallsign} ${numbers}`
+    }
+    return p.callsign
 }
 
 export function isStandaloneApp() {

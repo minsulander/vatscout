@@ -1,11 +1,11 @@
-import { defineStore } from "pinia"
-import { ref, reactive } from "vue"
-import axios from "axios"
-import GeoJSON from "ol/format/GeoJSON"
-import FeatureLike from "ol/Feature"
-import constants from "@/constants"
-import moment from "moment"
 import { arrivalDistance, departureDistance, distanceToAirport, eta, flightplanArrivalTime, flightplanDepartureTime } from "@/calc"
+import constants from "@/constants"
+import axios from "axios"
+import moment from "moment"
+import FeatureLike from "ol/Feature"
+import GeoJSON from "ol/format/GeoJSON"
+import { defineStore } from "pinia"
+import { ref } from "vue"
 import { useSettingsStore } from "./settings"
 
 const apiBaseUrl = "https://api.vatscout.com"
@@ -307,7 +307,7 @@ export const useVatsimStore = defineStore("vatsim", () => {
         try {
             const startRequest = new Date().getTime()
             const response = await axios.get(`${apiBaseUrl}/transceivers`)
-            let xcs: { [key: string]: Transceiver[] } = {}
+            const xcs: { [key: string]: Transceiver[] } = {}
             for (const entry of response.data) {
                 if (!(entry.callsign in xcs)) xcs[entry.callsign] = []
                 for (const entryxc of entry.transceivers) {
@@ -374,6 +374,7 @@ export const useVatsimStore = defineStore("vatsim", () => {
                     }
                     spydata.uirs.push(uir)
                 } else if (section == "idl") {
+                    //
                 } else {
                     console.log("wut?", section, line)
                 }
@@ -433,13 +434,11 @@ export const useVatsimStore = defineStore("vatsim", () => {
         }
     }
 
-    async function fetchEvents() {}
-
     let lastBookingsRefresh = 0
     let lastStaticDataRefresh = 0
 
     if (!(window as any).refreshInterval) {
-        ;(window as any).refreshInterval = setInterval(() => {
+        (window as any).refreshInterval = setInterval(() => {
             timeUntilRefresh.value -= 500
             if (timeUntilRefresh.value <= 0) {
                 timeUntilRefresh.value = constants.refreshInterval
@@ -466,7 +465,7 @@ export const useVatsimStore = defineStore("vatsim", () => {
                 }
             }
         }, 500)
-        document.addEventListener("visibilitychange", (event) => {
+        document.addEventListener("visibilitychange", () => {
             if (document.visibilityState == "visible") {
                 if (
                     !data.value.general ||

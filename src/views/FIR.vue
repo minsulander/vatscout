@@ -18,7 +18,7 @@
                 {{ fir.name }}<span v-if="fir.callsignPrefix"> | {{ fir.callsignPrefix }}</span>
             </div>
             <v-row class="mt-2">
-                <Controller v-for="controller in controllers" :value="controller" :prefix="id" />
+                <Controller v-for="controller in controllers" :value="controller" :prefix="id" :key="controller.cid"/>
             </v-row>
             <div class="bg-grey-darken-4 text-grey-lighten-1 pa-1 mt-5 mb-2">
                 <v-row>
@@ -39,15 +39,15 @@
 </template>
 
 <script lang="ts" setup>
-import { useRoute } from "vue-router"
-import { useVatsimStore } from "@/store/vatsim"
-import { computed, inject } from "vue"
-import { colorForController, compareControllers, labelForController } from "@/common"
+import { compareControllers } from "@/common"
 import AirportTopList from "@/components/AirportTopList.vue"
 import Booking from "@/components/Booking.vue"
 import Controller from "@/components/Controller.vue"
-import moment from "moment"
 import { useSettingsStore } from "@/store/settings"
+import { useVatsimStore } from "@/store/vatsim"
+import moment from "moment"
+import { computed } from "vue"
+import { useRoute } from "vue-router"
 const route = useRoute()
 const vatsim = useVatsimStore()
 const settings = useSettingsStore()

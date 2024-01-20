@@ -15,7 +15,7 @@ import { colorForController } from "@/common"
 import { useVatsimStore, Controller } from "@/store/vatsim"
 import moment from "moment"
 
-const props = defineProps<{ value: Controller; prefix?: string }>()
+defineProps<{ value: Controller; prefix?: string }>()
 const vatsim = useVatsimStore()
 
 function rating(controller: Controller) {
