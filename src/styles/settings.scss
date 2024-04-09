@@ -14,15 +14,16 @@ a {
     color: white;
 }
 a:hover:not(.v-btn) {
-    background: #333;
+    background: #313338;
+    border-radius: 3px;
 }
 
 html,
 body {
     overflow-y: overlay;
-    background-color: #1e2022;
+    background-color: #1e1f22;
     min-height: 100%;
-    scrollbar-color: grey #1e2022;
+    scrollbar-color: grey #1e1f22;
     scrollbar-width: thin;
 }
 ::-webkit-scrollbar {

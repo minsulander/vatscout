@@ -20,7 +20,7 @@
             <v-row class="mt-2">
                 <Controller v-for="controller in controllers" :value="controller" :prefix="id" :key="controller.cid"/>
             </v-row>
-            <div class="bg-grey-darken-4 text-grey-lighten-1 pa-1 mt-5 mb-2">
+            <div class="text-grey-lighten-1 pa-1 mt-5 mb-2" style="background: #313338">
                 <v-row>
                     <v-col cols="6" sm="6">Active airports </v-col>
                     <v-col cols="3" sm="1" class="text-center"><v-icon>mdi-airplane-takeoff</v-icon></v-col>
@@ -30,7 +30,7 @@
             </div>
             <airport-top-list :fir="id" class="mt-2" />
             <div v-if="bookings.length > 0" class="mt-5 text-grey">
-                <div class="bg-grey-darken-4 text-grey-lighten-1 pa-1 mb-2">Bookings</div>
+                <div class="text-grey-lighten-1 pa-1 mb-2" style="background: #313338">Bookings</div>
                 <Booking v-for="booking in bookings" :key="booking.id" :value="booking" class="mt-1" />
             </div>
         </div>
@@ -60,7 +60,7 @@ const fir = computed(() => {
 
 const controllers = computed(() => {
     if (!vatsim.data.controllers) return []
-    return vatsim.data.controllers.filter((c) => isMatchingCallsign(c.callsign)).sort(compareControllers)
+    return vatsim.data.controllers.filter((c) => c.facility > 0 && isMatchingCallsign(c.callsign)).sort(compareControllers)
 })
 
 const bookings = computed(() => {

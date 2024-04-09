@@ -32,6 +32,7 @@
                 <v-chip size="small" density="comfortable" label class="ml-1 px-1" v-if="value.flight_plan.flight_rules == 'V'">VFR</v-chip>
                 <v-chip size="small" density="comfortable" label class="ml-1 px-1" v-if="newPilot">NEW</v-chip>
                 <v-chip size="small" density="comfortable" label class="ml-1 px-1" v-if="streamer"><v-icon>mdi-video</v-icon></v-chip>
+                <v-chip size="small" density="comfortable" label class="ml-1 px-1" v-if="blind"><v-icon>mdi-eye-off</v-icon></v-chip>
                 <v-chip size="small" density="comfortable" label class="ml-1 px-1" v-if="textOnly">T</v-chip>
                 <v-chip size="small" density="comfortable" label class="ml-1 px-1" v-if="receiveOnly">R</v-chip>
                 <v-chip size="small" density="comfortable" label class="ml-1 px-1" color="red" v-if="departure && pending && transponderWarning">{{ transponderWarning }}</v-chip>
@@ -139,7 +140,14 @@ const streamer = computed(() => {
     const flightplan = props.value.flight_plan
     if (!flightplan) return false
     if (!flightplan.remarks) return false
-    return !!flightplan.remarks.toUpperCase().match(/TWITCH.TV|STREAM(ING?).*TWITCH|LIVE( ON?).*TWITCH/)
+    return !!flightplan.remarks.toUpperCase().match(/TWITCH.TV|STREAM(ING?).*TWITCH|LIVE( ON?).*TWITCH|YOUTUBE/)
+})
+
+const blind = computed(() => {
+    const flightplan = props.value.flight_plan
+    if (!flightplan) return false
+    if (!flightplan.remarks) return false
+    return !!flightplan.remarks.toUpperCase().match(/BLIND PILOT/)
 })
 
 function click() {

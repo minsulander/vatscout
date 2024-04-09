@@ -7,6 +7,7 @@ export default {
     atAirportDistance: 5,
     newPilotPhrases: [
         "NEW PILOT",
+        "NEWPILOT",
         "NEW TO VATSIM",
         "NEW ON VATSIM",
         "NEW AT VATSIM",

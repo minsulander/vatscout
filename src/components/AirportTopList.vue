@@ -1,7 +1,7 @@
 <template>
     <div>
-        <div v-if="activeAirports.length == 0" class="mt-2 text-caption text-grey-darken-2 font-weight-light text-center">
-            - NO DEPARTURES, ARRIVALS OR CONTROLLERS ACTIVE -
+        <div v-if="activeAirports.length == 0" class="mt-2 text-caption text-grey-darken-1 font-weight-light text-center">
+            NO DEPARTURES, ARRIVALS OR CONTROLLERS ACTIVE
         </div>
         <v-row v-for="airport in activeAirports" :key="airport.icao" no-gutters class="pa-1" @click="clickAirport(airport)">
             <v-col cols="6" sm="1">

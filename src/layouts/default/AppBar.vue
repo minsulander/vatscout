@@ -1,5 +1,5 @@
 <template>
-    <v-app-bar>
+    <v-app-bar color="#2b2d31">
         <v-row no-gutters align="center">
             <v-col cols="2" sm="2">
                 <span v-if="$route.path.length > 1">
@@ -12,10 +12,10 @@
                 </span>
             </v-col>
             <v-col cols="6" sm="3" class="text-right">
-                <v-btn icon plain color="grey-darken-3" @click="clickSettings"
+                <v-btn icon plain color="grey-darken-2" @click="clickSettings"
                     ><v-icon>mdi-cog</v-icon><v-tooltip activator="parent" location="bottom">Settings</v-tooltip></v-btn
                 >
-                <v-btn icon plain :color="settings.soundOn ? 'grey-darken-1' : 'grey-darken-3'" @click="clickBell">
+                <v-btn icon plain :color="settings.soundOn ? 'grey' : 'grey-darken-2'" @click="clickBell">
                     <v-icon>{{ settings.soundOn ? "mdi-bell-ring" : "mdi-bell-off" }}</v-icon>
                     <v-tooltip activator="parent" location="bottom">Toggle notifications sounds</v-tooltip>
                 </v-btn>

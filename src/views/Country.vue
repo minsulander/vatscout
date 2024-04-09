@@ -14,7 +14,7 @@
         <v-row class="mt-2">
             <Controller v-for="controller in controllers" :key="controller.cid" :value="controller" />
         </v-row>
-        <div v-if="country && firs" class="bg-grey-darken-4 text-grey-lighten-1 pa-1 mt-5 mb-2">
+        <div v-if="country && firs" class="text-grey-lighten-1 pa-1 mt-5 mb-2" style="background: #313338">
             <v-row>
                 <v-col cols="6" sm="6">Active airports </v-col>
                 <v-col cols="3" sm="1" class="text-center"><v-icon>mdi-airplane-takeoff</v-icon></v-col>
@@ -24,11 +24,11 @@
         </div>
         <airport-top-list v-if="firs" :firs="firs.map((f) => f.icao)" class="mt-2" />
         <div v-if="bookings.length > 0" class="mt-5 text-grey">
-            <div class="bg-grey-darken-4 text-grey-lighten-1 pa-1 mb-2">Bookings</div>
+            <div class="text-grey-lighten-1 pa-1 mb-2" style="background: #313338">Bookings</div>
             <Booking v-for="booking in bookings" :key="booking.id" :value="booking" class="mt-1" />
         </div>
         <div v-if="firs && firs.length > 0" class="mt-5">
-            <div class="bg-grey-darken-4 text-grey-lighten-1 pa-1 mb-2">FIRs</div>
+            <div class="text-grey-lighten-1 pa-1 mb-2" style="background: #313338">FIRs</div>
             <v-row no-gutters>
                 <v-col cols="12" sm="4" v-for="fir in firs" :key="fir.icao" @click="router.push(`/fir/${fir.icao}`)" class="fir pa-1 text-truncate">
                     {{ fir.icao }} <span class="text-grey-lighten-1 text-body-2">{{ fir.name }}</span>
@@ -86,6 +86,7 @@ const controllers = computed(() => {
     }
     return vatsim.data.controllers.filter(
         (c) =>
+            c.facility > 0 &&
             c.callsign &&
             c.callsign.endsWith("_CTR") &&
             !c.callsign.endsWith("_OBS") &&

@@ -53,7 +53,7 @@
         </v-row>
         <v-row class="mt-3">
             <v-col cols="12" sm="6">
-                <v-row no-gutters class="bg-grey-darken-4 text-grey-lighten-1 pa-1">
+                <v-row no-gutters class="text-grey-lighten-1 pa-1" style="background: #313338">
                     <v-col sm="7"><v-icon class="mr-1">mdi-airplane-takeoff</v-icon>Departures</v-col>
                     <v-col sm="5" class="text-right">
                         <span v-if="departurePrefiles.length > 0" class="text-grey ml-3">{{ departurePrefiles.length }}</span>
@@ -63,7 +63,7 @@
                         <span v-if="departedPilots.length > 0" class="text-cyan-darken-3 ml-3">{{ departedPilots.length }}</span>
                     </v-col>
                 </v-row>
-                <div class="text-caption text-grey-darken-2 font-weight-light mt-2 ml-1" v-if="departurePrefiles.length > 0">PREFILED</div>
+                <div class="text-caption text-grey-darken-1 font-weight-light mt-2 ml-1" v-if="departurePrefiles.length > 0">PREFILED</div>
                 <flight-row
                     v-for="p in departurePrefiles"
                     :key="p.callsign"
@@ -73,7 +73,7 @@
                     :class="newDepartures.includes(p.callsign) ? 'bg-blue-grey-darken-4' : ''"
                     @click="clickFlight(p.callsign)"
                 />
-                <div class="text-caption text-grey-darken-2 font-weight-light mt-2 ml-1" v-if="nofpPilots.length > 0">NO FLIGHTPLAN</div>
+                <div class="text-caption text-grey-darken-1 font-weight-light mt-2 ml-1" v-if="nofpPilots.length > 0">NO FLIGHTPLAN</div>
                 <flight-row
                     v-for="p in nofpPilots"
                     :key="p.callsign"
@@ -83,7 +83,7 @@
                     :class="newDepartures.includes(p.callsign) ? 'bg-blue-grey-darken-4' : ''"
                     @click="clickFlight(p.callsign)"
                 />
-                <div class="text-caption text-grey-darken-2 font-weight-light mt-2 ml-1" v-if="invalidfpPilots.length > 0">
+                <div class="text-caption text-grey-darken-1 font-weight-light mt-2 ml-1" v-if="invalidfpPilots.length > 0">
                     INVALID FLIGHTPLAN
                 </div>
                 <flight-row
@@ -95,7 +95,7 @@
                     :class="newDepartures.includes(p.callsign) ? 'bg-blue-grey-darken-4' : ''"
                     @click="clickFlight(p.callsign)"
                 />
-                <div class="text-caption text-grey-darken-2 font-weight-light mt-2 ml-1" v-if="departingPilots.length > 0">DEPARTING</div>
+                <div class="text-caption text-grey-darken-1 font-weight-light mt-2 ml-1" v-if="departingPilots.length > 0">DEPARTING</div>
                 <flight-row
                     v-for="p in departingPilots"
                     :key="p.callsign"
@@ -104,7 +104,7 @@
                     :class="newDepartures.includes(p.callsign) ? 'bg-blue-grey-darken-4' : ''"
                     @click="clickFlight(p.callsign)"
                 />
-                <div class="text-caption text-grey-darken-2 font-weight-light mt-2 ml-1" v-if="departedPilots.length > 0">DEPARTED</div>
+                <div class="text-caption text-grey-darken-1 font-weight-light mt-2 ml-1" v-if="departedPilots.length > 0">DEPARTED</div>
                 <flight-row v-for="p in departedPilots" :key="p.callsign" :value="p" departure @click="clickFlight(p.callsign)" />
                 <div
                     v-if="
@@ -114,13 +114,13 @@
                         departingPilots.length == 0 &&
                         departedPilots.length == 0
                     "
-                    class="mt-2 text-caption text-grey-darken-2 font-weight-light text-center"
+                    class="mt-2 text-caption text-grey-darken-1 font-weight-light text-center"
                 >
-                    - NO DEPARTURES -
+                    NO DEPARTURES
                 </div>
             </v-col>
             <v-col cols="12" sm="6">
-                <v-row no-gutters class="bg-grey-darken-4 text-grey-lighten-1 pa-1">
+                <v-row no-gutters class="text-grey-lighten-1 pa-1" style="background: #313338">
                     <v-col sm="7" class=""><v-icon class="mr-1">mdi-airplane-landing</v-icon>Arrivals</v-col>
                     <v-col sm="5" class="text-right">
                         <span v-if="arrivalPrefiles.length > 0" class="text-grey ml-3">{{ arrivalPrefiles.length }}</span>
@@ -128,7 +128,7 @@
                         <span v-if="arrivedPilots.length > 0" class="text-brown-lighten-1 ml-3">{{ arrivedPilots.length }}</span>
                     </v-col>
                 </v-row>
-                <div class="text-caption text-grey-darken-2 font-weight-light mt-2 ml-1" v-if="arrivalPrefiles.length > 0">PREFILED</div>
+                <div class="text-caption text-grey-darken-1 font-weight-light mt-2 ml-1" v-if="arrivalPrefiles.length > 0">PREFILED</div>
                 <flight-row
                     v-for="p in arrivalPrefiles"
                     :key="p.callsign"
@@ -138,7 +138,7 @@
                     :class="newArrivals.includes(p.callsign) ? 'bg-brown-darken-3' : ''"
                     @click="clickFlight(p.callsign)"
                 />
-                <div class="text-caption text-grey-darken-2 font-weight-light mt-2 ml-1" v-if="arrivingPilots.length > 0">ARRIVING</div>
+                <div class="text-caption text-grey-darken-1 font-weight-light mt-2 ml-1" v-if="arrivingPilots.length > 0">ARRIVING</div>
                 <flight-row
                     v-for="p in arrivingPilots"
                     :key="p.callsign"
@@ -147,18 +147,18 @@
                     :class="newArrivals.includes(p.callsign) ? 'bg-brown-darken-3' : ''"
                     @click="clickFlight(p.callsign)"
                 />
-                <div class="text-caption text-grey-darken-2 font-weight-light mt-2 ml-1" v-if="arrivedPilots.length > 0">ARRIVED</div>
+                <div class="text-caption text-grey-darken-1 font-weight-light mt-2 ml-1" v-if="arrivedPilots.length > 0">ARRIVED</div>
                 <flight-row v-for="p in arrivedPilots" :key="p.callsign" :value="p" arrival @click="clickFlight(p.callsign)" />
                 <div
                     v-if="arrivalPrefiles.length == 0 && arrivingPilots.length == 0 && arrivedPilots.length == 0"
-                    class="mt-2 text-caption text-grey-darken-2 font-weight-light text-center"
+                    class="mt-2 text-caption text-grey-darken-1 font-weight-light text-center"
                 >
-                    - NO ARRIVALS -
+                    NO ARRIVALS WITHIN {{ minutes2hhmm(settings.arrivingMaxMinutes) }}
                 </div>
             </v-col>
         </v-row>
         <div v-if="bookings.length > 0" class="mt-5 text-grey">
-            <div class="bg-grey-darken-4 text-grey-lighten-1 pa-1 mb-2">Bookings</div>
+            <div class="text-grey-lighten-1 pa-1 mb-2" style="background: #313338">Bookings</div>
             <Booking v-for="booking in bookings" :key="booking.id" :value="booking" :prefix="id" class="mt-1" />
         </div>
         <v-snackbar v-model="snackbar" timeout="10000" color="grey-darken-4" class="mb-3">
@@ -172,8 +172,8 @@
         <v-btn @click="snackbar=true; snackbarColor='cyan'; snackbarText='New departure <b style=\'font-family: monospace\'>ABC123</b>'">Test snackbar</v-btn>
         -->
         <v-dialog v-model="showFlightDialog" width="90%">
-            <v-card>
-                <v-card-text>
+            <v-card color="#1e1f22">
+                <v-card-text class="pa-3">
                     <flight-details :id="flightCallsign" />
                 </v-card-text>
             </v-card>
@@ -202,6 +202,7 @@ import moment from "moment"
 import { computed, ref, watch } from "vue"
 import { useRoute, useRouter } from "vue-router"
 import { useDisplay } from "vuetify"
+import { minutes2hhmm } from "@/common"
 
 const route = useRoute()
 const router = useRouter()
@@ -349,7 +350,7 @@ const atises = computed(() => {
 
 const controllers = computed(() => {
     if (!vatsim.data.controllers) return []
-    return vatsim.data.controllers.filter((c) => isMatchingCallsign(c.callsign)).sort(compareControllers)
+    return vatsim.data.controllers.filter((c) => c.facility > 0 && isMatchingCallsign(c.callsign)).sort(compareControllers)
 })
 
 const bookings = computed(() => {
@@ -499,6 +500,7 @@ watch([atises, controllers], () => {
 })
 
 watch(id, () => {
+    showFlightDialog.value = false
     if (!id.value || !airport.value) {
         lastDepartures = lastArrivals = lastAtc = []
     } else {

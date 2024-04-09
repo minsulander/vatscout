@@ -1,6 +1,6 @@
 <template>
     <div>
-        <v-row align="center">
+        <v-row align="center" style="background: #313338">
             <v-col cols="6" md="3">
                 <div class="text-h4">{{ id }}</div>
                 <div class="text-grey-lighten-1" v-if="callsign && callsign != id">{{ callsign }}</div>
@@ -165,7 +165,7 @@
         </div>
         <div v-else-if="prefile" class="mt-5">
             <v-row no-gutters align="baseline">
-                <v-col cols="2" sm="1" class="text-right pr-2 text-caption text-grey">Prefiled</v-col>
+                <v-col cols="2" sm="1" class="text-right pr-2 text-caption text-grey">CID</v-col>
                 <v-col cols="10" sm="5">
                     {{ prefile.name }}
                 </v-col>
@@ -175,8 +175,8 @@
                 </v-col>
             </v-row>
         </div>
-        <div v-if="flightplan" class="mt-5">
-            <div class="bg-grey-darken-4 text-grey-lighten-1 pa-1 mb-2">Flightplan</div>
+        <div v-if="flightplan" class="mt-3">
+            <div class="text-grey px-3 py-1 mb-2" style="background: #313338; margin-left: -12px; margin-right: -12px">Flightplan</div>
 
             <v-row no-gutters align="baseline">
                 <v-col cols="2" sm="1" class="text-right pr-2 text-caption text-grey">Rules</v-col>
@@ -449,6 +449,8 @@ const formattedRemarks = computed(() => {
         /(LIVE( ON)? TWITCH.(\w+))/,
         '<a class="text-purple-lighten-2 font-weight-bold" href="https://twitch.tv/$3" target="_blank">$1</a>'
     )
+    rmk = rmk.replace(/YOUTUBE/, '<span class="text-warning font-weight-bold">YOUTUBE</span>')
+    rmk = rmk.replace(/BLIND PILOT/, '<span class="text-warning font-weight-bold">BLIND PILOT</span>')
     return rmk
 })
 </script>

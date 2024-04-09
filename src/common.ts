@@ -66,7 +66,7 @@ export function extractAtisCode(atis: Atis) {
 export function extractCallsign(p: Pilot | Prefile) {
     const flightplan = p.flight_plan
     if (flightplan && (flightplan.remarks.includes("CALLSIGN") || flightplan.remarks.includes("CS/"))) {
-        const m = flightplan.remarks.match(/(CALLSIGN IS |CALLSIGN[/=_ ]+|CS\/)([\w\s-_"]+?)(TCAS|SIMBRIEF|\s\w+\/|\/|\(|$)/)
+        const m = flightplan.remarks.match(/(CALLSIGN IS |CALLSIGN[/=_ ]+|CS\/)([\w\s-_"]+?)(TCAS|SIMBRIEF|\s\w+\/|[,\.\/\(]|$)/)
         if (m && m.at(2)) {
             const remarkCallsign = m.at(2)?.replaceAll('"', "").trim()
             if (remarkCallsign) {
@@ -91,3 +91,16 @@ export function extractCallsign(p: Pilot | Prefile) {
 export function isStandaloneApp() {
     return (navigator as any).standalone || window.matchMedia("(display-mode: standalone)").matches
 }
+
+export function minutes2hhmm(minutes: number) {
+    const hours = Math.floor(minutes/60)
+    const mins = minutes - hours*60
+    return `${String(hours).padStart(2, "0")}${String(mins).padStart(2, "0")}`
+}
+
+export function hhmm2minutes(hhmm: string) {
+    const hours = parseInt(hhmm.substring(0,2))
+    const minutes = parseInt(hhmm.substring(2,4))
+    return hours*60+minutes
+}
+

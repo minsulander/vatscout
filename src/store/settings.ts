@@ -6,8 +6,8 @@ export const useSettingsStore = defineStore("settings", () => {
     const soundOn = ref(false)
     const soundVolume = ref(100)
     const departedMaxRange = ref(150)
-    const arrivingMaxMinutes = ref(120)
-    const prefileDepartureMaxMinutes = ref(120)
+    const arrivingMaxMinutes = ref(60)
+    const prefileDepartureMaxMinutes = ref(60)
     const prefileMaxTardinessMinutes = ref(60)
     const bookingsMaxHours = ref(6)
 
