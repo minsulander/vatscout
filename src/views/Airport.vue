@@ -229,7 +229,7 @@ function clickFlight(callsign: string) {
     }
 }
 
-function clickAtis(atisClicked: Atis) {
+function clickAtis(atisClicked: any) {
     atis.value = atisClicked
     showAtisDialog.value = true
 }
