@@ -153,12 +153,12 @@
                         <span v-if="vatsim.spy.firs && vatsim.spy.firs.find((f) => f.icao == boundary.getProperties().id)">
                             <router-link :to="`/fir/${boundary.getProperties().id}`">{{ boundary.getProperties().id }}</router-link>
                         </span>
-                        <span v-else-if="vatsim.spy.airports && vatsim.spy.airports.find((a) => a.icao == boundary.getProperties().id)">
-                            <router-link :to="`/airport/${boundary.getProperties().id}`">{{ boundary.getProperties().id }}</router-link>
-                        </span>
                         <span v-else>
                             {{ boundary.getProperties().id }}
                         </span>
+                    </span>
+                    <span v-for="boundary in withinTracon" :key="boundary.getProperties().id" class="mr-3">
+                        <router-link :to="`/tracon/${boundary.getProperties().id}`">{{ boundary.getProperties().id }}</router-link>
                     </span>
                 </v-col>
             </v-row>
@@ -350,19 +350,12 @@ const transceivers = computed(() => {
     return vatsim.transceivers[id.value]
 })
 const within = computed(() => {
-    if (!pilot.value || !pilot.value.longitude || !pilot.value.latitude) return []
-    const boundaries = []
-    for (const boundary of vatsim.boundaries) {
-        if (boundary.getGeometry()!.intersectsCoordinate([pilot.value.longitude, pilot.value.latitude])) {
-            boundaries.push(boundary)
-        }
-    }
-    for (const boundary of vatsim.traconBoundaries) {
-        if (boundary.getGeometry()!.intersectsCoordinate([pilot.value.longitude, pilot.value.latitude])) {
-            boundaries.push(boundary)
-        }
-    }
-    return boundaries
+    if (!pilot.value || !pilot.value.longitude || !pilot.value.latitude || !vatsim.boundaries) return []
+    return vatsim.boundaries.filter((boundary) => boundary.getGeometry()!.intersectsCoordinate([pilot.value!.longitude, pilot.value!.latitude]))
+})
+const withinTracon = computed(() => {
+    if (!pilot.value || !pilot.value.longitude || !pilot.value.latitude || !vatsim.traconBoundaries) return []
+    return vatsim.traconBoundaries.filter((boundary) => boundary.getGeometry()!.intersectsCoordinate([pilot.value!.longitude, pilot.value!.latitude]))
 })
 const departureAirport = computed(() => {
     return flightplan.value && vatsim.spy.airports && vatsim.spy.airports.find((a) => a.icao == flightplan.value!.departure)

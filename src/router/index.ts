@@ -27,6 +27,10 @@ const routes = [
                 component: () => import("@/views/Airport.vue"),
             },
             {
+                path: "tracon/:id",
+                component: () => import("@/views/Tracon.vue"),
+            },
+            {
                 path: "fir/:id",
                 component: () => import("@/views/FIR.vue"),
             },

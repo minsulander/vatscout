@@ -28,8 +28,8 @@ function enter() {
     if (vatsim.spy && vatsim.spy.countries && vatsim.spy.countries.find((c) => c.prefix == query)) return router.push(`/country/${query}`)
     // Exact matches on IATA etc
     if (vatsim.spy && vatsim.spy.airports) {
-        const airport = vatsim.spy.airports.find((a) => a.iata && a.iata == query)   
-        if (airport && airport.icao) return router.push(`/airport/${airport.icao}`)     
+        const airport = vatsim.spy.airports.find((a) => a.iata && a.iata == query)
+        if (airport && airport.icao) return router.push(`/airport/${airport.icao}`)
     }
     // Partial matches
     const shortPilot = query.length == 3 && vatsim.data && vatsim.data.pilots && vatsim.data.pilots.find((p) => `${p.callsign.substring(0, 1)}${p.callsign.substring(3)}` == query)
@@ -64,7 +64,7 @@ function enter() {
             if (fir) return router.push(`/fir/${fir.icao}`)
         }
     }
-    // TODO handle
+    if (query.endsWith("_APP")) return router.push(`/tracon/${query.replace("_APP", "")}`)
     errorMessages.value = `${query}: Nothing found`
 }
 </script>
