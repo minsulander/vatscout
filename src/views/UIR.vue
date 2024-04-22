@@ -1,5 +1,5 @@
 <template>
-    <v-container>
+    <div class="pa-2">
         <div class="text-h4">{{ id }}</div>
         <div v-if="uir">
             {{ uir.name }} |
@@ -8,7 +8,7 @@
         <div class="text-h5 font-weight-light text-grey mt-5">
             UIR page is not implemented yet...
         </div>
-    </v-container>
+    </div>
 </template>
 
 <script lang="ts" setup>

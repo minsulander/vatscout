@@ -1,5 +1,5 @@
 <template>
-    <v-container>
+    <div class="pa-2">
         <v-row>
             <v-col cols="4">
                 <div class="text-h4">{{ id }}_APP</div>
@@ -23,31 +23,35 @@
             <Controller v-for="controller in controllers" :key="controller.cid" :value="controller" :prefix="id" />
         </v-row>
         <div v-for="airport in activeAirports" :key="airport.icao" class="mt-3">
-            <v-row @click="router.push(`/airport/${airport.icao}`)" style="cursor: pointer">
-                <v-col cols="4">
-                    <div class="text-h5">{{ airport.icao }}</div>
+            <v-row no-gutters @click="router.push(`/airport/${airport.icao}`)" style="cursor: pointer">
+                <v-col cols="6" sm="1">
+                    <div class="text-h6">{{ airport.icao }}</div>
                 </v-col>
-                <v-col cols="8" class="text-right text-grey-lighten-1 text-h6 font-weight-light">
+                <v-col sm="11" class="text-h6 font-weight-light text-grey-lighten-1">
+                    <div class="float-right">
+                        <Atis compact v-for="atis in atises(airport.icao)" :key="atis.callsign" :value="atis" class="ml-1" />
+                        <Controller
+                            compact
+                            v-for="controller in localControllers(airport.icao)"
+                            :key="controller.callsign"
+                            :value="controller"
+                            class="ml-1"
+                        />
+                    </div>
                     {{ airport.name }}
                 </v-col>
             </v-row>
-            <v-row>
-                <Atis v-for="atis in atises(airport.icao)" :key="atis.callsign" :value="atis" :prefix="id" @click="clickAtis(atis)" />
-                <Controller v-for="controller in localControllers(airport.icao)" :key="controller.cid" :value="controller" :prefix="id" />
-            </v-row>
-            <v-row>
+            <v-row no-gutters>
                 <v-col cols="12" sm="6">
-                    <departure-list :icao="airport.icao" @click="clickFlight" />
+                    <departure-list compact :icao="airport.icao" @click="clickFlight" />
                 </v-col>
                 <v-col cols="12" sm="6">
-                    <arrival-list :icao="airport.icao" @click="clickFlight" />
+                    <arrival-list compact :icao="airport.icao" @click="clickFlight" />
                 </v-col>
             </v-row>
         </div>
         <div class="text-grey-darken-1 text-body-2 mt-5" v-if="inactiveAirportIds && inactiveAirportIds.length > 0">
-            <span v-for="id in inactiveAirportIds"
-                ><router-link :to="`/airport/${id}`" class="text-grey-darken-1 mr-2">{{ id }}</router-link></span
-            >
+                <span v-for="id in inactiveAirportIds"><router-link :to="`/airport/${id}`" class="text-grey-darken-1">{{ id }}</router-link>&nbsp; </span>
         </div>
         <v-dialog v-model="showFlightDialog" width="90%">
             <v-card color="#1e1f22">
@@ -63,7 +67,7 @@
                 </v-card-text>
             </v-card>
         </v-dialog>
-    </v-container>
+    </div>
 </template>
 
 <script setup lang="ts">

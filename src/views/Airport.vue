@@ -1,5 +1,5 @@
 <template>
-    <v-container>
+    <div class="pa-2">
         <v-row>
             <v-col cols="4">
                 <div class="text-h4">{{ id }}</div>
@@ -29,14 +29,14 @@
             <span class="pa-1">{{ airport.name }}</span>
         </div>
         <v-row>
-            <Atis v-for="atis in atises" :key="atis.callsign" :value="atis" :prefix="id" @click="clickAtis(atis)"/>
+            <Atis v-for="atis in atises" :key="atis.callsign" :value="atis" :prefix="id" @click="clickAtis(atis)" />
             <Controller v-for="controller in controllers" :key="controller.cid" :value="controller" :prefix="id" />
         </v-row>
-        <v-row class="mt-3">
-            <v-col cols="12" sm="6">
+        <v-row no-gutters>
+            <v-col cols="12" sm="6" class="mt-5">
                 <departure-list :icao="id" :new-departures="newDepartures" @click="clickFlight" />
             </v-col>
-            <v-col cols="12" sm="6">
+            <v-col cols="12" sm="6" class="mt-5">
                 <arrival-list :icao="id" :new-arrivals="newArrivals" @click="clickFlight" />
             </v-col>
         </v-row>
@@ -68,7 +68,7 @@
                 </v-card-text>
             </v-card>
         </v-dialog>
-    </v-container>
+    </div>
 </template>
 
 <script lang="ts" setup>
@@ -130,10 +130,9 @@ const departures = computed(() => {
         // nofp
         ...vatsim.data.pilots.filter(
             (p) =>
-                p.flight_plan &&
-                p.flight_plan.departure == id.value &&
-                p.groundspeed < constants.inflightGroundspeed &&
-                departureDistance(p) < constants.atAirportDistance
+                !p.flight_plan &&
+                distanceToAirport(p, airport.value) < constants.atAirportDistance &&
+                p.groundspeed < constants.motionGroundspeed
         ),
         // prefile
         ...vatsim.data.prefiles.filter(
@@ -150,8 +149,7 @@ const departures = computed(() => {
 const arrivals = computed(() => {
     if (!vatsim.data || !vatsim.data.pilots) return []
     return [
-        ...vatsim.data.pilots
-        .filter((p) => {
+        ...vatsim.data.pilots.filter((p) => {
             if (!p.flight_plan || p.flight_plan.arrival != id.value || p.flight_plan.departure == id.value) return false
             const departed = p.groundspeed >= constants.inflightGroundspeed || departureDistance(p) >= constants.atAirportDistance
             const etaOrArrivalTime = eta(p) || flightplanArrivalTime(p.flight_plan, !departed)
@@ -160,8 +158,7 @@ const arrivals = computed(() => {
                 (!etaOrArrivalTime || etaOrArrivalTime.isBefore(moment().add(settings.arrivingMaxMinutes, "minute")))
             )
         }),
-        ...vatsim.data.prefiles
-        .filter(
+        ...vatsim.data.prefiles.filter(
             (p) =>
                 p.flight_plan &&
                 p.flight_plan.arrival == id.value &&
@@ -170,7 +167,7 @@ const arrivals = computed(() => {
                     flightplanArrivalTime(p.flight_plan)?.isBefore(moment().add(settings.arrivingMaxMinutes, "minute"))) &&
                 (!flightplanDepartureTime(p.flight_plan) ||
                     flightplanDepartureTime(p.flight_plan)?.isAfter(moment().subtract(settings.prefileMaxTardinessMinutes, "minute")))
-        )
+        ),
     ].sort((a, b) => a.callsign.localeCompare(b.callsign))
 })
 

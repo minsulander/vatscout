@@ -1,7 +1,7 @@
 <template>
-    <v-container>
+    <div class="pa-2">
         <flight-details :id="id" />
-    </v-container>
+    </div>
 </template>
 
 <script lang="ts" setup>

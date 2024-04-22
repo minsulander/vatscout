@@ -48,40 +48,8 @@
             </v-col>
             <v-col sm="6" class="d-sm-none text-body-2 text-grey mt-1">{{ airport.name }} </v-col>
             <v-col cols="6" sm="4" class="text-right">
-                <span v-for="atis in atises(airport)" :key="atis.callsign" class="ml-1">
-                    <v-tooltip :text="`${atis.callsign} ${atis.frequency} ${atis.name}`" location="bottom">
-                        <template v-slot:activator="{ props }">
-                            <v-chip
-                                variant="flat"
-                                elevated
-                                label
-                                size="small"
-                                color="orange-darken-3"
-                                class="text-white font-weight-bold"
-                                v-bind="props"
-                            >
-                                <span v-if="extractAtisCode(atis)">{{ extractAtisCode(atis) }}</span>
-                                <span v-else class="text-black">{{ atis.atis_code || "/" }}</span>
-                            </v-chip>
-                        </template>
-                    </v-tooltip>
-                </span>
-                <span v-for="controller in controllers(airport)" :key="controller.callsign" class="ml-1">
-                    <v-tooltip :text="`${controller.callsign} ${controller.frequency} ${controller.name}`" location="bottom">
-                        <template v-slot:activator="{ props }">
-                            <v-chip
-                                variant="flat"
-                                elevated
-                                label
-                                size="small"
-                                class="font-weight-bold"
-                                v-bind="props"
-                                :color="colorForController(controller)"
-                                >{{ labelForController(controller) }}
-                            </v-chip>
-                        </template>
-                    </v-tooltip>
-                </span>
+                <Atis compact v-for="atis in atises(airport)" :key="atis.callsign" :value="atis" class="ml-1" />
+                <Controller compact v-for="controller in controllers(airport)" :key="controller.callsign" :value="controller" class="ml-1" />
             </v-col>
         </v-row>
     </div>
@@ -99,6 +67,8 @@ import { Airport, useVatsimStore } from "@/store/vatsim"
 import { computed } from "vue"
 import { colorForController, labelForController, compareControllers, extractAtisCode } from "@/common"
 import { useRouter } from "vue-router"
+import Atis from "@/components/Atis.vue"
+import Controller from "./Controller.vue"
 const vatsim = useVatsimStore()
 const router = useRouter()
 const props = defineProps<{ firs?: string[]; fir?: string }>()

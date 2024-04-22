@@ -1,5 +1,5 @@
 <template>
-    <v-row no-gutters class="text-grey-lighten-1 pa-1" style="background: #313338">
+    <v-row v-if="!compact" no-gutters class="text-grey-lighten-1 pa-1" style="background: #313338">
         <v-col sm="7" class=""><v-icon class="mr-1">mdi-airplane-landing</v-icon>Arrivals</v-col>
         <v-col sm="5" class="text-right">
             <span v-if="arrivalPrefiles.length > 0" class="text-grey ml-3">{{ arrivalPrefiles.length }}</span>
@@ -7,8 +7,11 @@
             <span v-if="arrivedPilots.length > 0" class="text-brown-lighten-1 ml-3">{{ arrivedPilots.length }}</span>
         </v-col>
     </v-row>
-    <div class="text-caption text-grey-darken-1 font-weight-light mt-2 ml-1" v-if="arrivalPrefiles.length > 0">PREFILED</div>
+    <div class="text-caption text-grey-darken-1 font-weight-light mt-2 ml-1" v-if="!props.compact && arrivalPrefiles.length > 0">
+        PREFILED
+    </div>
     <flight-row
+        v-if="!props.compact"
         v-for="p in arrivalPrefiles"
         :key="p.callsign"
         :value="p"
@@ -17,7 +20,9 @@
         :class="newArrivals.includes(p.callsign) ? 'bg-brown-darken-3' : ''"
         @click="emit('click', p.callsign)"
     />
-    <div class="text-caption text-grey-darken-1 font-weight-light mt-2 ml-1" v-if="arrivingPilots.length > 0">ARRIVING</div>
+    <div class="text-caption text-grey-darken-1 font-weight-light mt-2 ml-1" v-if="!props.compact && arrivingPilots.length > 0">
+        ARRIVING
+    </div>
     <flight-row
         v-for="p in arrivingPilots"
         :key="p.callsign"
@@ -26,11 +31,11 @@
         :class="newArrivals.includes(p.callsign) ? 'bg-brown-darken-3' : ''"
         @click="emit('click', p.callsign)"
     />
-    <div class="text-caption text-grey-darken-1 font-weight-light mt-2 ml-1" v-if="arrivedPilots.length > 0">ARRIVED</div>
-    <flight-row v-for="p in arrivedPilots" :key="p.callsign" :value="p" arrival @click="emit('click', p.callsign)" />
+    <div class="text-caption text-grey-darken-1 font-weight-light mt-2 ml-1" v-if="!props.compact && arrivedPilots.length > 0">ARRIVED</div>
+    <flight-row v-if="!props.compact" v-for="p in arrivedPilots" :key="p.callsign" :value="p" arrival @click="emit('click', p.callsign)" />
     <div
-        v-if="arrivalPrefiles.length == 0 && arrivingPilots.length == 0 && arrivedPilots.length == 0"
-        class="mt-2 text-caption text-grey-darken-1 font-weight-light text-center"
+        v-if="(arrivalPrefiles.length == 0 || props.compact) && arrivingPilots.length == 0 && (arrivedPilots.length == 0 || props.compact)"
+        class="mt-2 text-caption text-grey-darken-1 font-weight-light pa-1" :class="!props.compact ? 'text-center' : ''"
     >
         NO ARRIVALS WITHIN {{ minutes2hhmm(settings.arrivingMaxMinutes) }}
     </div>
@@ -53,6 +58,9 @@ import { useDisplay } from "vuetify"
 import { minutes2hhmm } from "@/common"
 
 const props = defineProps({
+    compact: {
+        type: Boolean,
+    },
     icao: {
         type: String,
         required: true,
@@ -84,8 +92,8 @@ const arrivingPilots = computed(() => {
             )
         })
         .sort((a, b) => {
-            const etaA = eta(a) || flightplanArrivalTime(a.flight_plan)
-            const etaB = eta(b) || flightplanArrivalTime(b.flight_plan)
+            const etaA = eta(a) || flightplanArrivalTime(a.flight_plan, true)
+            const etaB = eta(b) || flightplanArrivalTime(b.flight_plan, true)
             if (etaA && etaB) return etaA.diff(etaB)
             else if (etaA) return -1
             else if (etaB) return 1

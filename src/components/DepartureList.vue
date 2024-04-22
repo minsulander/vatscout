@@ -1,5 +1,5 @@
 <template>
-    <v-row no-gutters class="text-grey-lighten-1 pa-1" style="background: #313338">
+    <v-row v-if="!props.compact" no-gutters class="text-grey-lighten-1 pa-1" style="background: #313338">
         <v-col sm="7"><v-icon class="mr-1">mdi-airplane-takeoff</v-icon>Departures</v-col>
         <v-col sm="5" class="text-right">
             <span v-if="departurePrefiles.length > 0" class="text-grey ml-3">{{ departurePrefiles.length }}</span>
@@ -9,7 +9,9 @@
             <span v-if="departedPilots.length > 0" class="text-cyan-darken-3 ml-3">{{ departedPilots.length }}</span>
         </v-col>
     </v-row>
-    <div class="text-caption text-grey-darken-1 font-weight-light mt-2 ml-1" v-if="departurePrefiles.length > 0">PREFILED</div>
+    <div class="text-caption text-grey-darken-1 font-weight-light mt-2 ml-1" v-if="!props.compact && departurePrefiles.length > 0">
+        PREFILED
+    </div>
     <flight-row
         v-for="p in departurePrefiles"
         :key="p.callsign"
@@ -19,7 +21,9 @@
         :class="newDepartures.includes(p.callsign) ? 'bg-blue-grey-darken-4' : ''"
         @click="emit('click', p.callsign)"
     />
-    <div class="text-caption text-grey-darken-1 font-weight-light mt-2 ml-1" v-if="nofpPilots.length > 0">NO FLIGHTPLAN</div>
+    <div class="text-caption text-grey-darken-1 font-weight-light mt-2 ml-1" v-if="!props.compact && nofpPilots.length > 0">
+        NO FLIGHTPLAN
+    </div>
     <flight-row
         v-for="p in nofpPilots"
         :key="p.callsign"
@@ -29,7 +33,9 @@
         :class="newDepartures.includes(p.callsign) ? 'bg-blue-grey-darken-4' : ''"
         @click="emit('click', p.callsign)"
     />
-    <div class="text-caption text-grey-darken-1 font-weight-light mt-2 ml-1" v-if="invalidfpPilots.length > 0">INVALID FLIGHTPLAN</div>
+    <div class="text-caption text-grey-darken-1 font-weight-light mt-2 ml-1" v-if="!props.compact && invalidfpPilots.length > 0">
+        INVALID FLIGHTPLAN
+    </div>
     <flight-row
         v-for="p in invalidfpPilots"
         :key="p.callsign"
@@ -39,7 +45,9 @@
         :class="newDepartures.includes(p.callsign) ? 'bg-blue-grey-darken-4' : ''"
         @click="emit('click', p.callsign)"
     />
-    <div class="text-caption text-grey-darken-1 font-weight-light mt-2 ml-1" v-if="departingPilots.length > 0">DEPARTING</div>
+    <div class="text-caption text-grey-darken-1 font-weight-light mt-2 ml-1" v-if="!props.compact && departingPilots.length > 0">
+        DEPARTING
+    </div>
     <flight-row
         v-for="p in departingPilots"
         :key="p.callsign"
@@ -48,17 +56,27 @@
         :class="newDepartures.includes(p.callsign) ? 'bg-blue-grey-darken-4' : ''"
         @click="emit('click', p.callsign)"
     />
-    <div class="text-caption text-grey-darken-1 font-weight-light mt-2 ml-1" v-if="departedPilots.length > 0">DEPARTED</div>
-    <flight-row v-for="p in departedPilots" :key="p.callsign" :value="p" departure @click="emit('click', p.callsign)" />
+    <div class="text-caption text-grey-darken-1 font-weight-light mt-2 ml-1" v-if="!props.compact && departedPilots.length > 0">
+        DEPARTED
+    </div>
+    <flight-row
+        v-if="!props.compact"
+        v-for="p in departedPilots"
+        :key="p.callsign"
+        :value="p"
+        departure
+        @click="emit('click', p.callsign)"
+    />
     <div
         v-if="
             departurePrefiles.length == 0 &&
             nofpPilots.length == 0 &&
             invalidfpPilots.length == 0 &&
             departingPilots.length == 0 &&
-            departedPilots.length == 0
+            (departedPilots.length == 0 || props.compact)
         "
-        class="mt-2 text-caption text-grey-darken-1 font-weight-light text-center"
+        class="mt-2 text-caption text-grey-darken-1 font-weight-light pa-1"
+        :class="!props.compact ? 'text-center' : ''"
     >
         NO DEPARTURES
     </div>
@@ -73,6 +91,9 @@ import { useSettingsStore } from "@/store/settings"
 import moment from "moment"
 
 const props = defineProps({
+    compact: {
+        type: Boolean,
+    },
     icao: {
         type: String,
         required: true,

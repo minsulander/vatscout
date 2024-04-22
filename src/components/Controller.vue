@@ -1,5 +1,21 @@
 <template>
-    <v-col cols="12" sm="6" md="4" lg="3" xl="2">
+    <span v-if="props.compact">
+        <v-tooltip :text="`${controller.callsign} ${controller.frequency} ${controller.name}`" location="bottom">
+            <template v-slot:activator="{ props }">
+                <v-chip
+                    variant="flat"
+                    elevated
+                    label
+                    size="small"
+                    class="font-weight-bold"
+                    v-bind="props"
+                    :color="colorForController(controller)"
+                    >{{ labelForController(controller) }}
+                </v-chip>
+            </template>
+        </v-tooltip>
+    </span>
+    <v-col v-else cols="12" sm="6" md="4" lg="3" xl="2">
         <v-chip variant="flat" elevated label size="small" class="font-weight-bold mb-1" :color="colorForController(value)"
             ><span v-if="prefix">{{ value.callsign.replace(`${prefix}__`, "").replace(`${prefix}_`, "") }}</span
             ><span v-else>{{ value.callsign }}</span>
@@ -11,11 +27,13 @@
 </template>
 
 <script setup lang="ts">
-import { colorForController } from "@/common"
+import { colorForController, labelForController } from "@/common"
 import { useVatsimStore, Controller } from "@/store/vatsim"
 import moment from "moment"
+import { computed } from "vue"
 
-defineProps<{ value: Controller; prefix?: string }>()
+const props = defineProps<{ value: Controller; prefix?: string; compact?: boolean }>()
+const controller = computed(() => props.value)
 const vatsim = useVatsimStore()
 
 function rating(controller: Controller) {

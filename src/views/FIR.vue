@@ -1,5 +1,5 @@
 <template>
-    <v-container>
+    <div class="pa-2">
         <v-row>
             <v-col cols="4">
                 <div class="text-h4">{{ id }}</div>
@@ -35,7 +35,7 @@
             </div>
         </div>
         <div v-if="!fir && vatsim.spy.firs" class="text-h5 font-weight-light text-grey mt-5">No FIR known by that ID.</div>
-    </v-container>
+    </div>
 </template>
 
 <script lang="ts" setup>
