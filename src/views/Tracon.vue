@@ -122,15 +122,15 @@ const activeAirports = computed(
         airports.value
             .filter((a) => {
                 if (!(a.icao in vatsim.movements)) vatsim.movements[a.icao] = vatsim.countMovements(a.icao)
-                if (vatsim.movements[a.icao].pending > 0) return true
+                if (vatsim.movements[a.icao].active > 0) return true
                 if (vatsim.data.controllers && vatsim.data.controllers.find((c) => isMatchingAirportCallsign(c.callsign, a.icao)))
                     return true
             })
             .sort((a, b) => {
                 if (!(a.icao in vatsim.movements)) vatsim.movements[a.icao] = vatsim.countMovements(a.icao)
                 if (!(b.icao in vatsim.movements)) vatsim.movements[b.icao] = vatsim.countMovements(b.icao)
-                const acount = vatsim.movements[a.icao].pending
-                const bcount = vatsim.movements[b.icao].pending
+                const acount = vatsim.movements[a.icao].active
+                const bcount = vatsim.movements[b.icao].active
                 return acount >= bcount ? -1 : 1
             })
 )

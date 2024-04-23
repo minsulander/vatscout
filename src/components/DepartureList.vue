@@ -60,7 +60,6 @@
         DEPARTED
     </div>
     <flight-row
-        v-if="!props.compact"
         v-for="p in departedPilots"
         :key="p.callsign"
         :value="p"
@@ -73,7 +72,7 @@
             nofpPilots.length == 0 &&
             invalidfpPilots.length == 0 &&
             departingPilots.length == 0 &&
-            (departedPilots.length == 0 || props.compact)
+            departedPilots.length == 0
         "
         class="text-caption text-grey-darken-1 font-weight-light pa-1"
         :class="!props.compact ? 'text-center' : ''"

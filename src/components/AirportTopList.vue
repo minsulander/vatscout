@@ -26,13 +26,13 @@
                     vatsim.movements[airport.icao].departed
                 }}</span>
                 -->
-                <span v-if="vatsim.movements[airport.icao].pendingDepartures" class="text-cyan-lighten-2">{{
-                    vatsim.movements[airport.icao].pendingDepartures
+                <span v-if="vatsim.movements[airport.icao].activeDepartures" class="text-cyan-lighten-2">{{
+                    vatsim.movements[airport.icao].activeDepartures
                 }}</span>
             </v-col>
             <v-col cols="3" sm="1" class="text-center">
-                <span v-if="vatsim.movements[airport.icao].pendingArrivals" class="text-yellow-lighten-2">{{
-                    vatsim.movements[airport.icao].pendingArrivals
+                <span v-if="vatsim.movements[airport.icao].activeArrivals" class="text-yellow-lighten-2">{{
+                    vatsim.movements[airport.icao].activeArrivals
                 }}</span>
                 <!--
                 <span v-if="vatsim.movements[airport.icao].prefiledArrivals" class="text-grey mr-3">{{
@@ -101,14 +101,14 @@ const activeAirports = computed(() => {
         .filter((a) => {
             if (a.pseudo || !firs.value.includes(a.fir)) return false
             if (!(a.icao in vatsim.movements)) vatsim.movements[a.icao] = vatsim.countMovements(a.icao)
-            if (vatsim.movements[a.icao].pending > 0) return true
+            if (vatsim.movements[a.icao].active > 0) return true
             if (vatsim.data.controllers && vatsim.data.controllers.find(c => isMatchingCallsign(c.callsign, a))) return true
         })
         .sort((a, b) => {
             if (!(a.icao in vatsim.movements)) vatsim.movements[a.icao] = vatsim.countMovements(a.icao)
             if (!(b.icao in vatsim.movements)) vatsim.movements[b.icao] = vatsim.countMovements(b.icao)
-            const acount = vatsim.movements[a.icao].pending
-            const bcount = vatsim.movements[b.icao].pending
+            const acount = vatsim.movements[a.icao].active
+            const bcount = vatsim.movements[b.icao].active
             return acount >= bcount ? -1 : 1
         })
 })
