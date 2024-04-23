@@ -1,6 +1,6 @@
 <template>
-    <div class="pa-2">
-        <v-row>
+    <div class="pa-2" style="max-width: 99%; margin-left: auto; margin-right: auto">
+        <v-row no-gutters>
             <v-col cols="4">
                 <div class="text-h4">{{ id }}_APP</div>
             </v-col>
@@ -16,20 +16,27 @@
                 </div>
             </v-col>
         </v-row>
-        <div class="d-sm-none text-grey-lighten-1 text-h6 font-weight-light mb-3" v-if="tracon">
-            <span class="pa-1">{{ tracon.name }}</span>
+        <div class="d-sm-none text-grey-lighten-1 text-h6 font-weight-light" v-if="tracon">
+            {{ tracon.name }}
         </div>
-        <v-row>
+        <v-row no-gutters>
             <Controller v-for="controller in controllers" :key="controller.cid" :value="controller" :prefix="id" />
         </v-row>
-        <div v-for="airport in activeAirports" :key="airport.icao" class="mt-3">
-            <v-row no-gutters @click="router.push(`/airport/${airport.icao}`)" style="cursor: pointer">
-                <v-col cols="6" sm="1">
-                    <div class="text-h6">{{ airport.icao }}</div>
+        <div v-for="airport in activeAirports" :key="airport.icao" class="mt-5">
+            <v-row no-gutters @click="clickAirport(airport.icao)" style="cursor: pointer; background: #313338">
+                <v-col cols="3" sm="1">
+                    <div class="text-h6 pl-1">{{ airport.icao }}</div>
                 </v-col>
-                <v-col sm="11" class="text-h6 font-weight-light text-grey-lighten-1">
-                    <div class="float-right">
-                        <Atis compact v-for="atis in atises(airport.icao)" :key="atis.callsign" :value="atis" class="ml-1" />
+                <v-col cols="9" sm="11">
+                    <div class="float-right pa-1">
+                        <Atis
+                            compact
+                            v-for="atis in atises(airport.icao)"
+                            :key="atis.callsign"
+                            :value="atis"
+                            class="ml-1"
+                            @click="clickAtis"
+                        />
                         <Controller
                             compact
                             v-for="controller in localControllers(airport.icao)"
@@ -38,10 +45,12 @@
                             class="ml-1"
                         />
                     </div>
-                    {{ airport.name }}
+                    <div class="pt-1 font-weight-light text-grey-lighten-1 text-truncate" style="direction: rtl">
+                        {{ airport.name }}
+                    </div>
                 </v-col>
             </v-row>
-            <v-row no-gutters>
+            <v-row no-gutters class="mt-2">
                 <v-col cols="12" sm="6">
                     <departure-list compact :icao="airport.icao" @click="clickFlight" />
                 </v-col>
@@ -51,7 +60,10 @@
             </v-row>
         </div>
         <div class="text-grey-darken-1 text-body-2 mt-5" v-if="inactiveAirportIds && inactiveAirportIds.length > 0">
-                <span v-for="id in inactiveAirportIds"><router-link :to="`/airport/${id}`" class="text-grey-darken-1">{{ id }}</router-link>&nbsp; </span>
+            <span v-for="id in inactiveAirportIds"
+                ><router-link :to="`/airport/${id}`" class="text-grey-darken-1">{{ id }}</router-link
+                >&nbsp;
+            </span>
         </div>
         <v-dialog v-model="showFlightDialog" width="90%">
             <v-card color="#1e1f22">
@@ -164,6 +176,10 @@ function isMatchingAirportCallsign(callsign: string, icao: string) {
         !callsign.endsWith("_DEP") &&
         (callsign.startsWith(`${icao}_`) || (icao.startsWith("K") && callsign.startsWith(`${icao.substring(1)}_`)))
     )
+}
+
+function clickAirport(icao: string) {
+    if (!showAtisDialog.value && !showFlightDialog.value) router.push(`/airport/${icao}`)
 }
 
 function clickFlight(callsign: string) {

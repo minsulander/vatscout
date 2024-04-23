@@ -1,6 +1,6 @@
 <template>
-    <div class="pa-2">
-        <v-row>
+    <div class="pa-2" style="max-width: 99%; margin-left: auto; margin-right: auto">
+        <v-row no-gutters>
             <v-col cols="4">
                 <div class="text-h4">{{ id }}</div>
             </v-col>
@@ -17,7 +17,7 @@
             <div class="d-sm-none text-grey-lighten-1 text-h6 font-weight-light">
                 {{ fir.name }}<span v-if="fir.callsignPrefix"> | {{ fir.callsignPrefix }}</span>
             </div>
-            <v-row class="mt-2">
+            <v-row>
                 <Controller v-for="controller in controllers" :value="controller" :prefix="id" :key="controller.cid"/>
             </v-row>
             <div class="text-grey-lighten-1 pa-1 mt-5 mb-2" style="background: #313338">

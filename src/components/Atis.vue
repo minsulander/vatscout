@@ -10,6 +10,7 @@
                     color="orange-darken-3"
                     class="text-white font-weight-bold"
                     v-bind="props"
+                    @click="emit('click', atis)"
                 >
                     <span v-if="extractAtisCode(atis)">{{ extractAtisCode(atis) }}</span>
                     <span v-else class="text-black">{{ atis.atis_code || "/" }}</span>
@@ -24,6 +25,7 @@
         md="4"
         lg="3"
         xl="2"
+        class="mt-3"
         style="cursor: pointer; max-height: 65px; overflow: hidden"
         @click="emit('click', atis)"
     >

@@ -1,5 +1,5 @@
 <template>
-    <div class="pa-2">
+    <div class="pa-2" style="max-width: 99%; margin-left: auto; margin-right: auto">
         <div class="text-h4">{{ id }}</div>
         <div v-if="uir">
             {{ uir.name }} |

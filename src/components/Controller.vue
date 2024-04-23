@@ -15,7 +15,7 @@
             </template>
         </v-tooltip>
     </span>
-    <v-col v-else cols="12" sm="6" md="4" lg="3" xl="2">
+    <v-col v-else cols="12" sm="6" md="4" lg="3" xl="2" class="mt-3">
         <v-chip variant="flat" elevated label size="small" class="font-weight-bold mb-1" :color="colorForController(value)"
             ><span v-if="prefix">{{ value.callsign.replace(`${prefix}__`, "").replace(`${prefix}_`, "") }}</span
             ><span v-else>{{ value.callsign }}</span>

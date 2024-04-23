@@ -1,6 +1,6 @@
 <template>
-    <div class="pa-2">
-        <v-row>
+    <div class="pa-2" style="max-width: 99%; margin-left: auto; margin-right: auto">
+        <v-row no-gutters>
             <v-col cols="4">
                 <div class="text-h4">{{ id }}</div>
             </v-col>
@@ -22,13 +22,11 @@
                 </div>
             </v-col>
         </v-row>
-        <div class="d-sm-none text-grey-lighten-1 text-h6 font-weight-light mb-3" v-if="airport">
-            <span v-if="airport.iata"
-                ><span class="pa-1">{{ airport.iata }}</span> |
-            </span>
-            <span class="pa-1">{{ airport.name }}</span>
+        <div class="d-sm-none text-grey-lighten-1 text-h6 font-weight-light" v-if="airport">
+            <span v-if="airport.iata">{{ airport.iata }} | </span>
+            <span>{{ airport.name }}</span>
         </div>
-        <v-row>
+        <v-row no-gutters>
             <Atis v-for="atis in atises" :key="atis.callsign" :value="atis" :prefix="id" @click="clickAtis(atis)" />
             <Controller v-for="controller in controllers" :key="controller.cid" :value="controller" :prefix="id" />
         </v-row>
@@ -73,12 +71,12 @@
 
 <script lang="ts" setup>
 import { arrivalDistance, departureDistance, distanceToAirport, eta, flightplanArrivalTime, flightplanDepartureTime } from "@/calc"
-import { compareCallsigns, compareControllers, extractAtisCode } from "@/common"
-import Booking from "@/components/Booking.vue"
+import { compareCallsigns, compareControllers } from "@/common"
+import ArrivalList from "@/components/ArrivalList.vue"
 import Atis from "@/components/Atis.vue"
+import Booking from "@/components/Booking.vue"
 import Controller from "@/components/Controller.vue"
 import DepartureList from "@/components/DepartureList.vue"
-import ArrivalList from "@/components/ArrivalList.vue"
 import FlightDetails from "@/components/FlightDetails.vue"
 import constants from "@/constants"
 import { useSettingsStore } from "@/store/settings"
@@ -87,7 +85,6 @@ import moment from "moment"
 import { computed, ref, watch } from "vue"
 import { useRoute, useRouter } from "vue-router"
 import { useDisplay } from "vuetify"
-import { minutes2hhmm } from "@/common"
 
 const route = useRoute()
 const router = useRouter()

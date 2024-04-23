@@ -1,17 +1,17 @@
 <template>
-    <div class="pa-2">
+    <div class="pa-2" style="max-width: 99%; margin-left: auto; margin-right: auto">
         <v-row>
             <v-col cols="4">
                 <div class="text-h4">{{ id }}</div>
             </v-col>
             <v-col cols="8" class="text-right text-grey-lighten-1 text-h6 font-weight-light">
-                <div v-if="country" class="mt-3">
+                <div v-if="country" class="mt-2">
                     {{ country.name }}
                     {{ country.facility }}
                 </div>
             </v-col>
         </v-row>
-        <v-row class="mt-2">
+        <v-row>
             <Controller v-for="controller in controllers" :key="controller.cid" :value="controller" />
         </v-row>
         <div v-if="country && firs" class="text-grey-lighten-1 pa-1 mt-5 mb-2" style="background: #313338">
@@ -30,7 +30,14 @@
         <div v-if="firs && firs.length > 0" class="mt-5">
             <div class="text-grey-lighten-1 pa-1 mb-2" style="background: #313338">FIRs</div>
             <v-row no-gutters>
-                <v-col cols="12" sm="4" v-for="fir in firs" :key="fir.icao" @click="router.push(`/fir/${fir.icao}`)" class="fir pa-1 text-truncate">
+                <v-col
+                    cols="12"
+                    sm="4"
+                    v-for="fir in firs"
+                    :key="fir.icao"
+                    @click="router.push(`/fir/${fir.icao}`)"
+                    class="fir pa-1 text-truncate"
+                >
                     {{ fir.icao }} <span class="text-grey-lighten-1 text-body-2">{{ fir.name }}</span>
                 </v-col>
             </v-row>
