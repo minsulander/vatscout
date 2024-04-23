@@ -75,7 +75,7 @@
             departingPilots.length == 0 &&
             (departedPilots.length == 0 || props.compact)
         "
-        class="mt-2 text-caption text-grey-darken-1 font-weight-light pa-1"
+        class="text-caption text-grey-darken-1 font-weight-light pa-1"
         :class="!props.compact ? 'text-center' : ''"
     >
         NO DEPARTURES

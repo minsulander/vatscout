@@ -198,7 +198,7 @@ export class AirportMovements {
     }
 
     get pendingArrivals() {
-        return this.arriving + this.prefiledArrivals
+        return this.arriving
     }
 
     get pending() {
@@ -262,6 +262,7 @@ export const useVatsimStore = defineStore("vatsim", () => {
         )) {
             if (
                 distanceToAirport(p, airportByIcao.value[airport_icao]) < constants.atAirportDistance &&
+                distanceToAirport(p, airportByIcao.value[p.flight_plan.departure]) >= constants.atAirportDistance &&
                 p.groundspeed < constants.motionGroundspeed
             )
                 moves.invalidfp++

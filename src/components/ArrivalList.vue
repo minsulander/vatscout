@@ -35,7 +35,7 @@
     <flight-row v-if="!props.compact" v-for="p in arrivedPilots" :key="p.callsign" :value="p" arrival @click="emit('click', p.callsign)" />
     <div
         v-if="(arrivalPrefiles.length == 0 || props.compact) && arrivingPilots.length == 0 && (arrivedPilots.length == 0 || props.compact)"
-        class="mt-2 text-caption text-grey-darken-1 font-weight-light pa-1" :class="!props.compact ? 'text-center' : ''"
+        class="text-caption text-grey-darken-1 font-weight-light pa-1" :class="!props.compact ? 'text-center' : ''"
     >
         NO ARRIVALS WITHIN {{ minutes2hhmm(settings.arrivingMaxMinutes) }}
     </div>
