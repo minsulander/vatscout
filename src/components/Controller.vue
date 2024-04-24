@@ -7,7 +7,8 @@
                     elevated
                     label
                     size="small"
-                    class="font-weight-bold"
+                    class="font-weight-bold mb-1"
+                    style="width: 45px"
                     v-bind="props"
                     :color="colorForController(controller)"
                     >{{ labelForController(controller) }}

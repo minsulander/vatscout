@@ -1,5 +1,5 @@
 <template>
-    <div class="pa-2" style="max-width: 99%; margin-left: auto; margin-right: auto">
+    <v-container fluid>
         <v-row>
             <v-col cols="4">
                 <div class="text-h4">{{ id }}</div>
@@ -43,7 +43,7 @@
             </v-row>
         </div>
         <div v-if="!country && vatsim.spy.countries" class="text-h5 font-weight-light text-grey mt-5">No country known by that ID.</div>
-    </div>
+    </v-container>
 </template>
 
 <style>

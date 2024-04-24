@@ -1,11 +1,11 @@
 <template>
-    <div class="pa-2" style="max-width: 99%; margin-left: auto; margin-right: auto">
+    <v-container fluid>
         <v-row no-gutters>
             <v-col cols="4">
                 <div class="text-h4">{{ id }}</div>
             </v-col>
             <v-col cols="8" class="text-right text-grey-lighten-1 text-h6 font-weight-light">
-                <div v-if="fir" class="mt-3">
+                <div v-if="fir" class="mt-2">
                     <span class="d-none d-sm-inline"
                         >{{ fir.name }}<span v-if="fir.callsignPrefix"> | {{ fir.callsignPrefix }}</span> |</span
                     >
@@ -17,7 +17,7 @@
             <div class="d-sm-none text-grey-lighten-1 text-h6 font-weight-light">
                 {{ fir.name }}<span v-if="fir.callsignPrefix"> | {{ fir.callsignPrefix }}</span>
             </div>
-            <v-row>
+            <v-row class="mt-3">
                 <Controller v-for="controller in controllers" :value="controller" :prefix="id" :key="controller.cid"/>
             </v-row>
             <div class="text-grey-lighten-1 pa-1 mt-5 mb-2" style="background: #313338">
@@ -35,7 +35,7 @@
             </div>
         </div>
         <div v-if="!fir && vatsim.spy.firs" class="text-h5 font-weight-light text-grey mt-5">No FIR known by that ID.</div>
-    </div>
+    </v-container>
 </template>
 
 <script lang="ts" setup>

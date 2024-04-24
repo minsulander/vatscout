@@ -1,11 +1,11 @@
 <template>
-    <div class="pa-2" style="max-width: 99%; margin-left: auto; margin-right: auto">
+    <v-container fluid>
         <v-row no-gutters>
             <v-col cols="4">
                 <div class="text-h4">{{ id }}_APP</div>
             </v-col>
             <v-col cols="8" class="text-right text-grey-lighten-1 text-h6 font-weight-light">
-                <div v-if="tracon" class="mt-3">
+                <div v-if="tracon" class="mt-2">
                     <span class="d-none d-sm-inline">
                         <span class="pa-1">{{ tracon.name }}</span> |
                     </span>
@@ -28,7 +28,7 @@
                     <div class="text-h6 pl-1">{{ airport.icao }}</div>
                 </v-col>
                 <v-col cols="9" sm="11">
-                    <div class="float-right pa-1">
+                    <div class="float-right text-right pa-1">
                         <Atis
                             compact
                             v-for="atis in atises(airport.icao)"
@@ -65,6 +65,10 @@
                 >&nbsp;
             </span>
         </div>
+        <div v-if="bookings.length > 0" class="mt-5 text-grey">
+            <div class="text-grey-lighten-1 pa-1 mb-2" style="background: #313338">Bookings</div>
+            <Booking v-for="booking in bookings" :key="booking.id" :value="booking" :prefix="id" class="mt-1" />
+        </div>
         <v-dialog v-model="showFlightDialog" width="90%">
             <v-card color="#1e1f22">
                 <v-card-text class="pa-3">
@@ -79,7 +83,9 @@
                 </v-card-text>
             </v-card>
         </v-dialog>
-    </div>
+        <flight-notification :icaos="icaos" />
+        <atc-notification :id="id" :callsigns="atcCallsigns" />
+    </v-container>
 </template>
 
 <script setup lang="ts">
@@ -88,16 +94,22 @@ import Atis from "@/components/Atis.vue"
 import Controller from "@/components/Controller.vue"
 import DepartureList from "@/components/DepartureList.vue"
 import FlightDetails from "@/components/FlightDetails.vue"
+import FlightNotification from "@/components/FlightNotification.vue"
+import AtcNotification from "@/components/AtcNotification.vue"
+import Booking from "@/components/Booking.vue"
+import moment from "moment"
 
-import { compareControllers } from "@/common"
+import { compareCallsigns, compareControllers } from "@/common"
 import { useVatsimStore } from "@/store/vatsim"
-import { computed, ref } from "vue"
+import { computed, ref, watch } from "vue"
 import { useRoute, useRouter } from "vue-router"
+import { useSettingsStore } from "@/store/settings"
 import { useDisplay } from "vuetify/lib/framework.mjs"
 
 const vatsim = useVatsimStore()
 const route = useRoute()
 const router = useRouter()
+const settings = useSettingsStore()
 const display = useDisplay()
 
 const id = computed(() => (route.params.id as string)?.toUpperCase())
@@ -115,6 +127,7 @@ const airports = computed(
         vatsim.spy.airports &&
         vatsim.spy.airports.filter((a) => !a.pseudo && boundary.value?.getGeometry()?.intersectsCoordinate([a.longitude, a.latitude]))
 )
+const icaos = computed(() => airports.value ? airports.value.map((a) => a.icao) : [])
 
 const activeAirports = computed(
     () =>
@@ -151,6 +164,21 @@ const controllers = computed(() => {
     return vatsim.data.controllers.filter((c) => c.facility > 0 && isMatchingCallsign(c.callsign)).sort(compareControllers)
 })
 
+const bookings = computed(() => {
+    if (!vatsim.bookings) return []
+    return vatsim.bookings
+        .filter(
+            (b) =>
+                //!controllers.value.find(c => c.callsign == b.callsign) &&
+                moment(b.start) &&
+                moment(b.end) &&
+                moment(b.start).utc().isBefore(moment().add(settings.bookingsMaxHours, "hour")) &&
+                moment(b.end).utc().isAfter(moment()) &&
+                (isMatchingCallsign(b.callsign) || isMatchingAnyAirportCallsign(b.callsign))
+        )
+        .sort((a, b) => moment(a.start).diff(moment(b.start)) || compareCallsigns(a.callsign, b.callsign))
+})
+
 function isMatchingCallsign(callsign: string) {
     return (
         callsign &&
@@ -178,6 +206,20 @@ function isMatchingAirportCallsign(callsign: string, icao: string) {
     )
 }
 
+function isMatchingAnyAirportCallsign(callsign: string) {
+    return airports.value && airports.value.find((a) => isMatchingAirportCallsign(callsign, a.icao))
+}
+
+const atcCallsigns = computed(() => {
+    const callsigns: string[] = []
+    for (const controller of controllers.value) callsigns.push(controller.callsign)
+    for (const icao of icaos.value) {
+        for (const atis of atises(icao)) callsigns.push(atis.callsign)
+        for (const controller of localControllers(icao)) callsigns.push(controller.callsign)
+    }
+    return callsigns
+})
+
 function clickAirport(icao: string) {
     if (!showAtisDialog.value && !showFlightDialog.value) router.push(`/airport/${icao}`)
 }
@@ -195,4 +237,8 @@ function clickAtis(atisClicked: any) {
     atis.value = atisClicked
     showAtisDialog.value = true
 }
+
+watch(id, () => {
+    showFlightDialog.value = false
+})
 </script>

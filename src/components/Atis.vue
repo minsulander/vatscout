@@ -8,7 +8,7 @@
                     label
                     size="small"
                     color="orange-darken-3"
-                    class="text-white font-weight-bold"
+                    class="text-white font-weight-bold mb-1"
                     v-bind="props"
                     @click="emit('click', atis)"
                 >

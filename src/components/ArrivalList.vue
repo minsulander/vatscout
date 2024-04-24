@@ -32,30 +32,23 @@
         @click="emit('click', p.callsign)"
     />
     <div class="text-caption text-grey-darken-1 font-weight-light mt-2 ml-1" v-if="!props.compact && arrivedPilots.length > 0">ARRIVED</div>
-    <flight-row v-if="!props.compact" v-for="p in arrivedPilots" :key="p.callsign" :value="p" arrival @click="emit('click', p.callsign)" />
+    <flight-row v-for="p in arrivedPilots" :key="p.callsign" :value="p" arrival @click="emit('click', p.callsign)" />
     <div
         v-if="(arrivalPrefiles.length == 0 || props.compact) && arrivingPilots.length == 0 && (arrivedPilots.length == 0 || props.compact)"
-        class="text-caption text-grey-darken-1 font-weight-light pa-1" :class="!props.compact ? 'text-center' : ''"
+        class="text-center text-caption text-grey-darken-1 font-weight-light pa-1"
     >
         NO ARRIVALS WITHIN {{ minutes2hhmm(settings.arrivingMaxMinutes) }}
     </div>
 </template>
 <script setup lang="ts">
-import { arrivalDistance, departureDistance, distanceToAirport, eta, flightplanArrivalTime, flightplanDepartureTime } from "@/calc"
-import { compareCallsigns, compareControllers, extractAtisCode } from "@/common"
-import Booking from "@/components/Booking.vue"
-import Controller from "@/components/Controller.vue"
-import DepartureList from "@/components/DepartureList.vue"
-import FlightDetails from "@/components/FlightDetails.vue"
+import { arrivalDistance, departureDistance, eta, flightplanArrivalTime, flightplanDepartureTime } from "@/calc"
+import { minutes2hhmm } from "@/common"
 import FlightRow from "@/components/FlightRow.vue"
 import constants from "@/constants"
 import { useSettingsStore } from "@/store/settings"
-import { Atis, useVatsimStore } from "@/store/vatsim"
+import { useVatsimStore } from "@/store/vatsim"
 import moment from "moment"
 import { computed, ref, watch } from "vue"
-import { useRoute, useRouter } from "vue-router"
-import { useDisplay } from "vuetify"
-import { minutes2hhmm } from "@/common"
 
 const props = defineProps({
     compact: {
@@ -64,10 +57,6 @@ const props = defineProps({
     icao: {
         type: String,
         required: true,
-    },
-    newArrivals: {
-        type: Array,
-        default: () => [],
     },
 })
 
@@ -130,5 +119,21 @@ const arrivalPrefiles = computed(() => {
             if (arrivalTimeA && arrivalTimeB) return arrivalTimeA.diff(arrivalTimeB)
             return moment(a.last_updated).diff(b.last_updated)
         })
+})
+
+const arrivalCallsigns = () => arrivingPilots.value.map((p) => p.callsign)
+let lastArrivals = vatsim.data.pilots ? arrivalCallsigns() : undefined
+const newArrivals = ref([] as string[])
+watch(arrivingPilots, () => {
+    let popups = []
+    const allArrivals = arrivalCallsigns()
+    if (typeof lastArrivals != "undefined") {
+        for (const callsign of allArrivals) {
+            if (!lastArrivals.includes(callsign)) popups.push(callsign)
+        }
+    }
+    lastArrivals = allArrivals
+    newArrivals.value = popups
+    if (popups.length > 0) setTimeout(() => (newArrivals.value = []), 10000)
 })
 </script>

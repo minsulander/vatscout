@@ -59,13 +59,7 @@
     <div class="text-caption text-grey-darken-1 font-weight-light mt-2 ml-1" v-if="!props.compact && departedPilots.length > 0">
         DEPARTED
     </div>
-    <flight-row
-        v-for="p in departedPilots"
-        :key="p.callsign"
-        :value="p"
-        departure
-        @click="emit('click', p.callsign)"
-    />
+    <flight-row v-for="p in departedPilots" :key="p.callsign" :value="p" departure @click="emit('click', p.callsign)" />
     <div
         v-if="
             departurePrefiles.length == 0 &&
@@ -74,8 +68,7 @@
             departingPilots.length == 0 &&
             departedPilots.length == 0
         "
-        class="text-caption text-grey-darken-1 font-weight-light pa-1"
-        :class="!props.compact ? 'text-center' : ''"
+        class="text-center text-caption text-grey-darken-1 font-weight-light pa-1"
     >
         NO DEPARTURES
     </div>
@@ -96,10 +89,6 @@ const props = defineProps({
     icao: {
         type: String,
         required: true,
-    },
-    newDepartures: {
-        type: Array,
-        default: () => [],
     },
 })
 
@@ -172,5 +161,23 @@ const departurePrefiles = computed(() => {
                         flightplanDepartureTime(p.flight_plan)?.isBefore(moment().add(settings.prefileDepartureMaxMinutes, "minute"))))
         )
         .sort((a, b) => flightplanArrivalTime(a.flight_plan)?.diff(flightplanArrivalTime(b.flight_plan)) || 0)
+})
+
+const departures = computed(() => [...departurePrefiles.value, ...nofpPilots.value, ...invalidfpPilots.value, ...departingPilots.value])
+const departureCallsigns = () => departures.value.map((p) => p.callsign)
+let lastDepartures = vatsim.data.pilots ? departureCallsigns() : undefined
+const newDepartures = ref([] as string[])
+
+watch(departures, () => {
+    let popups = []
+    const allDepartures = departureCallsigns()
+    if (typeof lastDepartures != "undefined") {
+        for (const callsign of allDepartures) {
+            if (!lastDepartures.includes(callsign)) popups.push(callsign)
+        }
+    }
+    lastDepartures = allDepartures
+    newDepartures.value = popups
+    if (popups.length > 0) setTimeout(() => (newDepartures.value = []), 10000)
 })
 </script>

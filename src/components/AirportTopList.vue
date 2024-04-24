@@ -48,8 +48,8 @@
             </v-col>
             <v-col sm="6" class="d-sm-none text-body-2 text-grey mt-1">{{ airport.name }} </v-col>
             <v-col cols="6" sm="4" class="text-right">
-                <Atis compact v-for="atis in atises(airport)" :key="atis.callsign" :value="atis" class="ml-1" />
-                <Controller compact v-for="controller in controllers(airport)" :key="controller.callsign" :value="controller" class="ml-1" />
+                <Atis compact v-for="atis in atises(airport)" :key="atis.callsign" :value="atis" class="ml-1 mt-1" />
+                <Controller compact v-for="controller in controllers(airport)" :key="controller.callsign" :value="controller" class="ml-1 mt-1" />
             </v-col>
         </v-row>
     </div>
