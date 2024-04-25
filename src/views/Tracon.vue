@@ -190,10 +190,12 @@ function isMatchingCallsign(callsign: string) {
 
 const atises = (icao: string) =>
     vatsim.data &&
+    vatsim.data.atis &&
     vatsim.data.atis.filter((c) => c.callsign && c.callsign.startsWith(`${icao}_`)).sort((a, b) => a.callsign.localeCompare(b.callsign))
 
 const localControllers = (icao: string) =>
     vatsim.data &&
+    vatsim.data.controllers &&
     vatsim.data.controllers.filter((c) => isMatchingAirportCallsign(c.callsign, icao)).sort((a, b) => a.callsign.localeCompare(b.callsign))
 
 function isMatchingAirportCallsign(callsign: string, icao: string) {

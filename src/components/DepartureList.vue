@@ -9,57 +9,57 @@
             <span v-if="departedPilots.length > 0" class="text-cyan-darken-3 ml-3">{{ departedPilots.length }}</span>
         </v-col>
     </v-row>
-    <div class="text-caption text-grey-darken-1 font-weight-light mt-2 ml-1" v-if="!props.compact && departurePrefiles.length > 0">
-        PREFILED
+    <div v-if="departurePrefiles.length > 0">
+        <div class="text-caption text-grey-darken-1 font-weight-light mt-2 ml-1" v-if="!props.compact">PREFILED</div>
+        <flight-row
+            v-for="p in departurePrefiles"
+            :key="p.callsign"
+            :value="p"
+            departure
+            prefile
+            :class="newDepartures.includes(p.callsign) ? 'bg-blue-grey-darken-4' : ''"
+            @click="emit('click', p.callsign)"
+        />
     </div>
-    <flight-row
-        v-for="p in departurePrefiles"
-        :key="p.callsign"
-        :value="p"
-        departure
-        prefile
-        :class="newDepartures.includes(p.callsign) ? 'bg-blue-grey-darken-4' : ''"
-        @click="emit('click', p.callsign)"
-    />
-    <div class="text-caption text-grey-darken-1 font-weight-light mt-2 ml-1" v-if="!props.compact && nofpPilots.length > 0">
-        NO FLIGHTPLAN
+    <div v-if="nofpPilots.length > 0">
+        <div class="text-caption text-grey-darken-1 font-weight-light mt-2 ml-1" v-if="!props.compact">NO FLIGHTPLAN</div>
+        <flight-row
+            v-for="p in nofpPilots"
+            :key="p.callsign"
+            :value="p"
+            departure
+            nofp
+            :class="newDepartures.includes(p.callsign) ? 'bg-blue-grey-darken-4' : ''"
+            @click="emit('click', p.callsign)"
+        />
     </div>
-    <flight-row
-        v-for="p in nofpPilots"
-        :key="p.callsign"
-        :value="p"
-        departure
-        nofp
-        :class="newDepartures.includes(p.callsign) ? 'bg-blue-grey-darken-4' : ''"
-        @click="emit('click', p.callsign)"
-    />
-    <div class="text-caption text-grey-darken-1 font-weight-light mt-2 ml-1" v-if="!props.compact && invalidfpPilots.length > 0">
-        INVALID FLIGHTPLAN
+    <div v-if="invalidfpPilots.length > 0">
+        <div class="text-caption text-grey-darken-1 font-weight-light mt-2 ml-1" v-if="!props.compact">INVALID FLIGHTPLAN</div>
+        <flight-row
+            v-for="p in invalidfpPilots"
+            :key="p.callsign"
+            :value="p"
+            departure
+            invalid
+            :class="newDepartures.includes(p.callsign) ? 'bg-blue-grey-darken-4' : ''"
+            @click="emit('click', p.callsign)"
+        />
     </div>
-    <flight-row
-        v-for="p in invalidfpPilots"
-        :key="p.callsign"
-        :value="p"
-        departure
-        invalid
-        :class="newDepartures.includes(p.callsign) ? 'bg-blue-grey-darken-4' : ''"
-        @click="emit('click', p.callsign)"
-    />
-    <div class="text-caption text-grey-darken-1 font-weight-light mt-2 ml-1" v-if="!props.compact && departingPilots.length > 0">
-        DEPARTING
+    <div v-if="departingPilots.length > 0">
+        <div class="text-caption text-grey-darken-1 font-weight-light mt-2 ml-1" v-if="!props.compact">DEPARTING</div>
+        <flight-row
+            v-for="p in departingPilots"
+            :key="p.callsign"
+            :value="p"
+            departure
+            :class="newDepartures.includes(p.callsign) ? 'bg-blue-grey-darken-4' : ''"
+            @click="emit('click', p.callsign)"
+        />
     </div>
-    <flight-row
-        v-for="p in departingPilots"
-        :key="p.callsign"
-        :value="p"
-        departure
-        :class="newDepartures.includes(p.callsign) ? 'bg-blue-grey-darken-4' : ''"
-        @click="emit('click', p.callsign)"
-    />
-    <div class="text-caption text-grey-darken-1 font-weight-light mt-2 ml-1" v-if="!props.compact && departedPilots.length > 0">
-        DEPARTED
+    <div v-if="departedPilots.length > 0">
+        <div class="text-caption text-grey-darken-1 font-weight-light mt-2 ml-1" v-if="!props.compact">DEPARTED</div>
+        <flight-row v-for="p in departedPilots" :key="p.callsign" :value="p" departure @click="emit('click', p.callsign)" />
     </div>
-    <flight-row v-for="p in departedPilots" :key="p.callsign" :value="p" departure @click="emit('click', p.callsign)" />
     <div
         v-if="
             departurePrefiles.length == 0 &&
@@ -78,7 +78,7 @@ import { departureDistance, distanceToAirport, flightplanArrivalTime, flightplan
 import constants from "@/constants"
 import FlightRow from "@/components/FlightRow.vue"
 import { computed, ref, watch } from "vue"
-import { useVatsimStore } from "@/store/vatsim"
+import { Airport, useVatsimStore } from "@/store/vatsim"
 import { useSettingsStore } from "@/store/settings"
 import moment from "moment"
 
@@ -144,8 +144,14 @@ const invalidfpPilots = computed(() => {
                 p.flight_plan.departure != id.value &&
                 p.flight_plan.arrival != id.value &&
                 p.flight_plan.alternate != id.value &&
+                p.groundspeed < constants.motionGroundspeed &&
                 distanceToAirport(p, airport.value) < constants.atAirportDistance &&
-                p.groundspeed < constants.motionGroundspeed
+                distanceToAirport(p, vatsim.spy.airports.find((a) => a.icao == p.flight_plan.departure) as Airport) >=
+                    constants.atAirportDistance &&
+                distanceToAirport(p, vatsim.spy.airports.find((a) => a.icao == p.flight_plan.arrival) as Airport) >=
+                    constants.atAirportDistance &&
+                distanceToAirport(p, vatsim.spy.airports.find((a) => a.icao == p.flight_plan.alternate) as Airport) >=
+                    constants.atAirportDistance
         )
         .sort((a, b) => a.callsign.localeCompare(b.callsign))
 })
@@ -165,19 +171,24 @@ const departurePrefiles = computed(() => {
 
 const departures = computed(() => [...departurePrefiles.value, ...nofpPilots.value, ...invalidfpPilots.value, ...departingPilots.value])
 const departureCallsigns = () => departures.value.map((p) => p.callsign)
-let lastDepartures = vatsim.data.pilots ? departureCallsigns() : undefined
+let lastDepartures = vatsim.data && vatsim.data.pilots && vatsim.data.prefiles ? departureCallsigns() : undefined
 const newDepartures = ref([] as string[])
+let debounceTimeout: any = undefined
 
 watch(departures, () => {
-    let popups = []
-    const allDepartures = departureCallsigns()
-    if (typeof lastDepartures != "undefined") {
-        for (const callsign of allDepartures) {
-            if (!lastDepartures.includes(callsign)) popups.push(callsign)
+    if (debounceTimeout) clearTimeout(debounceTimeout)
+    debounceTimeout = setTimeout(() => {
+        debounceTimeout = undefined
+        let popups = []
+        const allDepartures = departureCallsigns()
+        if (typeof lastDepartures != "undefined") {
+            for (const callsign of allDepartures) {
+                if (!lastDepartures.includes(callsign)) popups.push(callsign)
+            }
         }
-    }
-    lastDepartures = allDepartures
-    newDepartures.value = popups
-    if (popups.length > 0) setTimeout(() => (newDepartures.value = []), 10000)
+        lastDepartures = allDepartures
+        newDepartures.value = popups
+        if (popups.length > 0) setTimeout(() => (newDepartures.value = []), 10000)
+    }, 300)
 })
 </script>

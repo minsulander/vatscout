@@ -261,9 +261,11 @@ export const useVatsimStore = defineStore("vatsim", () => {
                 p.flight_plan.alternate != airport_icao
         )) {
             if (
+                p.groundspeed < constants.motionGroundspeed &&
                 distanceToAirport(p, airportByIcao.value[airport_icao]) < constants.atAirportDistance &&
                 distanceToAirport(p, airportByIcao.value[p.flight_plan.departure]) >= constants.atAirportDistance &&
-                p.groundspeed < constants.motionGroundspeed
+                distanceToAirport(p, airportByIcao.value[p.flight_plan.arrival]) >= constants.atAirportDistance &&
+                distanceToAirport(p, airportByIcao.value[p.flight_plan.alternate]) >= constants.atAirportDistance
             )
                 moves.invalidfp++
         }

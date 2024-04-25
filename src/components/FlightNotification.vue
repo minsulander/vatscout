@@ -15,7 +15,6 @@ import { useSettingsStore } from "@/store/settings"
 import { arrivalDistance, departureDistance, distanceToAirport, eta, flightplanArrivalTime, flightplanDepartureTime } from "@/calc"
 import constants from "@/constants"
 import moment from "moment"
-
 import { Howl } from "howler"
 
 const props = defineProps<{ icaos: string[] }>()
@@ -33,7 +32,7 @@ const snackbarColor = ref("")
 const airports = computed(() => (vatsim.spy ? vatsim.spy.airports.filter((a) => props.icaos.includes(a.icao)) : []))
 
 const departures = computed(() => {
-    if (!vatsim.data || !vatsim.data.pilots) return []
+    if (!vatsim.data || !vatsim.data.pilots || !vatsim.data.prefiles || !vatsim.spy || !vatsim.spy.airports) return []
     return [
         // departing
         ...vatsim.data.pilots.filter(
@@ -89,11 +88,14 @@ const arrivals = computed(() => {
 })
 
 const departureCallsigns = () => departures.value.map((p) => p.callsign)
-let lastDepartures = vatsim.data.pilots ? departureCallsigns() : undefined
+let lastDepartures = vatsim.data && vatsim.data.pilots && vatsim.data.prefiles ? departureCallsigns() : undefined
 const newDepartures = ref([] as string[])
+let departureTimeout: any = undefined
 
 watch(departures, () => {
-    setTimeout(() => {
+    if (departureTimeout) clearTimeout(departureTimeout)
+    departureTimeout = setTimeout(() => {
+        departureTimeout = undefined
         let popups = []
         const allDepartures = departureCallsigns()
         if (typeof lastDepartures != "undefined") {
@@ -119,10 +121,14 @@ watch(departures, () => {
 })
 
 const arrivalCallsigns = () => arrivals.value.map((p) => p.callsign)
-let lastArrivals = vatsim.data.pilots ? arrivalCallsigns() : undefined
+let lastArrivals = vatsim.data && vatsim.data.pilots && vatsim.data.prefiles ? arrivalCallsigns() : undefined
 const newArrivals = ref([] as string[])
+let arrivalTimeout: any = undefined
+
 watch(arrivals, () => {
-    setTimeout(() => {
+    if (arrivalTimeout) clearTimeout(arrivalTimeout)
+    arrivalTimeout = setTimeout(() => {
+        arrivalTimeout = undefined
         let popups = []
         const allArrivals = arrivalCallsigns()
         if (typeof lastArrivals != "undefined") {

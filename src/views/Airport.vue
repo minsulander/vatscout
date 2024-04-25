@@ -56,7 +56,7 @@
                 </v-card-text>
             </v-card>
         </v-dialog>
-        <flight-notification :icaos="[airport.icao]" />
+        <flight-notification :icaos="[id]" />
         <atc-notification :id="id" :callsigns="atcCallsigns" />
     </v-container>
 </template>

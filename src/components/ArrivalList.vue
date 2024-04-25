@@ -7,34 +7,35 @@
             <span v-if="arrivedPilots.length > 0" class="text-brown-lighten-1 ml-3">{{ arrivedPilots.length }}</span>
         </v-col>
     </v-row>
-    <div class="text-caption text-grey-darken-1 font-weight-light mt-2 ml-1" v-if="!props.compact && arrivalPrefiles.length > 0">
-        PREFILED
+    <div v-if="!props.compact && arrivalPrefiles.length > 0">
+        <div class="text-caption text-grey-darken-1 font-weight-light mt-2 ml-1">PREFILED</div>
+        <flight-row
+            v-for="p in arrivalPrefiles"
+            :key="p.callsign"
+            :value="p"
+            arrival
+            prefile
+            :class="newArrivals.includes(p.callsign) ? 'bg-brown-darken-3' : ''"
+            @click="emit('click', p.callsign)"
+        />
     </div>
-    <flight-row
-        v-if="!props.compact"
-        v-for="p in arrivalPrefiles"
-        :key="p.callsign"
-        :value="p"
-        arrival
-        prefile
-        :class="newArrivals.includes(p.callsign) ? 'bg-brown-darken-3' : ''"
-        @click="emit('click', p.callsign)"
-    />
-    <div class="text-caption text-grey-darken-1 font-weight-light mt-2 ml-1" v-if="!props.compact && arrivingPilots.length > 0">
-        ARRIVING
+    <div v-if="arrivingPilots.length > 0">
+        <div class="text-caption text-grey-darken-1 font-weight-light mt-2 ml-1" v-if="!props.compact">ARRIVING</div>
+        <flight-row
+            v-for="p in arrivingPilots"
+            :key="p.callsign"
+            :value="p"
+            arrival
+            :class="newArrivals.includes(p.callsign) ? 'bg-brown-darken-3' : ''"
+            @click="emit('click', p.callsign)"
+        />
     </div>
-    <flight-row
-        v-for="p in arrivingPilots"
-        :key="p.callsign"
-        :value="p"
-        arrival
-        :class="newArrivals.includes(p.callsign) ? 'bg-brown-darken-3' : ''"
-        @click="emit('click', p.callsign)"
-    />
-    <div class="text-caption text-grey-darken-1 font-weight-light mt-2 ml-1" v-if="!props.compact && arrivedPilots.length > 0">ARRIVED</div>
-    <flight-row v-for="p in arrivedPilots" :key="p.callsign" :value="p" arrival @click="emit('click', p.callsign)" />
+    <div v-if="arrivedPilots.length > 0">
+        <div class="text-caption text-grey-darken-1 font-weight-light mt-2 ml-1" v-if="!props.compact">ARRIVED</div>
+        <flight-row v-for="p in arrivedPilots" :key="p.callsign" :value="p" arrival @click="emit('click', p.callsign)" />
+    </div>
     <div
-        v-if="(arrivalPrefiles.length == 0 || props.compact) && arrivingPilots.length == 0 && (arrivedPilots.length == 0 || props.compact)"
+        v-if="(arrivalPrefiles.length == 0 || props.compact) && arrivingPilots.length == 0 && arrivedPilots.length == 0"
         class="text-center text-caption text-grey-darken-1 font-weight-light pa-1"
     >
         NO ARRIVALS WITHIN {{ minutes2hhmm(settings.arrivingMaxMinutes) }}
@@ -122,18 +123,25 @@ const arrivalPrefiles = computed(() => {
 })
 
 const arrivalCallsigns = () => arrivingPilots.value.map((p) => p.callsign)
-let lastArrivals = vatsim.data.pilots ? arrivalCallsigns() : undefined
+let lastArrivals = vatsim.data && vatsim.data.pilots && vatsim.data.prefiles ? arrivalCallsigns() : undefined
 const newArrivals = ref([] as string[])
+let debounceTimeout: any = undefined
+
 watch(arrivingPilots, () => {
-    let popups = []
-    const allArrivals = arrivalCallsigns()
-    if (typeof lastArrivals != "undefined") {
-        for (const callsign of allArrivals) {
-            if (!lastArrivals.includes(callsign)) popups.push(callsign)
+    if (debounceTimeout) clearTimeout(debounceTimeout)
+    debounceTimeout = setTimeout(() => {
+        debounceTimeout = undefined
+        let popups = []
+        const allArrivals = arrivalCallsigns()
+        if (typeof lastArrivals != "undefined") {
+            for (const callsign of allArrivals) {
+                if (!lastArrivals.includes(callsign)) popups.push(callsign)
+            }
         }
-    }
-    lastArrivals = allArrivals
-    newArrivals.value = popups
-    if (popups.length > 0) setTimeout(() => (newArrivals.value = []), 10000)
+        if (popups.length > 0) console.log("wtf", popups, lastArrivals)
+        lastArrivals = allArrivals
+        newArrivals.value = popups
+        if (popups.length > 0) setTimeout(() => (newArrivals.value = []), 10000)
+    }, 300)
 })
 </script>
