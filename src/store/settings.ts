@@ -12,7 +12,6 @@ export const useSettingsStore = defineStore("settings", () => {
     const bookingsMaxHours = ref(6)
 
     function save() {
-        console.log("save settings")
         localStorage.settings_soundOn = soundOn.value
         localStorage.settings_soundVolume = soundVolume.value
         localStorage.settings_departedMaxRange = departedMaxRange.value

@@ -138,7 +138,6 @@ watch(arrivingPilots, () => {
                 if (!lastArrivals.includes(callsign)) popups.push(callsign)
             }
         }
-        if (popups.length > 0) console.log("wtf", popups, lastArrivals)
         lastArrivals = allArrivals
         newArrivals.value = popups
         if (popups.length > 0) setTimeout(() => (newArrivals.value = []), 10000)
