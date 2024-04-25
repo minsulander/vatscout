@@ -395,12 +395,6 @@ export const useVatsimStore = defineStore("vatsim", () => {
             const startRequest = new Date().getTime()
             const response = await axios.get(`${apiBaseUrl}/boundaries`)
             const features = new GeoJSON().readFeatures(response.data) as FeatureLike[]
-            // for (const feature of features) {
-            //     const geometry = feature.getGeometry()
-            //     if (geometry.intersectsCoordinate([19, 59])) {
-            //         console.log("EUREKA", geometry, feature.getProperties())
-            //     }
-            // }
             boundaries.value = features
             console.log(`Got boundaries in ${(new Date().getTime() - startRequest).toFixed()} ms`)
         } finally {

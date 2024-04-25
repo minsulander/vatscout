@@ -158,7 +158,7 @@
                         </span>
                     </span>
                     <span v-for="boundary in withinTracon" :key="boundary.getProperties().id" class="mr-3">
-                        <router-link :to="`/tracon/${boundary.getProperties().id}`">{{ boundary.getProperties().id }}</router-link>
+                        <router-link :to="`/tracon/${boundary.getProperties().id}`">{{ boundary.getProperties().id }}_APP</router-link>
                     </span>
                 </v-col>
             </v-row>
