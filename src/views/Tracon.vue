@@ -144,6 +144,11 @@ const activeAirports = computed(
                 if (!(b.icao in vatsim.movements)) vatsim.movements[b.icao] = vatsim.countMovements(b.icao)
                 const acount = vatsim.movements[a.icao].active
                 const bcount = vatsim.movements[b.icao].active
+                if (acount == bcount) {
+                    if (id.value.startsWith(a.icao)) return -1
+                    else if (id.value.startsWith(b.icao)) return 1
+                    else return a.icao.localeCompare(b.icao)
+                }
                 return acount >= bcount ? -1 : 1
             })
 )
