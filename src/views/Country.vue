@@ -14,6 +14,15 @@
         <v-row>
             <Controller v-for="controller in controllers" :key="controller.cid" :value="controller" />
         </v-row>
+        <div class="mt-3 text-grey">
+            <span v-if="totalPilotsCount > 0"
+                ><span class="text-white">{{ totalPilotsCount }}</span> flights</span
+            >
+            <span v-else-if="totalPilotsCount == 0">No flights</span>
+            <span v-if="inflightPilotsCount > 0 && inflightPilotsCount != totalPilotsCount" class="ml-2"
+                ><span class="text-white">{{ inflightPilotsCount }}</span> in flight</span
+            >
+        </div>
         <div v-if="country && firs" class="text-grey-lighten-1 pa-1 mt-5 mb-2" style="background: #313338">
             <v-row>
                 <v-col cols="6" sm="6">Active airports </v-col>
@@ -57,6 +66,7 @@
 import AirportTopList from "@/components/AirportTopList.vue"
 import Booking from "@/components/Booking.vue"
 import Controller from "@/components/Controller.vue"
+import constants from "@/constants"
 import { useSettingsStore } from "@/store/settings"
 import { useVatsimStore } from "@/store/vatsim"
 import moment from "moment"
@@ -82,6 +92,8 @@ const firs = computed(() => {
             .sort((a, b) => a.icao.localeCompare(b.icao))
     )
 })
+
+const firIcaos = computed(() => firs.value.map((f) => f.icao))
 
 const controllers = computed(() => {
     if (!vatsim.data.controllers) return []
@@ -122,6 +134,24 @@ const bookings = computed(() => {
                     (!b.callsign.endsWith("_CTR") && isAirportCallsign(b.callsign)))
         )
         .sort((a, b) => moment(a.start).diff(moment(b.start)))
+})
+
+const totalPilotsCount = computed(() => {
+    if (!vatsim.data || !vatsim.data.pilots || !vatsim.boundaries) return -1
+    const boundaries = vatsim.boundaries.filter((b) => firIcaos.value.includes(b.getProperties().id))
+    if (boundaries.length == 0) return -1
+    return vatsim.data.pilots.filter((p) => boundaries.find((b) => b.getGeometry()?.intersectsCoordinate([p.longitude, p.latitude]))).length
+})
+
+const inflightPilotsCount = computed(() => {
+    if (!vatsim.data || !vatsim.data.pilots || !vatsim.boundaries) return -1
+    const boundaries = vatsim.boundaries.filter((b) => firIcaos.value.includes(b.getProperties().id))
+    if (boundaries.length == 0) return -1
+    return vatsim.data.pilots.filter(
+        (p) =>
+            p.groundspeed >= constants.inflightGroundspeed &&
+            boundaries.find((b) => b.getGeometry()?.intersectsCoordinate([p.longitude, p.latitude]))
+    ).length
 })
 
 function isAirportCallsign(callsign: string) {

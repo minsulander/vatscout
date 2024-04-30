@@ -18,8 +18,17 @@
                 {{ fir.name }}<span v-if="fir.callsignPrefix"> | {{ fir.callsignPrefix }}</span>
             </div>
             <v-row class="mt-3">
-                <Controller v-for="controller in controllers" :value="controller" :prefix="id" :key="controller.cid"/>
+                <Controller v-for="controller in controllers" :value="controller" :prefix="id" :key="controller.cid" />
             </v-row>
+            <div class="mt-3 text-grey">
+                <span v-if="totalPilotsCount > 0"
+                    ><span class="text-white">{{ totalPilotsCount }}</span> flights</span
+                >
+                <span v-else-if="totalPilotsCount == 0">No flights</span>
+                <span v-if="inflightPilotsCount > 0 && inflightPilotsCount != totalPilotsCount" class="ml-2"
+                    ><span class="text-white">{{ inflightPilotsCount }}</span> in flight</span
+                >
+            </div>
             <div class="text-grey-lighten-1 pa-1 mt-5 mb-2" style="background: #313338">
                 <v-row>
                     <v-col cols="6" sm="6">Active airports </v-col>
@@ -43,6 +52,7 @@ import { compareControllers } from "@/common"
 import AirportTopList from "@/components/AirportTopList.vue"
 import Booking from "@/components/Booking.vue"
 import Controller from "@/components/Controller.vue"
+import constants from "@/constants"
 import { useSettingsStore } from "@/store/settings"
 import { useVatsimStore } from "@/store/vatsim"
 import moment from "moment"
@@ -74,6 +84,22 @@ const bookings = computed(() => {
                 (isMatchingCallsign(b.callsign) || isAirportCallsign(b.callsign))
         )
         .sort((a, b) => moment(a.start).diff(moment(b.start)))
+})
+
+const totalPilotsCount = computed(() => {
+    if (!vatsim.data || !vatsim.data.pilots || !vatsim.boundaries) return -1
+    const boundary = vatsim.boundaries.find((b) => b.getProperties().id == id.value)
+    if (!boundary || !boundary.getGeometry()) return -1
+    return vatsim.data.pilots.filter((p) => boundary.getGeometry()?.intersectsCoordinate([p.longitude, p.latitude])).length
+})
+
+const inflightPilotsCount = computed(() => {
+    if (!vatsim.data || !vatsim.data.pilots || !vatsim.boundaries) return -1
+    const boundary = vatsim.boundaries.find((b) => b.getProperties().id == id.value)
+    if (!boundary || !boundary.getGeometry()) return -1
+    return vatsim.data.pilots.filter(
+        (p) => p.groundspeed >= constants.inflightGroundspeed && boundary.getGeometry()?.intersectsCoordinate([p.longitude, p.latitude])
+    ).length
 })
 
 function isMatchingCallsign(callsign: string) {

@@ -24,28 +24,36 @@
         </v-row>
         <div v-for="airport in activeAirports" :key="airport.icao" class="mt-5">
             <v-row no-gutters @click="clickAirport(airport.icao)" style="cursor: pointer; background: #313338">
-                <v-col cols="3" sm="1">
+                <v-col cols="2" sm="1">
                     <div class="text-h6 pl-1">{{ airport.icao }}</div>
                 </v-col>
-                <v-col cols="9" sm="11">
-                    <div class="float-right text-right pa-1">
-                        <Atis
-                            compact
-                            v-for="atis in atises(airport.icao)"
-                            :key="atis.callsign"
-                            :value="atis"
-                            class="ml-1"
-                            @click="clickAtis"
-                        />
-                        <Controller
-                            compact
-                            v-for="controller in localControllers(airport.icao)"
-                            :key="controller.callsign"
-                            :value="controller"
-                            class="ml-1"
-                        />
+                <v-col cols="10" sm="11">
+                    <div class="float-right text-right pt-1 px-1">
+                        <span v-if="vatsim.movements[airport.icao].activeDepartures" class="text-cyan-lighten-2 ml-2">{{
+                            vatsim.movements[airport.icao].activeDepartures
+                        }}</span>
+                        <span v-if="vatsim.movements[airport.icao].activeArrivals" class="text-yellow-lighten-2 ml-2">{{
+                            vatsim.movements[airport.icao].activeArrivals
+                        }}</span>
+                        <span class="ml-2">
+                            <Atis
+                                compact
+                                v-for="atis in atises(airport.icao)"
+                                :key="atis.callsign"
+                                :value="atis"
+                                class="ml-1"
+                                @click="clickAtis"
+                            />
+                            <Controller
+                                compact
+                                v-for="controller in localControllers(airport.icao)"
+                                :key="controller.callsign"
+                                :value="controller"
+                                class="ml-1"
+                            />
+                        </span>
                     </div>
-                    <div class="pt-1 font-weight-light text-grey-lighten-1 text-truncate" style="direction: rtl">
+                    <div class="font-weight-light text-grey-lighten-1 text-truncate pa-1" style="direction: rtl">
                         {{ airport.name }}
                     </div>
                 </v-col>
@@ -59,16 +67,22 @@
                 </v-col>
             </v-row>
         </div>
-        <div class="text-grey-darken-1 text-body-2 mt-5" v-if="inactiveAirportIds && inactiveAirportIds.length > 0">
-            <span v-for="id in inactiveAirportIds"
-                ><router-link :to="`/airport/${id}`" class="text-grey-darken-1">{{ id }}</router-link
-                >&nbsp;
-            </span>
+        <div v-if="enroutePilots.length > 0" class="mt-5 text-grey">
+            <div class="text-grey-lighten-1 pa-1 mb-2" style="background: #313338">Enroute</div>
+            <a @click="clickFlight(p.callsign)" v-for="p in enroutePilots" class="text-grey-lighten-1 pa-1 mr-1">{{ p.callsign }}</a>
         </div>
         <div v-if="bookings.length > 0" class="mt-5 text-grey">
             <div class="text-grey-lighten-1 pa-1 mb-2" style="background: #313338">Bookings</div>
             <Booking v-for="booking in bookings" :key="booking.id" :value="booking" :prefix="id" class="mt-1" />
         </div>
+        <div class="text-grey-darken-1 text-body-2 mt-5" v-if="inactiveAirportIds && inactiveAirportIds.length > 0">
+            <div class="text-caption text-grey-darken-2">Inactive airports</div>
+            <span v-for="id in inactiveAirportIds"
+                ><router-link :to="`/airport/${id}`" class="text-grey-darken-1">{{ id }}</router-link
+                >&nbsp;
+            </span>
+        </div>
+
         <v-dialog v-model="showFlightDialog" width="90%">
             <v-card color="#1e1f22">
                 <v-card-text class="pa-3">
@@ -105,6 +119,7 @@ import { computed, ref, watch } from "vue"
 import { useRoute, useRouter } from "vue-router"
 import { useSettingsStore } from "@/store/settings"
 import { useDisplay } from "vuetify/lib/framework.mjs"
+import constants from "@/constants"
 
 const vatsim = useVatsimStore()
 const route = useRoute()
@@ -127,7 +142,7 @@ const airports = computed(
         vatsim.spy.airports &&
         vatsim.spy.airports.filter((a) => !a.pseudo && boundary.value?.getGeometry()?.intersectsCoordinate([a.longitude, a.latitude]))
 )
-const icaos = computed(() => airports.value ? airports.value.map((a) => a.icao) : [])
+const icaos = computed(() => (airports.value ? airports.value.map((a) => a.icao) : []))
 
 const activeAirports = computed(
     () =>
@@ -182,6 +197,21 @@ const bookings = computed(() => {
                 (isMatchingCallsign(b.callsign) || isMatchingAnyAirportCallsign(b.callsign))
         )
         .sort((a, b) => moment(a.start).diff(moment(b.start)) || compareCallsigns(a.callsign, b.callsign))
+})
+
+const enroutePilots = computed(() => {
+    if (!vatsim.data || !vatsim.data.pilots || !vatsim.traconBoundaries) return []
+    const boundary = vatsim.traconBoundaries.find((b) => b.getProperties().id == id.value)
+    if (!boundary) return []
+    return vatsim.data.pilots
+        .filter(
+            (p) =>
+                p.groundspeed >= constants.inflightGroundspeed &&
+                p.altitude < 20000 && // TODO hardcoded top of TMA
+                boundary.getGeometry()?.intersectsCoordinate([p.longitude, p.latitude]) &&
+                (!p.flight_plan || (!icaos.value.includes(p.flight_plan.departure) && !icaos.value.includes(p.flight_plan.arrival)))
+        )
+        .sort((a, b) => a.callsign.localeCompare(b.callsign))
 })
 
 function isMatchingCallsign(callsign: string) {

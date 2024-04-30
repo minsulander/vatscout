@@ -87,9 +87,6 @@ const display = useDisplay()
 const id = computed(() => (route.params.id as string)?.toUpperCase())
 const showFlightDialog = ref(false)
 const flightCallsign = ref("")
-const snackbar = ref(false)
-const snackbarText = ref("")
-const snackbarColor = ref("")
 
 const airport = computed(() => vatsim.airportByIcao[id.value])
 
