@@ -1,5 +1,5 @@
 <template>
-    <v-text-field variant="underlined" placeholder="Search" ref="siracha" v-model="search" autofocus :error-messages="errorMessages" @input="input" @keyup.enter="enter" />
+    <v-text-field variant="underlined" placeholder="Search" ref="siracha" v-model="search" autofocus :error-messages="errorMessages" @input="input" @keyup.enter="enter" @keyup.esc="esc"/>
 </template>
 
 <script setup lang="ts">
@@ -16,8 +16,17 @@ function input() {
     errorMessages.value = ""
 }
 
+function esc() {
+    search.value = ""
+    errorMessages.value = ""
+}
+
 function enter() {
     const query = search.value.toUpperCase()
+    if (query.length == 0) {
+        errorMessages.value = ""
+        return
+    }
     search.value = ""
     // Exact matches
     if (vatsim.data && vatsim.data.pilots && vatsim.data.pilots.find((p) => p.callsign == query)) return router.push(`/flight/${query}`)

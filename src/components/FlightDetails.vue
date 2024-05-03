@@ -63,20 +63,20 @@
                         </v-col>
                     </v-row>
                 </span>
-                <div v-if="pilot && flightplan">
+                <div v-if="pilot">
                     <v-progress-linear
                         v-model="progress"
                         color="grey"
                         class="ma-1"
-                        v-if="flightplan.arrival != flightplan.departure && typeof progress !== 'undefined'"
+                        v-if="flightplan && flightplan.arrival != flightplan.departure && typeof progress !== 'undefined'"
                     ></v-progress-linear>
                     <div
                         class="float-right px-1"
-                        v-if="flightplan.arrival != flightplan.departure && isFinite(calc.arrivalDistance(pilot))"
+                        v-if="flightplan && flightplan.arrival != flightplan.departure && isFinite(calc.arrivalDistance(pilot))"
                     >
                         <span class="text-caption text-grey">to go</span> {{ calc.arrivalDistance(pilot).toFixed(0) }}
                     </div>
-                    <div class="float-left px-1" v-if="isFinite(calc.departureDistance(pilot))">
+                    <div class="float-left px-1" v-if="flightplan && isFinite(calc.departureDistance(pilot))">
                         {{ calc.departureDistance(pilot).toFixed(0) }} <span class="text-caption text-grey">nm</span>
                     </div>
                     <div class="text-center text-body-2 text-grey pt-1">
@@ -105,7 +105,7 @@
                     <!--{{ pilot.pilot_rating }} {{ pilot.military_rating }}-->
                 </v-col>
 
-                <v-col cols="2" sm="1" class="text-right pr-2 text-caption text-grey">ETA</v-col>
+                <v-col cols="2" sm="1" class="text-right pr-2 text-caption text-grey"><span v-if="pilot && flightplan">ETA</span></v-col>
                 <v-col cols="10" sm="5">
                     <span v-if="calc.eta(pilot)"> {{ calc.eta(pilot)?.utc().format("HHmm") }}</span>
                     <span v-else-if="flightplan" class="text-grey">{{ calc.flightplanArrivalTime(flightplan, true)?.format("HHmm") }}</span>
@@ -149,7 +149,7 @@
                 </v-col>
                 <v-col cols="2" sm="1" class="text-right pr-2 text-caption text-grey">Within</v-col>
                 <v-col cols="10" class="text-body-2 text-grey-lighten-1">
-                    <span v-for="boundary in within" :key="boundary.getProperties().id" class="mr-3">
+                    <span v-for="boundary in within" :key="boundary.getProperties().id" class="mr-2">
                         <span v-if="vatsim.spy.firs && vatsim.spy.firs.find((f) => f.icao == boundary.getProperties().id)">
                             <router-link :to="`/fir/${boundary.getProperties().id}`">{{ boundary.getProperties().id }}</router-link>
                         </span>
@@ -157,7 +157,7 @@
                             {{ boundary.getProperties().id }}
                         </span>
                     </span>
-                    <span v-for="boundary in withinTracon" :key="boundary.getProperties().id" class="mr-3">
+                    <span v-for="boundary in withinTracon" :key="boundary.getProperties().id" class="mr-2">
                         <router-link :to="`/tracon/${boundary.getProperties().id}`">{{ boundary.getProperties().id }}_APP</router-link>
                     </span>
                 </v-col>

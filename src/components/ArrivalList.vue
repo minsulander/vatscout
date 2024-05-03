@@ -143,4 +143,8 @@ watch(arrivingPilots, () => {
         if (popups.length > 0) setTimeout(() => (newArrivals.value = []), 10000)
     }, 300)
 })
+
+watch(id, () => {
+    lastArrivals = vatsim.data && vatsim.data.pilots && vatsim.data.prefiles ? arrivalCallsigns() : undefined
+})
 </script>
