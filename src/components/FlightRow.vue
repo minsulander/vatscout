@@ -5,7 +5,9 @@
         </v-col>
         <v-col sm="3" v-if="value.flight_plan">
             <span>{{ value.flight_plan.aircraft_short }}</span>
-            <v-chip size="small" density="comfortable" label class="ml-1 px-1" v-if="typeClass && typeClass == 'H'"><v-icon>mdi-helicopter</v-icon></v-chip>
+            <v-chip size="small" density="comfortable" label class="ml-1 px-1" v-if="typeClass && typeClass == 'H'"
+                ><v-icon>mdi-helicopter</v-icon></v-chip
+            >
             <v-chip size="small" density="comfortable" label class="ml-1 px-1" v-else-if="wtc && wtc != 'M'">{{ wtc }}</v-chip>
         </v-col>
         <v-col sm="2" v-if="value.flight_plan">
@@ -21,11 +23,16 @@
             <span v-if="arrival && eta">
                 {{ moment(eta).utc().format("HHmm") }}
             </span>
-            <span v-else-if="departure && (pending || prefile) && value.flight_plan.deptime && value.flight_plan.deptime != '0000'">
-                {{ value.flight_plan.deptime }}
-            </span>
             <span v-else-if="arrival && pending && flightplanArrivalTime(value.flight_plan, true)" style="opacity: 0.5">
                 {{ flightplanArrivalTime(value.flight_plan, true)!.format("HHmm") }}
+            </span>
+            <span v-else-if="departure && value.flight_plan.deptime && value.flight_plan.deptime != '0000'">
+                <span v-if="prefile && lateDeparture" style="opacity: 0.5">
+                    {{ value.flight_plan.deptime }}
+                </span>
+                <span v-else>
+                    {{ value.flight_plan.deptime }}
+                </span>
             </span>
             <div class="float-right text-nowrap">
                 <!--<v-chip size="small" density="comfortable" label class="ml-1 px-1" v-if="t1">T1</v-chip>-->
@@ -35,7 +42,15 @@
                 <v-chip size="small" density="comfortable" label class="ml-1 px-1" v-if="blind"><v-icon>mdi-eye-off</v-icon></v-chip>
                 <v-chip size="small" density="comfortable" label class="ml-1 px-1" v-if="textOnly">T</v-chip>
                 <v-chip size="small" density="comfortable" label class="ml-1 px-1" v-if="receiveOnly">R</v-chip>
-                <v-chip size="small" density="comfortable" label class="ml-1 px-1" color="red" v-if="departure && pending && transponderWarning">{{ transponderWarning }}</v-chip>
+                <v-chip
+                    size="small"
+                    density="comfortable"
+                    label
+                    class="ml-1 px-1"
+                    color="red"
+                    v-if="departure && pending && transponderWarning"
+                    >{{ transponderWarning }}</v-chip
+                >
             </div>
         </v-col>
     </v-row>
@@ -84,6 +99,12 @@ const pending = computed(() => {
     )
 })
 const eta = computed(() => calc.eta(props.value as Pilot))
+const lateDeparture = computed(() => {
+    const pilot = props.value as Pilot
+    if (!pilot) return false
+    const etd = calc.flightplanDepartureTime(pilot.flight_plan)
+    return moment().diff(etd) > 0
+})
 
 const rowclass = computed(() => {
     if (props.prefile) return "text-grey"
