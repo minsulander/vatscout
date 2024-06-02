@@ -32,7 +32,7 @@ export function arrivalDistance(pilot: Pilot) {
 }
 
 export function distanceToAirport(pilot: Pilot, airport: Airport) {
-    if (!airport) return Infinity
+    if (!airport || !isFinite(airport.longitude) || !isFinite(airport.latitude)) return Infinity
     const from = turf.point([pilot.longitude, pilot.latitude])
     const to = turf.point([airport.longitude, airport.latitude])
     const distance = turf.distance(from, to) / 1.852
@@ -53,7 +53,7 @@ export function eta(pilot: Pilot) {
     const vatsim = useVatsimStore()
     if (!vatsim.spy || !vatsim.spy.airports) return undefined
     const airport = vatsim.airportByIcao[pilot.flight_plan.arrival]
-    if (!airport) return undefined
+    if (!airport || !isFinite(airport.longitude) || !isFinite(airport.latitude)) return undefined
     const from = turf.point([pilot.longitude, pilot.latitude])
     const to = turf.point([airport.longitude, airport.latitude])
     const distance = turf.distance(from, to) / 1.852
