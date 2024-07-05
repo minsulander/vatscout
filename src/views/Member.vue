@@ -63,7 +63,7 @@ const facility = computed(() => {
 const rating = computed(() => {
     if (!vatsim.data || !vatsim.data.ratings) return undefined
     if (!controller.value) return "?"
-    const rating = vatsim.data.ratings.find((r) => r.id == controller.value.rating)
+    const rating = vatsim.data.ratings.find((r) => controller.value && r.id == controller.value.rating)
     if (rating) return rating.short
     return "?"
 })
