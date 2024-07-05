@@ -1,6 +1,6 @@
 <template>
     <span v-if="props.compact">
-        <v-tooltip :text="`${controller.callsign} ${controller.frequency} ${controller.name}`" location="bottom">
+        <v-tooltip :text="`${controller.callsign} ${controller.frequency} ${name}`" location="bottom">
             <template v-slot:activator="{ props }">
                 <v-chip
                     variant="flat"
@@ -21,7 +21,7 @@
             ><span v-if="prefix">{{ value.callsign.replace(`${prefix}__`, "").replace(`${prefix}_`, "") }}</span
             ><span v-else>{{ value.callsign }}</span>
         </v-chip>
-        {{ value.frequency }}<br /><router-link :to="`/member/${value.cid}`" class="mr-1">{{ value.name }}</router-link>
+        {{ value.frequency }}<br /><router-link :to="`/member/${value.cid}`" class="mr-1">{{ name }}</router-link>
         <v-chip density="comfortable" color="grey-lighten-1" style="padding: 5px" class="mr-1">{{ rating(value) }}</v-chip>
         <span class="text-grey">{{ moment.utc(moment().diff(moment(value.logon_time))).format("HHmm") }}</span>
     </v-col>
@@ -36,6 +36,15 @@ import { computed } from "vue"
 const props = defineProps<{ value: Controller; prefix?: string; compact?: boolean }>()
 const controller = computed(() => props.value)
 const vatsim = useVatsimStore()
+
+const name = computed(() => {
+    if (controller.value) {
+        const key = `name_cid_${controller.value.cid}`
+        if (key in localStorage) return localStorage[key]
+        return controller.value.name
+    }
+    return ""
+})
 
 function rating(controller: Controller) {
     if (!vatsim.data || !vatsim.data.ratings) return undefined

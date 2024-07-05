@@ -1,6 +1,6 @@
 <template>
     <span v-if="props.compact">
-        <v-tooltip :text="`${atis.callsign} ${atis.frequency} ${atis.name}`" location="bottom">
+        <v-tooltip :text="`${atis.callsign} ${atis.frequency} ${name}`" location="bottom">
             <template v-slot:activator="{ props }">
                 <v-chip
                     variant="flat"
@@ -37,7 +37,7 @@
         <router-link :to="`/member/${atis.cid}`">{{ atis.name }}</router-link>
         <span class="text-grey ml-1">{{ moment.utc(moment().diff(moment(atis.logon_time))).format("HHmm") }}</span>
         <br />
-        <div class="text-caption text-grey">
+        <div class="text-caption text-grey mr-1">
             {{ atis.text_atis?.join("\n") }}
         </div>
     </v-col>
@@ -52,4 +52,14 @@ import moment from "moment"
 const props = defineProps<{ value: Atis; prefix?: string; compact?: boolean }>()
 const emit = defineEmits(["click"])
 const atis = computed(() => props.value)
+
+const name = computed(() => {
+    if (atis.value) {
+        const key = `name_cid_${atis.value.cid}`
+        if (key in localStorage) return localStorage[key]
+        return atis.value.name
+    }
+    return ""
+})
+
 </script>

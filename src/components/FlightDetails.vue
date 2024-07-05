@@ -93,7 +93,7 @@
                 <v-col cols="2" sm="1" class="text-right pr-2 text-caption text-grey">Pilot</v-col>
                 <v-col cols="10" sm="5">
                     <router-link :to="`/member/${pilot.cid}`">
-                        {{ pilot.name }}
+                        {{ name }}
                         <span class="text-grey-lighten-1">{{ pilot.cid }}</span>
                         <v-chip v-if="pilot.pilot_rating" size="small" variant="flat" label class="ml-2" color="grey-darken-2">{{
                             pilotRating
@@ -295,6 +295,15 @@ const callsign = computed(() => {
     const pp = pilot.value || prefile.value
     return pp ? extractCallsign(pp) : ""
 })
+const name = computed(() => {
+    const pp = pilot.value || prefile.value
+    if (pp) {
+        const key = `name_cid_${pp.cid}`
+        if (key in localStorage) return localStorage[key]
+        return pp.name
+    }
+    return ""
+})
 const actypeName = computed(() => flightplan.value && (actypenames as any)[flightplan.value.aircraft_short])
 const actypeCode = computed(() => flightplan.value && (actypecodes as any)[flightplan.value.aircraft_short])
 const wtc = computed(() => actypeCode.value && actypeCode.value[0])
@@ -400,6 +409,10 @@ const formattedRemarks = computed(() => {
         rmk = rmk.replace("CALLSIGN/", '<span class="text-grey">CALLSIGN/</span>')
     } else if (rmk.includes("CALLSIGN")) {
         rmk = rmk.replace("CALLSIGN", '<span class="text-warning font-weight-bold">CALLSIGN</span>')
+    } else if (rmk.includes("CS/")) {
+        rmk = rmk.replace("CS/", '<span class="text-warning font-weight-bold">CS/</span>')
+    } else if (rmk.includes("C/S")) {
+        rmk = rmk.replace("C/S", '<span class="text-warning font-weight-bold">C/S</span>')
     }
     rmk = rmk.replace("/T/", `<span class="text-warning font-weight-bold">/T/</span>`)
     rmk = rmk.replace("/R/", `<span class="text-warning font-weight-bold">/R/</span>`)

@@ -51,8 +51,14 @@ watch(props, () => {
                 atcPopupSound.play()
             }
             snackbarText.value = ""
-            if (popups.length > 0) snackbarText.value += `<b style='font-family: monospace'>${popups.join(", ")}</b> online. `
-            if (popoffs.length > 0) snackbarText.value += `<b style='font-family: monospace'>${popoffs.join(", ")}</b> offline. `
+            if (popups.length > 0) {
+                console.log("Online ATC", popups.join(", "))
+                snackbarText.value += `<b style='font-family: monospace'>${popups.join(", ")}</b> online. `
+            }
+            if (popoffs.length > 0) {
+                console.log("Offline ATC", popoffs.join(", "))
+                snackbarText.value += `<b style='font-family: monospace'>${popoffs.join(", ")}</b> offline. `
+            }
             snackbarColor.value = "white"
             snackbar.value = true
         }

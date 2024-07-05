@@ -65,8 +65,8 @@ export function extractAtisCode(atis: Atis) {
 
 export function extractCallsign(p: Pilot | Prefile) {
     const flightplan = p.flight_plan
-    if (flightplan && (flightplan.remarks.includes("CALLSIGN") || flightplan.remarks.includes("CS/"))) {
-        const m = flightplan.remarks.match(/(\WCALLSIGN IS |\WCALLSIGN[/=_ ]+|\WCS\/)([\w\s-_"]+?)(TCAS|SIMBRIEF|\s\w+\/|[,\.\/\(]|$)/)
+    if (flightplan && (flightplan.remarks.includes("CALLSIGN") || flightplan.remarks.includes("CS/") || flightplan.remarks.includes("C/S"))) {
+        const m = flightplan.remarks.match(/(\WCALLSIGN IS |\WCALLSIGN[/=_ ]+|\WC\/S[=_ ]|\WCS\/)([\w\s-_"]+?)(TCAS|SIMBRIEF|\s\w+\/|[,\.\/\(]|$)/)
         if (m && m.at(2)) {
             const remarkCallsign = m.at(2)?.replaceAll('"', "").trim()
             if (remarkCallsign) {

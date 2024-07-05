@@ -122,29 +122,29 @@ const arrivalPrefiles = computed(() => {
         })
 })
 
-const arrivalCallsigns = () => arrivingPilots.value.map((p) => p.callsign)
-let lastArrivals = vatsim.data && vatsim.data.pilots && vatsim.data.prefiles ? arrivalCallsigns() : undefined
+const arrivalCallsigns = computed(() => arrivingPilots.value.map((p) => p.callsign))
+const arrivalsFilled = ref(false)
 const newArrivals = ref([] as string[])
-let debounceTimeout: any = undefined
 
-watch(arrivingPilots, () => {
+let debounceTimeout: any = undefined
+watch(arrivalCallsigns, (newValue, oldValue) => {
     if (debounceTimeout) clearTimeout(debounceTimeout)
     debounceTimeout = setTimeout(() => {
         debounceTimeout = undefined
-        let popups = []
-        const allArrivals = arrivalCallsigns()
-        if (typeof lastArrivals != "undefined") {
-            for (const callsign of allArrivals) {
-                if (!lastArrivals.includes(callsign)) popups.push(callsign)
-            }
+        if (!arrivalsFilled.value) {
+            arrivalsFilled.value = true
+            return
         }
-        lastArrivals = allArrivals
+        let popups = []
+        for (const callsign of newValue) {
+            if (!oldValue.includes(callsign)) popups.push(callsign)
+        }
         newArrivals.value = popups
         if (popups.length > 0) setTimeout(() => (newArrivals.value = []), 10000)
     }, 300)
 })
 
 watch(id, () => {
-    lastArrivals = vatsim.data && vatsim.data.pilots && vatsim.data.prefiles ? arrivalCallsigns() : undefined
+    arrivalsFilled.value = false
 })
 </script>

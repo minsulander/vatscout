@@ -18,6 +18,7 @@ import moment from "moment"
 import { Howl } from "howler"
 
 const props = defineProps<{ icaos: string[] }>()
+const icaos = computed(() => props.icaos.join(", "))
 
 const departurePopupSound = new Howl({ src: "/audio/pop.mp3" })
 const arrivalPopupSound = new Howl({ src: "/audio/decide.mp3" })
@@ -70,6 +71,7 @@ const departures = computed(() => {
         ),
     ].sort((a, b) => a.callsign.localeCompare(b.callsign))
 })
+const departureCallsigns = computed(() => departures.value.map((p) => p.callsign))
 
 const arrivals = computed(() => {
     if (!vatsim.data || !vatsim.data.pilots) return []
@@ -86,26 +88,25 @@ const arrivals = computed(() => {
         }),
     ].sort((a, b) => a.callsign.localeCompare(b.callsign))
 })
+const arrivalCallsigns = computed(() => arrivals.value.map((p) => p.callsign))
 
-const departureCallsigns = () => departures.value.map((p) => p.callsign)
-let lastDepartures = vatsim.data && vatsim.data.pilots && vatsim.data.prefiles ? departureCallsigns() : undefined
-const newDepartures = ref([] as string[])
+
 let departureTimeout: any = undefined
-
-watch(departures, () => {
+const departuresFilled = ref(false)
+watch(departureCallsigns, (newValue, oldValue) => {
     if (departureTimeout) clearTimeout(departureTimeout)
     departureTimeout = setTimeout(() => {
         departureTimeout = undefined
-        let popups = []
-        const allDepartures = departureCallsigns()
-        if (typeof lastDepartures != "undefined") {
-            for (const callsign of allDepartures) {
-                if (!lastDepartures.includes(callsign)) popups.push(callsign)
-            }
+        if (!departuresFilled.value) {
+            departuresFilled.value = true
+            return
         }
-        lastDepartures = allDepartures
-        newDepartures.value = popups
+        let popups = []
+        for (const callsign of newValue) {
+            if (!oldValue.includes(callsign)) popups.push(callsign)
+        }
         if (popups.length > 0) {
+            console.log("New departures", popups.join(", "))
             if (settings.soundOn) {
                 departurePopupSound.volume(settings.soundVolume / 100)
                 departurePopupSound.play()
@@ -120,25 +121,23 @@ watch(departures, () => {
     }, 1000)
 })
 
-const arrivalCallsigns = () => arrivals.value.map((p) => p.callsign)
-let lastArrivals = vatsim.data && vatsim.data.pilots && vatsim.data.prefiles ? arrivalCallsigns() : undefined
-const newArrivals = ref([] as string[])
-let arrivalTimeout: any = undefined
 
-watch(arrivals, () => {
+let arrivalTimeout: any = undefined
+const arrivalsFilled = ref(false)
+watch(arrivalCallsigns, (newValue, oldValue) => {
     if (arrivalTimeout) clearTimeout(arrivalTimeout)
     arrivalTimeout = setTimeout(() => {
         arrivalTimeout = undefined
-        let popups = []
-        const allArrivals = arrivalCallsigns()
-        if (typeof lastArrivals != "undefined") {
-            for (const callsign of allArrivals) {
-                if (!lastArrivals.includes(callsign)) popups.push(callsign)
-            }
+        if (!arrivalsFilled.value) {
+            arrivalsFilled.value = true
+            return
         }
-        lastArrivals = allArrivals
-        newArrivals.value = popups
+        let popups = []
+        for (const callsign of newValue) {
+            if (!oldValue.includes(callsign)) popups.push(callsign)
+        }
         if (popups.length > 0) {
+            console.log("New arrivals", popups.join(", "))
             if (settings.soundOn) {
                 arrivalPopupSound.volume(settings.soundVolume / 100)
                 arrivalPopupSound.play()
@@ -153,8 +152,8 @@ watch(arrivals, () => {
     }, 500)
 })
 
-watch(props, () => {
-    lastDepartures = departureCallsigns()
-    lastArrivals = arrivalCallsigns()
+watch(icaos, (newValue, oldValue) => {
+    departuresFilled.value = false
+    arrivalsFilled.value = false
 })
 </script>

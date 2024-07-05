@@ -10,6 +10,7 @@ export default {
         "NEWPILOT",
         "NEW TO VATSIM",
         "NEW ON VATSIM",
+        "NEW ON THE VATSIM",
         "NEW AT VATSIM",
         "NEW IN VATSIM",
         "NEW VATSIM PILOT",

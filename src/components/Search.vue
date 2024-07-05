@@ -1,5 +1,15 @@
 <template>
-    <v-text-field variant="underlined" placeholder="Search" ref="siracha" v-model="search" autofocus :error-messages="errorMessages" @input="input" @keyup.enter="enter" @keyup.esc="esc"/>
+    <v-text-field
+        variant="underlined"
+        placeholder="Search"
+        ref="siracha"
+        v-model="search"
+        autofocus
+        :error-messages="errorMessages"
+        @input="input"
+        @keyup.enter="enter"
+        @keyup.esc="esc"
+    />
 </template>
 
 <script setup lang="ts">
@@ -41,7 +51,11 @@ function enter() {
         if (airport && airport.icao) return router.push(`/airport/${airport.icao}`)
     }
     // Partial matches
-    const shortPilot = query.length == 3 && vatsim.data && vatsim.data.pilots && vatsim.data.pilots.find((p) => `${p.callsign.substring(0, 1)}${p.callsign.substring(3)}` == query)
+    const shortPilot =
+        query.length == 3 &&
+        vatsim.data &&
+        vatsim.data.pilots &&
+        vatsim.data.pilots.find((p) => `${p.callsign.substring(0, 1)}${p.callsign.substring(3)}` == query)
     if (shortPilot) return router.push(`/flight/${shortPilot.callsign}`)
     // const iataAirport = vatsim.spy && vatsim.spy.airports && vatsim.spy.airports.find((a) => a.iata == query)
     // if (iataAirport) return router.push(`/airport/${iataAirport.icao}`)
@@ -55,22 +69,32 @@ function enter() {
     if (startsPrefile) return router.push(`/flight/${startsPrefile.callsign}`)
     // Name matches
     if (vatsim.spy && vatsim.spy.countries && vatsim.spy.airports) {
-        const country = vatsim.spy.countries.find(c => c.name && c.name.toUpperCase().includes(query))
+        const country = vatsim.spy.countries.find((c) => c.name && c.name.toUpperCase().includes(query))
         if (country && country.prefix) return router.push(`/country/${country.prefix}`)
-        const airport = vatsim.spy.airports.find(a => a.name && a.name.toUpperCase().includes(query))
+        const airport = vatsim.spy.airports.find((a) => a.name && a.name.toUpperCase().includes(query))
         if (airport && airport.icao) return router.push(`/airport/${airport.icao}`)
     }
     if (vatsim.data && vatsim.data.pilots) {
-        const pilot = vatsim.data.pilots.find(p => p.name.toUpperCase().includes(query) || query == `${p.cid}`)
-        if (pilot && pilot.callsign) return router.push(`/flight/${pilot.callsign}`)
+        const pilot = vatsim.data.pilots.find((p) => p.name.toUpperCase().includes(query) || query == `${p.cid}`)
+        if (pilot) {
+            if (pilot.callsign) return router.push(`/flight/${pilot.callsign}`)
+            if (query == `${pilot.cid}`) return router.push(`/member/${pilot.cid}`)
+        }
     }
     if (vatsim.data && vatsim.data.controllers) {
-        const controller = vatsim.data.controllers.find(c => c.name.toUpperCase().includes(query) || query == `${c.cid}` || query == c.callsign)
+        const controller = vatsim.data.controllers.find(
+            (c) => c.name.toUpperCase().includes(query) || query == `${c.cid}` || query == c.callsign
+        )
         if (controller && controller.callsign) {
-            const icao = controller.callsign.substring(0,4)
+            const icao = controller.callsign.substring(0, 4)
             if (icao in vatsim.airportByIcao) return router.push(`/airport/${icao}`)
-            const fir = vatsim.spy && vatsim.spy.firs && vatsim.spy.firs.find(f => f.icao == icao || (f.callsignPrefix && controller.callsign.startsWith(f.callsignPrefix)))
+            const fir =
+                vatsim.spy &&
+                vatsim.spy.firs &&
+                vatsim.spy.firs.find((f) => f.icao == icao || (f.callsignPrefix && controller.callsign.startsWith(f.callsignPrefix)))
             if (fir) return router.push(`/fir/${fir.icao}`)
+            if (query == `${controller.cid}` || query == controller.callsign) return router.push(`/member/${controller.cid}`)
+
         }
     }
     if (query.endsWith("_APP")) return router.push(`/tracon/${query.replace("_APP", "")}`)

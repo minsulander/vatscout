@@ -170,29 +170,30 @@ const departurePrefiles = computed(() => {
 })
 
 const departures = computed(() => [...departurePrefiles.value, ...nofpPilots.value, ...invalidfpPilots.value, ...departingPilots.value])
-const departureCallsigns = () => departures.value.map((p) => p.callsign)
-let lastDepartures = vatsim.data && vatsim.data.pilots && vatsim.data.prefiles ? departureCallsigns() : undefined
-const newDepartures = ref([] as string[])
-let debounceTimeout: any = undefined
+const departureCallsigns = computed(() => departures.value.map((p) => p.callsign))
 
-watch(departures, () => {
+const departuresFilled = ref(false)
+const newDepartures = ref([] as string[])
+
+let debounceTimeout: any = undefined
+watch(departureCallsigns, (newValue, oldValue) => {
     if (debounceTimeout) clearTimeout(debounceTimeout)
     debounceTimeout = setTimeout(() => {
         debounceTimeout = undefined
-        let popups = []
-        const allDepartures = departureCallsigns()
-        if (typeof lastDepartures != "undefined") {
-            for (const callsign of allDepartures) {
-                if (!lastDepartures.includes(callsign)) popups.push(callsign)
-            }
+        if (!departuresFilled.value) {
+            departuresFilled.value = true
+            return
         }
-        lastDepartures = allDepartures
+        let popups = []
+        for (const callsign of newValue) {
+            if (!oldValue.includes(callsign)) popups.push(callsign)
+        }
         newDepartures.value = popups
         if (popups.length > 0) setTimeout(() => (newDepartures.value = []), 10000)
     }, 300)
 })
 
 watch(id, () => {
-    lastDepartures = vatsim.data && vatsim.data.pilots && vatsim.data.prefiles ? departureCallsigns() : undefined
+    departuresFilled.value = false
 })
 </script>
