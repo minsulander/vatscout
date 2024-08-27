@@ -5,7 +5,7 @@ import moment from "moment"
 import FeatureLike from "ol/Feature"
 import GeoJSON from "ol/format/GeoJSON"
 import { defineStore } from "pinia"
-import { ref } from "vue"
+import { computed, ref } from "vue"
 import { useSettingsStore } from "./settings"
 
 const apiBaseUrl = "https://api.vatscout.com"
@@ -292,6 +292,14 @@ export const useVatsimStore = defineStore("vatsim", () => {
         return moves
     }
 
+    const refreshInterval = computed(() => iAmOnline.value ? constants.refreshIntervalOnline : constants.refreshIntervalOffline)
+
+    const iAmOnline = computed(() => isCidOnline(settings.cid))
+
+    function isCidOnline(cid: number) {
+        return !!((data.value.controllers && data.value.controllers.find(c => c.cid == cid && c.facility > 0)) || (data.value.pilots && data.value.pilots.find(p => p.cid == cid)))
+    }
+
     async function fetchData() {
         refreshing.value++
         try {
@@ -437,8 +445,9 @@ export const useVatsimStore = defineStore("vatsim", () => {
     if (!(window as any).refreshInterval) {
         (window as any).refreshInterval = setInterval(() => {
             timeUntilRefresh.value -= 500
+            if (timeUntilRefresh.value > refreshInterval.value) timeUntilRefresh.value = refreshInterval.value
             if (timeUntilRefresh.value <= 0) {
-                timeUntilRefresh.value = constants.refreshInterval
+                timeUntilRefresh.value = refreshInterval.value
                 if (document.visibilityState == "visible") {
                     fetchData()
                     fetchTransceivers()
@@ -467,7 +476,7 @@ export const useVatsimStore = defineStore("vatsim", () => {
                 if (
                     !data.value.general ||
                     !data.value.general.update_timestamp ||
-                    moment(data.value.general.update_timestamp).isBefore(moment().add(-constants.refreshInterval, "millisecond"))
+                    moment(data.value.general.update_timestamp).isBefore(moment().add(-refreshInterval.value, "millisecond"))
                 ) {
                     if (refreshing.value > 0) {
                         console.log("Became visible with outdated data but already refreshing")
@@ -490,6 +499,9 @@ export const useVatsimStore = defineStore("vatsim", () => {
         bookings,
         movements,
         countMovements,
+        refreshInterval,
+        iAmOnline,
+        isCidOnline,
         timeUntilRefresh,
         refreshing,
         fetchData,

@@ -1,5 +1,6 @@
 export default {
-    refreshInterval: 60000,
+    refreshIntervalOffline: 60000,
+    refreshIntervalOnline: 15000,
     bookingsRefreshInterval: 600000,
     staticDataRefreshInterval: 3600000,
     inflightGroundspeed: 40,

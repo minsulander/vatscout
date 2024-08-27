@@ -14,6 +14,7 @@
                 >
                     <span v-if="extractAtisCode(atis)">{{ extractAtisCode(atis) }}</span>
                     <span v-else class="text-black">{{ atis.atis_code || "/" }}</span>
+                    <span v-if="extractRunwayInUse(atis)" class="ml-1 text-orange-lighten-3">{{ extractRunwayInUse(atis) }}</span>
                 </v-chip>
             </template>
         </v-tooltip>
@@ -32,6 +33,7 @@
         <v-chip variant="flat" elevated label size="small" color="orange-darken-3" class="text-white font-weight-bold mb-1">
             <span v-if="extractAtisCode(atis)">{{ extractAtisCode(atis) }}</span>
             <span v-else class="text-black">{{ atis.atis_code || "/" }}</span>
+            <span v-if="extractRunwayInUse(atis)" class="ml-1 text-orange-lighten-3">{{ extractRunwayInUse(atis) }}</span>
         </v-chip>
         {{ atis.frequency }} {{ atis.callsign.replace(`${props.prefix}_`, "").replace("_ATIS", "").replace("ATIS", "") }}
         <router-link :to="`/member/${atis.cid}`">{{ atis.name }}</router-link>
@@ -44,7 +46,7 @@
 </template>
 
 <script setup lang="ts">
-import { extractAtisCode } from "@/common"
+import { extractAtisCode, extractRunwayInUse } from "@/common"
 import { Atis } from "@/store/vatsim"
 import { computed } from "vue"
 import moment from "moment"

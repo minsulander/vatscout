@@ -1,5 +1,5 @@
 <template>
-    <v-container fluid>
+    <v-container fluid class="pt-3">
         <flight-details :id="id" />
     </v-container>
 </template>

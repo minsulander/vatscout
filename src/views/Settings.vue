@@ -10,6 +10,7 @@
         <v-text-field label="Prefile departure max time (from now to ETD)" suffix="HHMM" variant="underlined" v-model="prefileDepartureMaxTime" @change="settings.save()"></v-text-field>
         <v-text-field label="Prefile max tardiness (from filed ETD)" suffix="HHMM" variant="underlined" v-model="prefileMaxTardinessTime" @change="settings.save()"></v-text-field>
         <v-text-field label="Bookings max time" suffix="hours" variant="underlined" v-model="settings.bookingsMaxHours" @change="settings.save()"></v-text-field>
+        <v-text-field label="My VATSIM CID" variant="underlined" v-model="cid" @change="settings.save()"></v-text-field>
     </v-container>
 </template>
 
@@ -32,6 +33,11 @@ const prefileDepartureMaxTime = computed({
 const prefileMaxTardinessTime = computed({
     get() { return minutes2hhmm(settings.prefileMaxTardinessMinutes)},
     set(value: string) { if (value.length == 4) settings.prefileMaxTardinessMinutes = hhmm2minutes(value)}
+})
+
+const cid = computed({
+    get() { return settings.cid > 0 ? "" + settings.cid : "" },
+    set(value: string) { settings.cid = parseInt(value) }
 })
 
 const sound = new Howl({ src: "/audio/notification.mp3" })

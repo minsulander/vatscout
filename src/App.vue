@@ -13,13 +13,17 @@
                     </span>
                 </v-col>
                 <v-col cols="6" sm="3" class="text-right">
-                    <v-btn icon plain color="grey-darken-2" @click="clickSettings"
-                        ><v-icon>mdi-cog</v-icon><v-tooltip activator="parent" location="bottom">Settings</v-tooltip></v-btn
-                    >
+                    <v-btn v-if="settings.cid" icon plain :color="vatsim.iAmOnline ? 'grey' : 'grey-darken-2'" @click="clickMe">
+                        <v-icon>{{ vatsim.iAmOnline ? 'mdi-account' : 'mdi-account-outline' }}</v-icon>
+                        <v-tooltip activator="parent" location="bottom">{{ vatsim.iAmOnline ? 'Go most relevant page for online position' : 'Offline' }}</v-tooltip>
+                    </v-btn>
                     <v-btn icon plain :color="settings.soundOn ? 'grey' : 'grey-darken-2'" @click="clickBell">
                         <v-icon>{{ settings.soundOn ? "mdi-bell-ring" : "mdi-bell-off" }}</v-icon>
                         <v-tooltip activator="parent" location="bottom">Toggle notifications sounds</v-tooltip>
                     </v-btn>
+                    <v-btn icon plain color="grey-darken-2" @click="clickSettings"
+                        ><v-icon>mdi-cog</v-icon><v-tooltip activator="parent" location="bottom">Settings</v-tooltip></v-btn
+                    >
                     <v-btn icon plain class="mx-2" @click="clickProgress">
                         <v-progress-circular
                             :model-value="progress"
@@ -101,23 +105,34 @@ const showSettings = ref(false)
 const snackbar = ref(false)
 const snackbarText = ref("")
 
-const progress = computed(() => (vatsim.timeUntilRefresh * 100) / constants.refreshInterval)
+const progress = computed(() => (vatsim.timeUntilRefresh * 100) / vatsim.refreshInterval)
 
 const outdated = computed(() => {
     if (!vatsim.data || !vatsim.data.general) return true
-    return moment(vatsim.data.general.update_timestamp).isBefore(moment().add(-constants.refreshInterval * 2.5, "millisecond"))
+    return moment(vatsim.data.general.update_timestamp).isBefore(moment().add(-vatsim.refreshInterval * 2.5, "millisecond"))
 })
 
 const sound = new Howl({ src: "/audio/notification.mp3" })
 
-function clickSettings() {
-    if (display.xs.value) {
-        router.push("/settings")
-    } else {
-        showSettings.value = true
+function clickMe() {
+    const controller = vatsim.data.controllers.find(c => c.cid == settings.cid)
+    if (controller) {
+        let m: any = undefined
+        m = controller.callsign.match(/^(\w\w\w\w)_.*?(CTR)$/)
+        if (m && m[1] && vatsim.spy.firs && vatsim.spy.firs.find((f) => f.icao == m[1])) return router.push(`/fir/${m[1]}`)
+        m = controller.callsign.match(/^(\w\w\w\w)_.*?(APP)$/)
+        if (m && m[1] && vatsim.traconBoundaries && vatsim.traconBoundaries.find((b) => b.getProperties().id == m[1])) return router.push(`/tracon/${m[1]}`)
+        m = controller.callsign.match(/^(\w\w\w\w)_.*?(DEL|GND|TWR|APP)$/)
+        if (m && m[1]) return router.push(`/airport/${m[1]}`)
+        console.warn("Unknown page for controller", controller)
+        return
     }
+    const pilot = vatsim.data.pilots.find(p => p.cid == settings.cid)
+    if (pilot && pilot.callsign) {
+        return router.push(`/flight/${pilot.callsign}`)
+    }
+    console.log(`${settings.cid} is not online`)
 }
-
 function clickBell() {
     settings.soundOn = !settings.soundOn
     settings.save()
@@ -129,6 +144,14 @@ function clickBell() {
     } else {
         snackbarText.value = "Notification sounds are muted"
         snackbar.value = true
+    }
+}
+
+function clickSettings() {
+    if (display.xs.value) {
+        router.push("/settings")
+    } else {
+        showSettings.value = true
     }
 }
 

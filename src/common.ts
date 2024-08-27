@@ -60,7 +60,37 @@ export function extractAtisCode(atis: Atis) {
         if (m) return m.at(1)
         m = text.match(new RegExp(`ACK\\w+ RECEIPT OF INF\\w+ (\\w)`))
         if (m) return m.at(1)
+        m = text.match(new RegExp(`^\\w+ INFORMATION (\\w)`))
+        if (m) return m.at(1)
     }
+}
+
+export function extractRunwayInUse(atis: Atis) {
+    if (atis.text_atis && atis.text_atis.length > 0) return extractRunwayInUseFromAtisText(atis.text_atis.join(" ").trim())
+}
+
+export function extractRunwayInUseFromAtisText(text: string) {
+    // returns e.g. "25B"" for "25L AND R", or "29/34" for "29 AND 34"
+
+    let m = undefined
+    // order from most specific to least specific
+    m = text.match(/(RUNWAYS IN USE|RUNWAYS|RWYS|RUNWAY|RWY)[\s\]:]+(\d+)[LRC] AND (\d+)[LRC]/) // EDDV and KPDX dual runways
+    if (m && m[2] && m[3] && m[2] == m[3]) return `${m[2]}B`
+    m = text.match(/\s+(DEPARTURE|DEP|ARRIVAL|ARR)\s+(RUNWAY|RWY)\s+(\d+[LRC]?)\s+(AND RUNWAY|RUNWAY|AND RWY|RWY)\s+(\d+[LRC]?)/) // VHHH and LOWW dual runways
+    if (m && m[3] && m[5]) return m[3].substring(0,2) == m[5].substring(0,2) ? `${m[3].substring(0,2)}B` : `${m[3]}/${m[5]}`
+    m = text.match(/\[RWY\] (\d+)[LRC] AND [LRC]/) // YSSY dual runways
+    if (m && m[1]) return `${m[1]}B`
+    m = text.match(/\[RWY\] (\d+[LRC])/) // NZAA
+    if (m && m[1]) return `${m[1]}`
+    m = text.match(/\s+(RUNWAY|RWY)\s+(\d+[LRC]?)\s+IN USE/)
+    if (m && m[2]) return m[2]
+    m = text.match(/\s+(RUNWAY IN USE|RWY IN USE|RUNWAY IN USE RWY|RUNWAY IN USE RUNWAY|RWY IN USE RUNWAY)\s+(\d+[LRC]?)/)
+    if (m && m[2]) return m[2]
+    m = text.match(/\s+(DEPARTURE|DEP|ARRIVAL|ARR)\s+(RUNWAY|RWY|RUNWAYS|RWYS)[\s,:]+(\d+[LRC]?)/)
+    if (m && m[3]) return m[3]
+    m = text.match(/\s+(EXPECT|EXP)\s+.*?\s+(RUNWAY|RWY|APCH)\s+(\d+[LRC]?)/)
+    if (m && m[3]) return m[3]
+    return undefined
 }
 
 export function extractCallsign(p: Pilot | Prefile) {

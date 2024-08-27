@@ -10,6 +10,7 @@ export const useSettingsStore = defineStore("settings", () => {
     const prefileDepartureMaxMinutes = ref(60)
     const prefileMaxTardinessMinutes = ref(60)
     const bookingsMaxHours = ref(6)
+    const cid = ref(0)
 
     function save() {
         localStorage.settings_soundOn = soundOn.value
@@ -19,6 +20,8 @@ export const useSettingsStore = defineStore("settings", () => {
         localStorage.settings_prefileDepartureMaxMinutes = prefileDepartureMaxMinutes.value
         localStorage.settings_prefileMaxTardinessMinutes = prefileMaxTardinessMinutes.value
         localStorage.settings_bookingsMaxHours = bookingsMaxHours.value
+        if (cid.value) localStorage.settings_cid = cid.value
+        else delete localStorage.settings_cid
     }
 
     function load() {
@@ -30,6 +33,7 @@ export const useSettingsStore = defineStore("settings", () => {
             if ("settings_prefileDepartureMaxMinutes" in localStorage) prefileDepartureMaxMinutes.value = parseInt(localStorage.settings_prefileDepartureMaxMinutes)
             if ("settings_prefileMaxTardinessMinutes" in localStorage) prefileMaxTardinessMinutes.value = parseInt(localStorage.settings_prefileMaxTardinessMinutes)
             if ("settings_bookingsMaxHours" in localStorage) bookingsMaxHours.value = parseInt(localStorage.settings_bookingsMaxHours)
+            if ("settings_cid" in localStorage) cid.value = parseInt(localStorage.settings_cid) || 0
         } catch (err: any) {
             console.error("Failed to load settings", err)
         }
@@ -44,6 +48,7 @@ export const useSettingsStore = defineStore("settings", () => {
         prefileDepartureMaxMinutes,
         prefileMaxTardinessMinutes,
         bookingsMaxHours,
+        cid,
         save
     }
 })
