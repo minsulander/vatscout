@@ -48,7 +48,7 @@ export function extractAtisCode(atis: Atis) {
         if (m) return m.at(3)
         m = text.match(new RegExp(`${icao} INFORMATION (\\w)`))
         if (m) return m.at(1)
-        m = text.match(new RegExp(`(ATIS|ARRIVAL|DEPARTURE|ARR AND DEP) (INFORMATION|INFO) (\\w)`))
+        m = text.match(new RegExp(`(ATIS|ARRIVAL|DEPARTURE|ARR|DEP|ARR AND DEP) (INFORMATION|INFO) (\\w)`))
         if (m) return m.at(3)
         m = text.match(new RegExp(`THIS IS \\w+ INFORMATION (\\w)`))
         if (m) return m.at(1)
@@ -61,6 +61,8 @@ export function extractAtisCode(atis: Atis) {
         m = text.match(new RegExp(`ACK\\w+ RECEIPT OF INF\\w+ (\\w)`))
         if (m) return m.at(1)
         m = text.match(new RegExp(`^\\w+ INFORMATION (\\w)`))
+        if (m) return m.at(1)
+        m = text.match(new RegExp(`^\\w+ \\w+ INFORMATION (\\w)`))
         if (m) return m.at(1)
     }
 }
@@ -84,11 +86,11 @@ export function extractRunwayInUseFromAtisText(text: string) {
     if (m && m[1]) return `${m[1]}B`
     m = text.match(/\[RWY\] (\d+[LRC])/) // NZAA
     if (m && m[1]) return `${m[1]}`
-    m = text.match(/\s+(RUNWAY|RWY)\s+(\d+[LRC]?)\s+(IN USE|FOR ARRIVALS AND DEPARTURES)/)
+    m = text.match(/\s+(RUNWAY|RWY)\s+(\d+[LRC]?)\s+(IN USE|FOR ARRIVAL)/)
     if (m && m[2]) return m[2]
     m = text.match(/\s+(RUNWAY IN USE|RUNWAYS IN USE|RWY IN USE|RUNWAY IN USE RWY|RUNWAY IN USE RUNWAY|RWY IN USE RUNWAY)\s+(\d+[LRC]?)/)
     if (m && m[2]) return m[2]
-    m = text.match(/\s+(DEPARTURE|DEP|ARRIVAL|ARR)\s+(RUNWAY|RWY|RUNWAYS|RWYS)[\s,:]+(\d+[LRC]?)/)
+    m = text.match(/\s+(DEPARTURE|DEP|ARRIVAL|ARR|LDG)\s+(RUNWAY|RWY|RUNWAYS|RWYS)[\s,:]+(\d+[LRC]?)/)
     if (m && m[3]) return m[3]
     m = text.match(/\s+(EXPECT|EXP)\s+.*?\s+(RUNWAY|RWY|APCH)\s+(\d+[LRC]?)/)
     if (m && m[3]) return m[3]
