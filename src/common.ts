@@ -84,6 +84,8 @@ export function extractRunwayInUseFromAtisText(text: string) {
     if (m && m[3] && m[5]) return m[3].substring(0,2) == m[5].substring(0,2) ? `${m[3].substring(0,2)}B` : `${m[3]}/${m[5]}`
     m = text.match(/\[RWY\] (\d+)[LRC] AND [LRC]/) // YSSY dual runways
     if (m && m[1]) return `${m[1]}B`
+    m = text.match(/\s+(RUNWAY IN USE FOR LANDING|RUNWAY IN USE FOR TAKEOFF)\s+(\d+)\s+(LEFT|RIGHT|)/) // EKCH danish pastry style
+    if (m && m[2]) return m[2] + (m[3] == "LEFT" ? "L" : m[3] == "RIGHT" ? "R" : "")
     m = text.match(/\[RWY\] (\d+[LRC])/) // NZAA
     if (m && m[1]) return `${m[1]}`
     m = text.match(/\s+(RUNWAY|RWY)\s+(\d+[LRC]?)\s+(IN USE|FOR ARRIVAL)/)
@@ -98,8 +100,6 @@ export function extractRunwayInUseFromAtisText(text: string) {
     if (m && m[3]) return m[3]
     m = text.match(/\s+RWY\s+(\d+[LRC]?)\s+APCH IN USE/) // KISP
     if (m && m[1]) return m[1]
-    m = text.match(/\s+(RUNWAY IN USE FOR LANDING|RUNWAY IN USE FOR TAKEOFF)\s+(\d+)\s+(LEFT|RIGHT|)/) // EKCH danish pastry style
-    if (m && m[2]) return m[2] + (m[3] == "LEFT" ? "L" : m[3] == "RIGHT" ? "R" : "")
 
     return undefined
 }
