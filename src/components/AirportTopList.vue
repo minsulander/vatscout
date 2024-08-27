@@ -103,6 +103,7 @@ const activeAirports = computed(() => {
             if (!(a.icao in vatsim.movements)) vatsim.movements[a.icao] = vatsim.countMovements(a.icao)
             if (vatsim.movements[a.icao].active > 0) return true
             if (vatsim.data.controllers && vatsim.data.controllers.find(c => isMatchingCallsign(c.callsign, a))) return true
+            if (vatsim.data.atis && vatsim.data.atis.find(at => isMatchingCallsign(at.callsign, a))) return true
         })
         .sort((a, b) => {
             if (!(a.icao in vatsim.movements)) vatsim.movements[a.icao] = vatsim.countMovements(a.icao)

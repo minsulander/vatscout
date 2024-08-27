@@ -74,22 +74,31 @@ export function extractRunwayInUseFromAtisText(text: string) {
 
     let m = undefined
     // order from most specific to least specific
-    m = text.match(/(RUNWAYS IN USE|RUNWAYS|RWYS|RUNWAY|RWY)[\s\]:]+(\d+)[LRC] AND (\d+)[LRC]/) // EDDV and KPDX dual runways
+    m = text.match(/(RUNWAYS IN USE|RUNWAYS|RWYS|RUNWAY|RWY)[\s\]:]+(\d+)[LRC] AND (\d+)[LRC]/) // EDDV and KPDX dual runways "both"
     if (m && m[2] && m[3] && m[2] == m[3]) return `${m[2]}B`
+    m = text.match(/(RUNWAYS IN USE)[\s\]:]+(\d+[LRC]?) AND (\d+[LRC]?)/) // EDDF dual runways "/"
+    if (m && m[2] && m[3]) return `${m[2]}/${m[3]}`
     m = text.match(/\s+(DEPARTURE|DEP|ARRIVAL|ARR)\s+(RUNWAY|RWY)\s+(\d+[LRC]?)\s+(AND RUNWAY|RUNWAY|AND RWY|RWY)\s+(\d+[LRC]?)/) // VHHH and LOWW dual runways
     if (m && m[3] && m[5]) return m[3].substring(0,2) == m[5].substring(0,2) ? `${m[3].substring(0,2)}B` : `${m[3]}/${m[5]}`
     m = text.match(/\[RWY\] (\d+)[LRC] AND [LRC]/) // YSSY dual runways
     if (m && m[1]) return `${m[1]}B`
     m = text.match(/\[RWY\] (\d+[LRC])/) // NZAA
     if (m && m[1]) return `${m[1]}`
-    m = text.match(/\s+(RUNWAY|RWY)\s+(\d+[LRC]?)\s+IN USE/)
+    m = text.match(/\s+(RUNWAY|RWY)\s+(\d+[LRC]?)\s+(IN USE|FOR ARRIVALS AND DEPARTURES)/)
     if (m && m[2]) return m[2]
-    m = text.match(/\s+(RUNWAY IN USE|RWY IN USE|RUNWAY IN USE RWY|RUNWAY IN USE RUNWAY|RWY IN USE RUNWAY)\s+(\d+[LRC]?)/)
+    m = text.match(/\s+(RUNWAY IN USE|RUNWAYS IN USE|RWY IN USE|RUNWAY IN USE RWY|RUNWAY IN USE RUNWAY|RWY IN USE RUNWAY)\s+(\d+[LRC]?)/)
     if (m && m[2]) return m[2]
     m = text.match(/\s+(DEPARTURE|DEP|ARRIVAL|ARR)\s+(RUNWAY|RWY|RUNWAYS|RWYS)[\s,:]+(\d+[LRC]?)/)
     if (m && m[3]) return m[3]
     m = text.match(/\s+(EXPECT|EXP)\s+.*?\s+(RUNWAY|RWY|APCH)\s+(\d+[LRC]?)/)
     if (m && m[3]) return m[3]
+    m = text.match(/\s+(APCH IN USE)\s+.*?\s+(RY)\s+(\d+[LRC]?)/) // KJFK
+    if (m && m[3]) return m[3]
+    m = text.match(/\s+RWY\s+(\d+[LRC]?)\s+APCH IN USE/) // KISP
+    if (m && m[1]) return m[1]
+    m = text.match(/\s+(RUNWAY IN USE FOR LANDING|RUNWAY IN USE FOR TAKEOFF)\s+(\d+)\s+(LEFT|RIGHT|)/) // EKCH danish pastry style
+    if (m && m[2]) return m[2] + (m[3] == "LEFT" ? "L" : m[3] == "RIGHT" ? "R" : "")
+
     return undefined
 }
 
