@@ -39,6 +39,11 @@ const routes = [
         path: "/member/:id",
         component: () => import("@/views/Member.vue"),
     },
+    {
+        path: "/:pathMatch(.*)*",
+        name: "404",
+        component: () => import("@/views/Home.vue"),
+    },
 ]
 
 const router = createRouter({
