@@ -24,3 +24,5 @@ pnpm-debug.log*
 
 tsconfig.tsbuildinfo
 test-result*.xml
+
+/simaware-tracon-project/

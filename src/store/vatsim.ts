@@ -292,12 +292,15 @@ export const useVatsimStore = defineStore("vatsim", () => {
         return moves
     }
 
-    const refreshInterval = computed(() => iAmOnline.value ? constants.refreshIntervalOnline : constants.refreshIntervalOffline)
+    const refreshInterval = computed(() => (iAmOnline.value ? constants.refreshIntervalOnline : constants.refreshIntervalOffline))
 
     const iAmOnline = computed(() => isCidOnline(settings.cid))
 
     function isCidOnline(cid: number) {
-        return !!((data.value.controllers && data.value.controllers.find(c => c.cid == cid && c.facility > 0)) || (data.value.pilots && data.value.pilots.find(p => p.cid == cid)))
+        return !!(
+            (data.value.controllers && data.value.controllers.find((c) => c.cid == cid && c.facility > 0)) ||
+            (data.value.pilots && data.value.pilots.find((p) => p.cid == cid))
+        )
     }
 
     async function fetchData() {
@@ -414,7 +417,17 @@ export const useVatsimStore = defineStore("vatsim", () => {
         refreshing.value++
         try {
             const startRequest = new Date().getTime()
-            const response = await axios.get(`${apiBaseUrl}/tracon-boundaries`)
+            const response = await axios.get(`/data/TRACONBoundaries.geojson`)
+            // flatten nested FeatureCollections as OpenLayers doesn't support it
+            const flatFeatures = []
+            for (const feature of response.data.features) {
+                if (feature.type == "FeatureCollection") {
+                    for (const f of feature.features) flatFeatures.push(f)
+                } else {
+                    flatFeatures.push(feature)
+                }
+            }
+            response.data.features = flatFeatures
             const features = new GeoJSON().readFeatures(response.data) as FeatureLike[]
             traconBoundaries.value = features
             console.log(`Got tracon boundaries in ${(new Date().getTime() - startRequest).toFixed()} ms`)
@@ -443,7 +456,7 @@ export const useVatsimStore = defineStore("vatsim", () => {
     let lastStaticDataRefresh = 0
 
     if (!(window as any).refreshInterval) {
-        (window as any).refreshInterval = setInterval(() => {
+        ;(window as any).refreshInterval = setInterval(() => {
             timeUntilRefresh.value -= 500
             if (timeUntilRefresh.value > refreshInterval.value) timeUntilRefresh.value = refreshInterval.value
             if (timeUntilRefresh.value <= 0) {
