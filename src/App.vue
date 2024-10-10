@@ -7,15 +7,15 @@
                         <v-btn icon plain @click="clickBack" color="grey"><v-icon size="x-large">mdi-chevron-left</v-icon></v-btn>
                     </span>
                 </v-col>
-                <v-col cols="4" sm="7">
+                <v-col cols="4" sm="6" md="7" lg="8">
                     <span v-if="$route.path.length > 1">
                         <Search class="app-bar-search" />
                     </span>
                 </v-col>
-                <v-col cols="6" sm="3" class="text-right">
+                <v-col cols="6" sm="4" md="3" lg="2" class="text-right" style="white-space: nowrap">
                     <v-btn v-if="settings.cid" icon plain :color="vatsim.iAmOnline ? 'grey' : 'grey-darken-2'" @click="clickMe">
                         <v-icon>{{ vatsim.iAmOnline ? 'mdi-account' : 'mdi-account-outline' }}</v-icon>
-                        <v-tooltip activator="parent" location="bottom">{{ vatsim.iAmOnline ? 'Go most relevant page for online position' : 'Offline' }}</v-tooltip>
+                        <v-tooltip activator="parent" location="bottom">{{ vatsim.iAmOnline ? 'Go to most relevant page for online position' : 'Offline' }}</v-tooltip>
                     </v-btn>
                     <v-btn icon plain :color="settings.soundOn ? 'grey' : 'grey-darken-2'" @click="clickBell">
                         <v-icon>{{ settings.soundOn ? "mdi-bell-ring" : "mdi-bell-off" }}</v-icon>

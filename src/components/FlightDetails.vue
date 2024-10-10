@@ -211,7 +211,7 @@
                     {{ flightplan.cruise_tas }}
                     <span class="text-caption text-grey">kts TAS</span>
                 </v-col>
-                <v-col cols="2" sm="1" class="text-right pr-2 text-caption text-grey">Departure</v-col>
+                <v-col cols="2" sm="1" class="text-right pr-2 text-caption text-grey" style="white-space: nowrap">Departure</v-col>
                 <v-col cols="10" sm="5">
                     <span v-if="!(flightplan.departure in vatsim.airportByIcao)">
                         <span class="bg-red-darken-3 pa-1">

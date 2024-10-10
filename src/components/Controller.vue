@@ -1,6 +1,6 @@
 <template>
     <span v-if="props.compact">
-        <v-tooltip :text="`${controller.callsign} ${controller.frequency} ${name}`" location="bottom">
+        <v-tooltip :text="`${controller.callsign} ${controller.frequency} ${name} ${timeOnline}`" location="bottom">
             <template v-slot:activator="{ props }">
                 <v-chip
                     variant="flat"
@@ -23,7 +23,7 @@
         </v-chip>
         {{ value.frequency }}<br /><router-link :to="`/member/${value.cid}`" class="mr-1">{{ name }}</router-link>
         <v-chip density="comfortable" color="grey-lighten-1" style="padding: 5px" class="mr-1">{{ rating(value) }}</v-chip>
-        <span class="text-grey">{{ moment.utc(moment().diff(moment(value.logon_time))).format("HHmm") }}</span>
+        <span class="text-grey">{{ timeOnline }}</span>
     </v-col>
 </template>
 
@@ -45,6 +45,8 @@ const name = computed(() => {
     }
     return ""
 })
+
+const timeOnline = computed(() => moment.utc(moment().diff(moment(props.value.logon_time))).format("HHmm"))
 
 function rating(controller: Controller) {
     if (!vatsim.data || !vatsim.data.ratings) return undefined

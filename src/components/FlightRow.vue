@@ -5,10 +5,10 @@
         </v-col>
         <v-col sm="3" v-if="value.flight_plan">
             <span>{{ value.flight_plan.aircraft_short }}</span>
-            <v-chip size="small" density="comfortable" label class="ml-1 px-1" v-if="typeClass && typeClass == 'H'"
-                ><v-icon>mdi-helicopter</v-icon></v-chip
-            >
-            <v-chip size="small" density="comfortable" label class="ml-1 px-1" v-else-if="wtc && wtc != 'M'">{{ wtc }}</v-chip>
+            <v-chip size="small" density="comfortable" label class="ml-1 px-1"
+                v-if="typeClass && typeClass == 'H'"><v-icon>mdi-helicopter</v-icon></v-chip>
+            <v-chip size="small" density="comfortable" label class="ml-1 px-1" v-else-if="wtc && wtc != 'M'">{{ wtc
+            }}</v-chip>
         </v-col>
         <v-col sm="2" v-if="value.flight_plan">
             <span v-if="!departure">
@@ -35,22 +35,15 @@
                 </span>
             </span>
             <div class="float-right text-nowrap">
-                <!--<v-chip size="small" density="comfortable" label class="ml-1 px-1" v-if="t1">T1</v-chip>-->
+                <v-chip size="small" density="comfortable" label class="ml-1 px-1" v-if="t1">T1</v-chip>
                 <v-chip size="small" density="comfortable" label class="ml-1 px-1" v-if="value.flight_plan.flight_rules == 'V'">VFR</v-chip>
-                <v-chip size="small" density="comfortable" label class="ml-1 px-1" v-if="newPilot">NEW</v-chip>
+                <v-chip size="small" density="comfortable" label class="ml-1 px-1" v-if="slow"><v-icon>mdi-tortoise</v-icon></v-chip>
                 <v-chip size="small" density="comfortable" label class="ml-1 px-1" v-if="streamer"><v-icon>mdi-video</v-icon></v-chip>
                 <v-chip size="small" density="comfortable" label class="ml-1 px-1" v-if="blind"><v-icon>mdi-eye-off</v-icon></v-chip>
                 <v-chip size="small" density="comfortable" label class="ml-1 px-1" v-if="textOnly">T</v-chip>
                 <v-chip size="small" density="comfortable" label class="ml-1 px-1" v-if="receiveOnly">R</v-chip>
-                <v-chip
-                    size="small"
-                    density="comfortable"
-                    label
-                    class="ml-1 px-1"
-                    color="red"
-                    v-if="departure && pending && transponderWarning"
-                    >{{ transponderWarning }}</v-chip
-                >
+                <v-chip size="small" density="comfortable" label class="ml-1 px-1" v-if="newPilot">NEW</v-chip>
+                <v-chip size="small" density="comfortable" label class="ml-1 px-1" color="red" v-if="departure && pending && transponderWarning">{{ transponderWarning }}</v-chip>
             </div>
         </v-col>
     </v-row>
@@ -134,14 +127,30 @@ const newPilot = computed(() => {
     return false
 })
 
-/*
+const slow = computed(() => {
+    // Stockholm LPM:
+    // The following aircraft are considered “low speed aircraft”:
+    // • All propeller driven aircraft of wake turbulence category LIGHT, except P180
+    // • The following aircraft of wake turbulence category MEDIUM:
+    // ATP, AT43, AT45, AT72, AT75, AT76, B190, C212, D328, DH8A, DH8B, DH8C,
+    // E120, F27, F50, JS31, JS 32, JS41, S100, SF34, SH33, SH36, SW4, T100
+    const flightplan = props.value.flight_plan
+    if (!flightplan) return false
+    if (flightplan.flight_rules == "V") return false
+    const actypeCode = (actypecodes as any)[flightplan.aircraft_short]
+    if (!actypeCode) return false
+    if (actypeCode[0] == "L" && actypeCode[3] != "J" && flightplan.aircraft_short != "P180") return true
+    const slowMediums = ["ATP", "AT43", "AT45", "AT72", "AT75", "AT76", "B190", "C212", "D328", "DH8A", "DH8B", "DH8C", "E120", "F27", "F50", "JS31", "JS32", "JS41", "S100", "SF34", "SH33", "SH36", "SW4", "T100"]
+    if (actypeCode[0] == "M" && slowMediums.includes(flightplan.aircraft_short)) return true
+    return false
+})
+
 const t1 = computed(() => {
     const flightplan = props.value.flight_plan
     if (!flightplan) return false
     if (!flightplan.remarks) return false
     return !!flightplan.remarks.match(/PBN\/\w+T1/)
 })
-*/
 
 const textOnly = computed(() => {
     const flightplan = props.value.flight_plan
