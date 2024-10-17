@@ -286,9 +286,11 @@ import constants from "@/constants"
 import actypecodes from "@/data/actypecodes.json"
 import actypenames from "@/data/actypenames.json"
 import moment from "moment"
+import { useSettingsStore } from "@/store/settings"
 
 const props = defineProps<{ id: string }>()
 const vatsim = useVatsimStore()
+const settings = useSettingsStore()
 
 const id = computed(() => props.id)
 const callsign = computed(() => {
@@ -398,7 +400,7 @@ const formattedRoute = computed(() => {
 const formattedRemarks = computed(() => {
     if (!flightplan.value || !flightplan.value.remarks) return ""
     let rmk = flightplan.value.remarks.toUpperCase()
-    rmk = rmk.replace(/(PBN\/\w+)T1/, '$1<span class="text-warning font-weight-bold">T1</span>')
+    if (settings.showT1) rmk = rmk.replace(/(PBN\/\w+)T1/, '$1<span class="text-warning font-weight-bold">T1</span>')
     for (const phrase of constants.newPilotPhrases) {
         if (rmk.includes(phrase)) {
             rmk = rmk.replace(phrase, `<span class="text-warning font-weight-bold">${phrase}</span>`)

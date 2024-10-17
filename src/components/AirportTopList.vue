@@ -49,7 +49,13 @@
             <v-col sm="6" class="d-sm-none text-body-2 text-grey mt-1">{{ airport.name }} </v-col>
             <v-col cols="6" sm="4" class="text-right">
                 <Atis compact v-for="atis in atises(airport)" :key="atis.callsign" :value="atis" class="ml-1 mt-1" />
-                <Controller compact v-for="controller in controllers(airport)" :key="controller.callsign" :value="controller" class="ml-1 mt-1" />
+                <Controller
+                    compact
+                    v-for="controller in controllers(airport)"
+                    :key="controller.callsign"
+                    :value="controller"
+                    class="ml-1 mt-1"
+                />
             </v-col>
         </v-row>
     </div>
@@ -63,14 +69,16 @@
 </style>
 
 <script setup lang="ts">
+import { compareControllers } from "@/common"
+import Atis from "@/components/Atis.vue"
+import { useSettingsStore } from "@/store/settings"
 import { Airport, useVatsimStore } from "@/store/vatsim"
 import { computed } from "vue"
-import { colorForController, labelForController, compareControllers, extractAtisCode } from "@/common"
 import { useRouter } from "vue-router"
-import Atis from "@/components/Atis.vue"
 import Controller from "./Controller.vue"
-const vatsim = useVatsimStore()
 const router = useRouter()
+const vatsim = useVatsimStore()
+const settings = useSettingsStore()
 const props = defineProps<{ firs?: string[]; fir?: string }>()
 
 const firs = computed(() => (props.firs ? props.firs : [props.fir]))
@@ -89,6 +97,7 @@ function controllers(airport: Airport) {
             (c) =>
                 c.callsign &&
                 !c.callsign.endsWith("_CTR") &&
+                (settings.showUnprimedControllers || c.frequency != "199.998") &&
                 (c.callsign.startsWith(`${airport.icao}_`) ||
                     (airport.icao.startsWith("K") && c.callsign.startsWith(`${airport.icao.substring(1)}_`)))
         )
@@ -102,8 +111,8 @@ const activeAirports = computed(() => {
             if (a.pseudo || !firs.value.includes(a.fir)) return false
             if (!(a.icao in vatsim.movements)) vatsim.movements[a.icao] = vatsim.countMovements(a.icao)
             if (vatsim.movements[a.icao].active > 0) return true
-            if (vatsim.data.controllers && vatsim.data.controllers.find(c => isMatchingCallsign(c.callsign, a))) return true
-            if (vatsim.data.atis && vatsim.data.atis.find(at => isMatchingCallsign(at.callsign, a))) return true
+            if (vatsim.data.controllers && vatsim.data.controllers.find((c) => isMatchingCallsign(c.callsign, a))) return true
+            if (vatsim.data.atis && vatsim.data.atis.find((at) => isMatchingCallsign(at.callsign, a))) return true
         })
         .sort((a, b) => {
             if (!(a.icao in vatsim.movements)) vatsim.movements[a.icao] = vatsim.countMovements(a.icao)
@@ -116,9 +125,10 @@ const activeAirports = computed(() => {
 
 function isMatchingCallsign(callsign: string, airport: Airport) {
     return (
-        callsign && airport &&
-        (!callsign.endsWith("_CTR") &&
-            (callsign.startsWith(`${airport.icao}_`) || (airport.icao.startsWith("K") && callsign.startsWith(`${airport.icao.substring(1)}_`))))
+        callsign &&
+        airport &&
+        !callsign.endsWith("_CTR") &&
+        (callsign.startsWith(`${airport.icao}_`) || (airport.icao.startsWith("K") && callsign.startsWith(`${airport.icao.substring(1)}_`)))
     )
 }
 

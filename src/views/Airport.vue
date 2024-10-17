@@ -113,7 +113,9 @@ const atises = computed(() => {
 
 const controllers = computed(() => {
     if (!vatsim.data.controllers) return []
-    return vatsim.data.controllers.filter((c) => c.facility > 0 && isMatchingCallsign(c.callsign)).sort(compareControllers)
+    return vatsim.data.controllers
+        .filter((c) => c.facility > 0 && (settings.showUnprimedControllers || c.frequency != "199.998") && isMatchingCallsign(c.callsign))
+        .sort(compareControllers)
 })
 
 const bookings = computed(() => {

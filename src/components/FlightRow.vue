@@ -35,14 +35,14 @@
                 </span>
             </span>
             <div class="float-right text-nowrap">
-                <v-chip size="small" density="comfortable" label class="ml-1 px-1" v-if="t1">T1</v-chip>
                 <v-chip size="small" density="comfortable" label class="ml-1 px-1" v-if="value.flight_plan.flight_rules == 'V'">VFR</v-chip>
-                <v-chip size="small" density="comfortable" label class="ml-1 px-1" v-if="slow"><v-icon>mdi-tortoise</v-icon></v-chip>
                 <v-chip size="small" density="comfortable" label class="ml-1 px-1" v-if="streamer"><v-icon>mdi-video</v-icon></v-chip>
                 <v-chip size="small" density="comfortable" label class="ml-1 px-1" v-if="blind"><v-icon>mdi-eye-off</v-icon></v-chip>
                 <v-chip size="small" density="comfortable" label class="ml-1 px-1" v-if="textOnly">T</v-chip>
                 <v-chip size="small" density="comfortable" label class="ml-1 px-1" v-if="receiveOnly">R</v-chip>
                 <v-chip size="small" density="comfortable" label class="ml-1 px-1" v-if="newPilot">NEW</v-chip>
+                <v-chip size="small" density="comfortable" label class="ml-1 px-1" v-if="t1 && settings.showT1">T1</v-chip>
+                <v-chip size="small" density="comfortable" label class="ml-1 px-1" v-if="slow && settings.showSlow"><v-icon>mdi-tortoise</v-icon></v-chip>
                 <v-chip size="small" density="comfortable" label class="ml-1 px-1" color="red" v-if="departure && pending && transponderWarning">{{ transponderWarning }}</v-chip>
             </div>
         </v-col>
@@ -61,6 +61,7 @@ import * as calc from "@/calc"
 import { flightplanArrivalTime } from "@/calc"
 import constants from "@/constants"
 import actypecodes from "@/data/actypecodes.json"
+import { useSettingsStore } from "@/store/settings"
 import { Pilot, Prefile } from "@/store/vatsim"
 import moment from "moment"
 import { computed } from "vue"
@@ -75,6 +76,8 @@ const props = defineProps<{
     hideIcao?: boolean
 }>()
 const emit = defineEmits(["click"])
+
+const settings = useSettingsStore()
 
 const actypeCode = computed(() => props.value.flight_plan && (actypecodes as any)[props.value.flight_plan.aircraft_short])
 const typeClass = computed(() => actypeCode.value && actypeCode.value[1])

@@ -10,6 +10,9 @@ export const useSettingsStore = defineStore("settings", () => {
     const prefileDepartureMaxMinutes = ref(60)
     const prefileMaxTardinessMinutes = ref(60)
     const bookingsMaxHours = ref(6)
+    const showT1 = ref(false)
+    const showSlow = ref(false)
+    const showUnprimedControllers = ref(false)
     const cid = ref(0)
 
     function save() {
@@ -20,6 +23,9 @@ export const useSettingsStore = defineStore("settings", () => {
         localStorage.settings_prefileDepartureMaxMinutes = prefileDepartureMaxMinutes.value
         localStorage.settings_prefileMaxTardinessMinutes = prefileMaxTardinessMinutes.value
         localStorage.settings_bookingsMaxHours = bookingsMaxHours.value
+        localStorage.settings_showT1 = showT1.value
+        localStorage.settings_showSlow = showSlow.value
+        localStorage.settings_showUnprimedControllers = showUnprimedControllers.value
         if (cid.value) localStorage.settings_cid = cid.value
         else delete localStorage.settings_cid
     }
@@ -33,6 +39,9 @@ export const useSettingsStore = defineStore("settings", () => {
             if ("settings_prefileDepartureMaxMinutes" in localStorage) prefileDepartureMaxMinutes.value = parseInt(localStorage.settings_prefileDepartureMaxMinutes)
             if ("settings_prefileMaxTardinessMinutes" in localStorage) prefileMaxTardinessMinutes.value = parseInt(localStorage.settings_prefileMaxTardinessMinutes)
             if ("settings_bookingsMaxHours" in localStorage) bookingsMaxHours.value = parseInt(localStorage.settings_bookingsMaxHours)
+            if ("settings_showT1" in localStorage) showT1.value = localStorage.settings_showT1 == "true"
+            if ("settings_showSlow" in localStorage) showSlow.value = localStorage.settings_showSlow == "true"
+            if ("settings_showUnprimedControllers" in localStorage) showUnprimedControllers.value = localStorage.settings_showUnprimedControllers == "true"
             if ("settings_cid" in localStorage) cid.value = parseInt(localStorage.settings_cid) || 0
         } catch (err: any) {
             console.error("Failed to load settings", err)
@@ -48,6 +57,9 @@ export const useSettingsStore = defineStore("settings", () => {
         prefileDepartureMaxMinutes,
         prefileMaxTardinessMinutes,
         bookingsMaxHours,
+        showT1,
+        showSlow,
+        showUnprimedControllers,
         cid,
         save
     }

@@ -153,8 +153,7 @@ const activeAirports = computed(
                 if (vatsim.movements[a.icao].total > 0) return true
                 if (vatsim.data.controllers && vatsim.data.controllers.find((c) => isMatchingAirportCallsign(c.callsign, a.icao)))
                     return true
-                if (vatsim.data.atis && vatsim.data.atis.find((c) => isMatchingAirportCallsign(c.callsign, a.icao)))
-                    return true
+                if (vatsim.data.atis && vatsim.data.atis.find((c) => isMatchingAirportCallsign(c.callsign, a.icao))) return true
             })
             .sort((a, b) => {
                 if (!(a.icao in vatsim.movements)) vatsim.movements[a.icao] = vatsim.countMovements(a.icao)
@@ -183,7 +182,9 @@ const fir = computed(
 
 const controllers = computed(() => {
     if (!vatsim.data.controllers) return []
-    return vatsim.data.controllers.filter((c) => c.facility > 0 && isMatchingCallsign(c.callsign)).sort(compareControllers)
+    return vatsim.data.controllers
+        .filter((c) => c.facility > 0 && (settings.showUnprimedControllers || c.frequency != "199.998") && isMatchingCallsign(c.callsign))
+        .sort(compareControllers)
 })
 
 const bookings = computed(() => {
@@ -227,13 +228,19 @@ function isMatchingCallsign(callsign: string) {
 
 const atises = (icao: string) =>
     (vatsim.data &&
-    vatsim.data.atis &&
-    vatsim.data.atis.filter((c) => c.callsign && c.callsign.startsWith(`${icao}_`)).sort((a, b) => a.callsign.localeCompare(b.callsign))) || []
+        vatsim.data.atis &&
+        vatsim.data.atis
+            .filter((c) => c.callsign && c.callsign.startsWith(`${icao}_`))
+            .sort((a, b) => a.callsign.localeCompare(b.callsign))) ||
+    []
 
 const localControllers = (icao: string) =>
     (vatsim.data &&
-    vatsim.data.controllers &&
-    vatsim.data.controllers.filter((c) => isMatchingAirportCallsign(c.callsign, icao)).sort((a, b) => a.callsign.localeCompare(b.callsign))) || []
+        vatsim.data.controllers &&
+        vatsim.data.controllers
+            .filter((c) => (settings.showUnprimedControllers || c.frequency != "199.998") && isMatchingAirportCallsign(c.callsign, icao))
+            .sort((a, b) => a.callsign.localeCompare(b.callsign))) ||
+    []
 
 function isMatchingAirportCallsign(callsign: string, icao: string) {
     return (
