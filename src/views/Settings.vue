@@ -57,12 +57,14 @@
                 ></v-switch>
                 <v-switch
                     label="Show turtle icon for slow IFR aircraft"
+                    color="primary"
                     v-model="settings.showSlow"
                     @change="settings.save()"
                     hide-details
                 ></v-switch>
                 <v-switch
                     label="Show T1 for aircraft with PBN/T1 capability"
+                    color="primary"
                     v-model="settings.showT1"
                     @change="settings.save()"
                     hide-details
