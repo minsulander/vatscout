@@ -194,15 +194,27 @@ export class AirportMovements {
     }
 
     get activeDepartures() {
-        return this.departed + this.departing + this.nofp + this.invalidfp
+        return this.departing + this.nofp + this.invalidfp
     }
 
     get activeArrivals() {
-        return this.arriving + this.arrived
+        return this.arriving
     }
 
     get active() {
         return this.activeDepartures + this.activeArrivals
+    }
+
+    get inactiveDepartures() {
+        return this.departed + this.prefiledDepartures
+    }
+
+    get inactiveArrivals() {
+        return this.arrived
+    }
+
+    get inactive() {
+        return this.inactiveDepartures + this.inactiveArrivals
     }
 }
 

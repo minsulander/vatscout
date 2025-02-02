@@ -27,7 +27,7 @@
                 {{ flightplanArrivalTime(value.flight_plan, true)!.format("HHmm") }}
             </span>
             <span v-else-if="departure && value.flight_plan.deptime && value.flight_plan.deptime != '0000'">
-                <span v-if="prefile && lateDeparture" style="opacity: 0.5">
+                <span v-if="lateDeparture" style="opacity: 0.5">
                     {{ value.flight_plan.deptime }}
                 </span>
                 <span v-else>
@@ -98,6 +98,7 @@ const eta = computed(() => calc.eta(props.value as Pilot))
 const lateDeparture = computed(() => {
     const pilot = props.value as Pilot
     if (!pilot) return false
+    if (pilot.groundspeed && (pilot.groundspeed >= constants.inflightGroundspeed || calc.departureDistance(pilot) >= constants.atAirportDistance)) return false
     const etd = calc.flightplanDepartureTime(pilot.flight_plan)
     return moment().diff(etd) > 0
 })

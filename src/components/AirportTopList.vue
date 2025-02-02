@@ -29,10 +29,16 @@
                 <span v-if="vatsim.movements[airport.icao].activeDepartures" class="text-cyan-lighten-2">{{
                     vatsim.movements[airport.icao].activeDepartures
                 }}</span>
+                <span v-else-if="vatsim.movements[airport.icao].inactiveDepartures" class="text-cyan-darken-3">{{
+                    vatsim.movements[airport.icao].inactiveDepartures
+                }}</span>
             </v-col>
             <v-col cols="3" sm="1" class="text-center">
                 <span v-if="vatsim.movements[airport.icao].activeArrivals" class="text-yellow-lighten-2">{{
                     vatsim.movements[airport.icao].activeArrivals
+                }}</span>
+                <span v-else-if="vatsim.movements[airport.icao].inactiveArrivals" class="text-brown-lighten-1">{{
+                    vatsim.movements[airport.icao].inactiveArrivals
                 }}</span>
                 <!--
                 <span v-if="vatsim.movements[airport.icao].prefiledArrivals" class="text-grey mr-3">{{
@@ -95,6 +101,7 @@ function controllers(airport: Airport) {
     return vatsim.data.controllers
         .filter(
             (c) =>
+                c.facility > 0 &&
                 c.callsign &&
                 !c.callsign.endsWith("_CTR") &&
                 (settings.showUnprimedControllers || c.frequency != "199.998") &&

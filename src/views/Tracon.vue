@@ -29,12 +29,14 @@
                 </v-col>
                 <v-col cols="10" sm="11">
                     <div class="float-right text-right pt-1 px-1">
-                        <span v-if="vatsim.movements[airport.icao].activeDepartures" class="text-cyan-lighten-2 ml-2">{{
-                            vatsim.movements[airport.icao].activeDepartures
-                        }}</span>
-                        <span v-if="vatsim.movements[airport.icao].activeArrivals" class="text-yellow-lighten-2 ml-2">{{
-                            vatsim.movements[airport.icao].activeArrivals
-                        }}</span>
+                        <span v-if="vatsim.movements[airport.icao].prefiledDepartures > 0" class="text-grey ml-3">{{ vatsim.movements[airport.icao].prefiledDepartures }}</span>
+                        <span v-if="vatsim.movements[airport.icao].nofp > 0" class="text-grey-lighten-1 ml-3">{{ vatsim.movements[airport.icao].nofp }}</span>
+                        <span v-if="vatsim.movements[airport.icao].invalidfp > 0" class="text-error ml-3">{{ vatsim.movements[airport.icao].invalidfp }}</span>
+                        <span v-if="vatsim.movements[airport.icao].departing > 0" class="text-cyan-lighten-2 ml-3">{{ vatsim.movements[airport.icao].departing }}</span>
+                        <span v-if="vatsim.movements[airport.icao].departed > 0" class="text-cyan-darken-3 ml-3">{{ vatsim.movements[airport.icao].departed }}</span>
+                        <span v-if="vatsim.movements[airport.icao].prefiledArrivals > 0" class="text-grey ml-3">{{ vatsim.movements[airport.icao].prefiledArrivals }}</span>
+                        <span v-if="vatsim.movements[airport.icao].arriving > 0" class="text-yellow-lighten-2 ml-3">{{ vatsim.movements[airport.icao].arriving }}</span>
+                        <span v-if="vatsim.movements[airport.icao].arrived > 0" class="text-brown-lighten-1 ml-3">{{ vatsim.movements[airport.icao].arrived }}</span>
                         <span class="ml-2">
                             <Atis
                                 compact
@@ -238,7 +240,7 @@ const localControllers = (icao: string) =>
     (vatsim.data &&
         vatsim.data.controllers &&
         vatsim.data.controllers
-            .filter((c) => (settings.showUnprimedControllers || c.frequency != "199.998") && isMatchingAirportCallsign(c.callsign, icao))
+            .filter((c) => c.facility > 0 && (settings.showUnprimedControllers || c.frequency != "199.998") && isMatchingAirportCallsign(c.callsign, icao))
             .sort((a, b) => a.callsign.localeCompare(b.callsign))) ||
     []
 
