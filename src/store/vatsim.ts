@@ -7,8 +7,9 @@ import GeoJSON from "ol/format/GeoJSON"
 import { defineStore } from "pinia"
 import { computed, ref } from "vue"
 import { useSettingsStore } from "./settings"
+import { compareCallsigns } from "@/common"
 
-const apiBaseUrl = "https://api.vatscout.com"
+export const apiBaseUrl = "https://api.vatscout.com"
 
 export interface Controller {
     callsign: string
@@ -315,6 +316,40 @@ export const useVatsimStore = defineStore("vatsim", () => {
         )
     }
 
+    function getAtises(icao: string) {
+        return (
+            (data.value &&
+                data.value.atis &&
+                data.value.atis
+                    .filter((c) => c.callsign && c.callsign.startsWith(`${icao}_`))
+                    .sort((a, b) => a.callsign.localeCompare(b.callsign))) ||
+            []
+        )
+    }
+
+    function getLocalControllers(icao: string, excludeAppDep = false) {
+        return (data.value &&
+            data.value.controllers &&
+            data.value.controllers
+                .filter(
+                    (c) =>
+                        c.facility > 0 &&
+                        (settings.showUnprimedControllers || c.frequency != "199.998") &&
+                        isMatchingAirportCallsign(c.callsign, icao)
+                )
+                .sort((a, b) => compareCallsigns(a.callsign, b.callsign))) ||
+        []
+            }
+
+    function isMatchingAirportCallsign(callsign: string, icao: string, excludeAppDep = false) {
+        return (
+            callsign &&
+            !callsign.endsWith("_CTR") &&
+            (!excludeAppDep || (!callsign.endsWith("_APP") && !callsign.endsWith("_DEP"))) &&
+            (callsign.startsWith(`${icao}_`) || (icao.startsWith("K") && callsign.startsWith(`${icao.substring(1)}_`)))
+        )
+    }
+
     async function fetchData() {
         refreshing.value++
         try {
@@ -527,6 +562,9 @@ export const useVatsimStore = defineStore("vatsim", () => {
         refreshInterval,
         iAmOnline,
         isCidOnline,
+        getAtises,
+        getLocalControllers,
+        isMatchingAirportCallsign,
         timeUntilRefresh,
         refreshing,
         fetchData,

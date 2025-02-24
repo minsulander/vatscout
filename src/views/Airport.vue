@@ -27,6 +27,7 @@
             <span>{{ airport.name }}</span>
         </div>
         <v-row no-gutters>
+            <Metar v-if="atises.length == 0" :icao="id" />
             <Atis v-for="atis in atises" :key="atis.callsign" :value="atis" :prefix="id" @click="clickAtis(atis)" />
             <Controller v-for="controller in controllers" :key="controller.cid" :value="controller" :prefix="id" />
         </v-row>
@@ -65,6 +66,7 @@
 import { compareCallsigns, compareControllers } from "@/common"
 import ArrivalList from "@/components/ArrivalList.vue"
 import AtcNotification from "@/components/AtcNotification.vue"
+import Metar from "@/components/Metar.vue"
 import Atis from "@/components/Atis.vue"
 import Booking from "@/components/Booking.vue"
 import Controller from "@/components/Controller.vue"

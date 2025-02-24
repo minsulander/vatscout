@@ -98,6 +98,7 @@ function enter() {
         }
     }
     if (query.endsWith("_APP")) return router.push(`/tracon/${query.replace("_APP", "")}`)
+    if (query.match(/([A-Z]{4}\W+)+[A-Z]{4}/)) return router.push(`/airports/${query}`)
     errorMessages.value = `${query}: Nothing found`
 }
 </script>

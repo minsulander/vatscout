@@ -58,7 +58,7 @@
             <hr color="#313338" class="mt-5" />
             <v-row class="text-caption font-weight-light mx-1 mb-1">
                 <v-col cols="6">
-                    <router-link class="text-grey-darken-1 pa-1" to="/"> &copy; 2024 VATScout project contributors </router-link>
+                    <router-link class="text-grey-darken-1 pa-1" to="/"> &copy; 2025 VATScout project contributors </router-link>
                 </v-col>
                 <v-col cols="6" class="text-right">
                     <a class="text-grey-darken-1 pa-1" href="https://github.com/minsulander/vatscout"
