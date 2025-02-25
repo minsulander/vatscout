@@ -31,11 +31,11 @@ export const useMetarStore = defineStore("metar", () => {
 
     function unsubscribe(subscription: string) {
         if (subscription in subscriptions) {
-            const icao = subscriptions[subscription]
             delete subscriptions[subscription]
-            if (!Object.values(subscriptions).includes(icao)) {
-                delete metar[icao]
-            }
+            // const icao = subscriptions[subscription]
+            // if (!Object.values(subscriptions).includes(icao)) {
+            //     delete metar[icao]
+            // }
         }
     }
 
