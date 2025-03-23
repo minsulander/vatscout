@@ -67,7 +67,7 @@ const label = computed(() => {
     const parsed = metars.parse(props.icao)
     if (!parsed) return ""
     if (!parsed.wind) return ""
-    const wind = `${parsed.wind.degrees}`.padStart(3, "0")
+    const wind = `${parsed.wind.degrees || 'VRB'}`.padStart(3, "0")
     const speed = `${parsed.wind.speed}` + (parsed.wind.gust ? `G${parsed.wind.gust}` : "")
     return `${wind} ${speed}`
 })
