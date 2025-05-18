@@ -183,6 +183,7 @@ function isMatchingCallsign(callsign: string) {
         !callsign.endsWith("_OBS") &&
         (callsign.startsWith(`${id.value}_`) ||
             (fir.value && fir.value.callsignPrefix && callsign.startsWith(fir.value.callsignPrefix)) ||
+            (callsign.startsWith("ESAA") && callsign.endsWith("_CTR") && id.value.startsWith("ES")) ||
             (id.value.startsWith("K") && callsign.startsWith(`${id.value.substring(1)}_`)))
     )
 }
