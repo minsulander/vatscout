@@ -64,6 +64,8 @@ export function extractAtisCode(atis: Atis) {
         if (m) return m.at(1)
         m = text.match(new RegExp(`^\\w+ \\w+ INFORMATION (\\w)`))
         if (m) return m.at(1)
+        m = text.match(new RegExp(`^\\w+ ATIS (\\w) TIME`))
+        if (m) return m.at(1)
     }
 }
 
@@ -100,6 +102,9 @@ export function extractRunwayInUseFromAtisText(text: string) {
     if (m && m[3]) return m[3]
     m = text.match(/\s+RWY\s+(\d+[LRC]?)\s+APCH IN USE/) // KISP
     if (m && m[1]) return m[1]
+    m = text.match(/(ILS|LOC|RNP|VOR|NDB) APCH RWY\s+(\d+[LRC]?)\s+/) // ES* new/old? format
+    if (m && m[2]) return m[2]
+
 
     return undefined
 }
