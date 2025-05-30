@@ -5,6 +5,9 @@ import { createVuetify } from "vuetify"
 import "@mdi/font/css/materialdesignicons.css"
 import "vuetify/styles"
 import "./styles/settings.scss"
+import { registerSW } from "virtual:pwa-register"
+
+registerSW({ immediate: true })
 
 const vuetify = createVuetify({
     theme: {
