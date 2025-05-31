@@ -34,9 +34,6 @@ export default defineConfig({
         VitePWA({
             registerType: "autoUpdate",
             devOptions: { enabled: true },
-            workbox: {
-                cleanupOutdatedCaches: false,
-            },
             manifest: {
                 name: "VATScout",
                 short_name: "VATScout",
