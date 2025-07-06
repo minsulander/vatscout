@@ -39,6 +39,24 @@ export function distanceToAirport(pilot: Pilot, airport: Airport) {
     return distance
 }
 
+export function closestAirport(pilot: Pilot) {
+    const from = turf.point([pilot.longitude, pilot.latitude])
+    const vatsim = useVatsimStore()
+    if (!vatsim.spy || !vatsim.spy.airports) return undefined
+    let minDistance = Infinity
+    let closestAirport: Airport | undefined = undefined
+    for (const airport of vatsim.spy.airports) {
+        if (!isFinite(airport.longitude) || !isFinite(airport.latitude)) continue
+        const to = turf.point([airport.longitude, airport.latitude])
+        const distance = turf.distance(from, to) / 1.852
+        if (distance < minDistance) {
+            minDistance = distance
+            closestAirport = airport
+        }
+    }
+    return closestAirport
+}
+
 export function eta(pilot: Pilot) {
     if (
         !pilot ||

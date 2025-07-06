@@ -5,7 +5,7 @@ export default {
     staticDataRefreshInterval: 3600000,
     inflightGroundspeed: 40,
     motionGroundspeed: 10,
-    atAirportDistance: 4,
+    atAirportDistance: 3,
     newPilotPhrases: [
         "NEW PILOT",
         "NEWPILOT",

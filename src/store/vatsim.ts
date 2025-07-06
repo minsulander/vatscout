@@ -1,4 +1,4 @@
-import { arrivalDistance, departureDistance, distanceToAirport, eta, flightplanArrivalTime, flightplanDepartureTime } from "@/calc"
+import { arrivalDistance, closestAirport, departureDistance, distanceToAirport, eta, flightplanArrivalTime, flightplanDepartureTime } from "@/calc"
 import constants from "@/constants"
 import axios from "axios"
 import moment from "moment"
@@ -262,7 +262,8 @@ export const useVatsimStore = defineStore("vatsim", () => {
         for (const p of data.value.pilots.filter((p) => !p.flight_plan)) {
             if (
                 distanceToAirport(p, airportByIcao.value[airport_icao]) < constants.atAirportDistance &&
-                p.groundspeed < constants.motionGroundspeed
+                p.groundspeed < constants.motionGroundspeed &&
+                closestAirport(p)?.icao == airport_icao
             )
                 moves.nofp++
         }
