@@ -27,8 +27,8 @@
 </template>
 
 <script setup lang="ts">
-import { useRoute } from "vue-router"
-import { computed, onMounted, reactive, ref, watch } from "vue"
+import { onBeforeRouteLeave, useRoute } from "vue-router"
+import { computed, onBeforeUnmount, onMounted, reactive, ref, watch } from "vue"
 import { useVatsimStore, apiBaseUrl } from "@/store/vatsim"
 import moment from "moment"
 import axios from "axios"
@@ -97,21 +97,30 @@ const militaryRating = computed(() => {
     return rating.short_name
 })
 
+const mounted = ref(false)
+
 watch(id, () => {
     savedName.value = ""
     for (const key in member) delete member[key]
     for (const key in stats) delete stats[key]
-    if (id.value) {
+    if (id.value && mounted.value) {
         fetchMember()
         fetchStats()
     }
 })
 
 onMounted(() => {
+    mounted.value = true
     if (id.value) {
         fetchMember()
         fetchStats()
     }
+})
+
+onBeforeRouteLeave(() => {
+    mounted.value = false
+    for (const key in member) delete member[key]
+    for (const key in stats) delete stats[key]
 })
 
 async function fetchMember() {

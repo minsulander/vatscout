@@ -28,7 +28,7 @@
         </div>
         <v-row no-gutters>
             <Metar v-if="atises.length == 0" :icao="id" />
-            <Atis v-for="atis in atises" :key="atis.callsign" :value="atis" :prefix="id" @click="clickAtis(atis)" />
+            <Atis v-for="atis in atises" :key="atis.callsign" :value="atis" :prefix="id" />
             <Controller v-for="controller in controllers" :key="controller.cid" :value="controller" :prefix="id" />
         </v-row>
         <v-row no-gutters>
@@ -154,11 +154,6 @@ function clickFlight(callsign: string) {
         flightCallsign.value = callsign
         showFlightDialog.value = true
     }
-}
-
-function clickAtis(atisClicked: any) {
-    atis.value = atisClicked
-    showAtisDialog.value = true
 }
 
 const atcCallsigns = computed(() => [...atises.value.map((a) => a.callsign), ...controllers.value.map((c) => c.callsign)])

@@ -38,7 +38,6 @@
                             :key="atis.callsign"
                             :value="atis"
                             class="ml-1"
-                            @click="emit('clickAtis', atis)"
                         />
                         <Controller
                             compact
@@ -85,7 +84,7 @@ import { computed } from "vue"
 import { compareCallsigns } from "@/common"
 
 const props = defineProps<{ icaos: string[]; hideInactive?: boolean; noAppDep?: boolean }>()
-const emit = defineEmits(["clickAirport", "clickFlight", "clickAtis"])
+const emit = defineEmits(["clickAirport", "clickFlight"])
 
 const vatsim = useVatsimStore()
 const settings = useSettingsStore()
