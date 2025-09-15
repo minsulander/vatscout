@@ -25,9 +25,13 @@
         <airports-list no-app-dep :icaos="icaos" @click-airport="clickAirport" @click-flight="clickFlight" />
         <div v-if="enroutePilots.length > 0" class="mt-5 text-grey">
             <div class="text-grey-lighten-1 pa-1 mb-2" style="background: #313338">Enroute</div>
-            <a @click="clickFlight(p.callsign)" v-for="p in enroutePilots" :key="p.callsign" class="text-grey-lighten-1 px-1 d-inline-block">{{
-                p.callsign
-            }}</a>
+            <a
+                @click="clickFlight(p.callsign)"
+                v-for="p in enroutePilots"
+                :key="p.callsign"
+                class="text-grey-lighten-1 px-1 d-inline-block"
+                >{{ p.callsign }}</a
+            >
         </div>
         <div v-if="bookings.length > 0" class="mt-5 text-grey">
             <div class="text-grey-lighten-1 pa-1 mb-2" style="background: #313338">Bookings</div>
@@ -84,12 +88,16 @@ const airports = computed(
 )
 const icaos = computed(() => (airports.value ? airports.value.map((a) => a.icao) : []))
 
-const fir = computed(
-    () =>
+const fir = computed(() => {
+    const mainAirport = vatsim.spy && vatsim.spy.airports && vatsim.spy.airports.find((a) => a.icao == id.value)
+    if (mainAirport && mainAirport.fir)
+        return vatsim.spy.firs && vatsim.spy.firs.find((f) => f.icao == mainAirport.fir)
+    else return (
         vatsim.spy &&
         vatsim.spy.firs &&
         vatsim.spy.firs.find((f) => airports.value && airports.value.length > 0 && f.icao == airports.value[0].fir)
-)
+    )
+})
 
 const controllers = computed(() => {
     if (!vatsim.data.controllers) return []
@@ -134,7 +142,8 @@ function isMatchingCallsign(callsign: string) {
         ((!callsign.endsWith("_CTR") && callsign.startsWith(`${id.value}_`) && (callsign.endsWith("_APP") || callsign.endsWith("_DEP"))) ||
             (callsign.endsWith("_CTR") && fir.value && fir.value.callsignPrefix && callsign.startsWith(`${fir.value.callsignPrefix}_`)) ||
             (callsign.endsWith("_CTR") && fir.value && !fir.value.callsignPrefix && callsign.startsWith(`${fir.value.icao}_`)) ||
-            (callsign.startsWith("ESAA") && callsign.endsWith("_CTR") && id.value.startsWith("ES")))
+            (callsign.startsWith("ESAA") && callsign.endsWith("_CTR") && id.value.startsWith("ES")) ||
+            (callsign == "ESSR_MM_APP" && fir.value && fir.value.icao == "ESMM"))
     )
 }
 

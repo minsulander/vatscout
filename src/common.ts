@@ -6,10 +6,11 @@ export function colorForController(controller: Controller) {
 }
 
 export function colorForControllerCallsign(callsign: string) {
+    if (callsign == "ESSR_MM_APP" || callsign == "ESSR_CTR") return "purple-darken-3"
     if (callsign.endsWith("DEL")) return "blue-darken-3"
     if (callsign.endsWith("GND")) return "green-darken-3"
     if (callsign.endsWith("TWR")) return "red-darken-3"
-    if (callsign.endsWith("DEP")) return "purple-darken-3"
+    if (callsign.endsWith("DEP")) return "teal-darken-3"
     if (callsign.endsWith("APP")) return "cyan-darken-3"
     if (callsign.endsWith("CTR")) return "grey-darken-1"
 }

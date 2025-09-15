@@ -143,7 +143,10 @@ function isMatchingCallsign(callsign: string) {
             (callsign.startsWith(`${id.value}_`) || (id.value.startsWith("K") && callsign.startsWith(`${id.value.substring(1)}_`)))) ||
             (callsign.endsWith("_CTR") && airport.value && callsign.startsWith(`${airport.value.fir}_`)) ||
             (callsign.endsWith("_CTR") && fir.value && fir.value.callsignPrefix && callsign.startsWith(`${fir.value.callsignPrefix}_`)) ||
-            (callsign.startsWith("ESAA") && callsign.endsWith("_CTR") && id.value.startsWith("ES")))
+            (callsign.startsWith("ESAA") && callsign.endsWith("_CTR") && id.value.startsWith("ES")) ||
+            (tracon.value && tracon.value.id && callsign.startsWith(tracon.value.id) && callsign.endsWith("_APP")) ||
+            (callsign == "ESSR_MM_APP" && fir.value && fir.value.icao == "ESMM") ||
+            (callsign == "ESSR_CTR" && fir.value && fir.value.icao == "ESOS"))
     )
 }
 

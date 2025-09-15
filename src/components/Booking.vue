@@ -9,12 +9,7 @@
                 class="font-weight-bold mb-1 mr-1"
                 :color="colorForControllerCallsign(value.callsign)"
             >
-                <span v-if="prefix">
-                    {{ value.callsign.replace(`${prefix}_`, "") }}
-                </span>
-                <span v-else>
-                    {{ value.callsign }}
-                </span>
+                {{ callsign }}
             </v-chip>
         </v-col>
         <v-col cols="5" sm="5" class="d-none d-sm-block">
@@ -30,9 +25,7 @@
             <span v-if="abs(moment().diff(moment(value.start), 'hour')) > 12">
                 {{ moment(value.start).utc().format("YYYY-MM-DD HHmm") }} - {{ moment(value.end).utc().format("HHmm") }}
             </span>
-            <span v-else>
-                {{ moment(value.start).utc().format("HHmm") }} - {{ moment(value.end).utc().format("HHmm") }}
-            </span>
+            <span v-else> {{ moment(value.start).utc().format("HHmm") }} - {{ moment(value.end).utc().format("HHmm") }} </span>
         </v-col>
         <v-col cols="12" class="d-sm-none">
             <router-link :to="`/member/${value.cid}`" class="text-grey">{{ name }}</router-link>
@@ -47,6 +40,14 @@ import moment from "moment"
 import { computed } from "vue"
 const props = defineProps<{ value: Booking; prefix?: string }>()
 const vatsim = useVatsimStore()
+
+const callsign = computed(() => {
+    let callsign = props.value.callsign
+    if (callsign == "ESSR_MM_APP") return "MM_RTC"
+    if (callsign == "ESSR_CTR") return "OS_RTC"
+    if (props.prefix) callsign = callsign.replace(`${props.prefix}__`, "").replace(`${props.prefix}_`, "")
+    return callsign
+})
 
 const name = computed(() => {
     const key = `name_cid_${props.value.cid}`

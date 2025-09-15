@@ -141,7 +141,7 @@ const firs = computed(() => {
 const firIcaos = computed(() => firs.value.map((f) => f.icao))
 
 const airportIcaos = computed(
-    () => vatsim.spy && vatsim.spy.airports && vatsim.spy.airports.filter((a) => firIcaos.value.includes(a.fir)).map((a) => a.icao) || []
+    () => (vatsim.spy && vatsim.spy.airports && vatsim.spy.airports.filter((a) => firIcaos.value.includes(a.fir)).map((a) => a.icao)) || []
 )
 
 const controllers = computed(() => {
@@ -156,7 +156,7 @@ const controllers = computed(() => {
         (c) =>
             c.facility > 0 &&
             c.callsign &&
-            c.callsign.endsWith("_CTR") &&
+            (c.callsign.endsWith("_CTR") || (id.value == "ES" && c.callsign == "ESSR_MM_APP")) &&
             !c.callsign.endsWith("_OBS") &&
             ((c.callsign.startsWith(id.value) && c.callsign[4] == "_") || callsignPrefixes.find((prefix) => c.callsign.startsWith(prefix)))
     )
@@ -192,7 +192,7 @@ const bookings = computed(() => {
                 moment(b.start).utc().isBefore(moment().add(settings.bookingsMaxHours, "hour")) &&
                 moment(b.end).utc().isAfter(moment()) &&
                 b.callsign &&
-                ((b.callsign.endsWith("_CTR") &&
+                (((b.callsign.endsWith("_CTR") || (id.value == "ES" && b.callsign == "ESSR_MM_APP")) &&
                     ((b.callsign.startsWith(id.value) && b.callsign[4] == "_") ||
                         callsignPrefixes.find((prefix) => b.callsign.startsWith(prefix)))) ||
                     (!b.callsign.endsWith("_CTR") && isAirportCallsign(b.callsign)))

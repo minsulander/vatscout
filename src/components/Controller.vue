@@ -19,10 +19,10 @@
     </span>
     <v-col v-else cols="12" sm="6" md="4" lg="3" xl="2" class="mt-3" :style="controller.frequency == '199.998' ? 'opacity: 0.5' : ''">
         <v-chip variant="flat" elevated label size="small" class="font-weight-bold mb-1" :color="colorForController(value)"
-            ><span v-if="prefix">{{ value.callsign.replace(`${prefix}__`, "").replace(`${prefix}_`, "") }}</span
-            ><span v-else>{{ value.callsign }}</span>
+            >{{ callsign }}
         </v-chip>
-        <span class="ml-1" v-if="value.frequency != '199.998'"> {{ value.frequency }}</span><br/>
+        <span class="ml-1" v-if="value.frequency != '199.998'"> {{ value.frequency }}</span
+        ><br />
         <router-link :to="`/member/${value.cid}`" class="mr-1">{{ name }}</router-link>
         <v-chip density="comfortable" color="grey-lighten-1" style="padding: 5px" class="mr-1">{{ rating(value) }}</v-chip>
         <span class="text-grey">{{ timeOnline }}</span>
@@ -38,6 +38,14 @@ import { computed } from "vue"
 const props = defineProps<{ value: Controller; prefix?: string; compact?: boolean }>()
 const controller = computed(() => props.value)
 const vatsim = useVatsimStore()
+
+const callsign = computed(() => {
+    let callsign = props.value.callsign
+    if (callsign == "ESSR_MM_APP") return "MM_RTC"
+    if (callsign == "ESSR_CTR") return "OS_RTC"
+    if (props.prefix) callsign = callsign.replace(`${props.prefix}__`, "").replace(`${props.prefix}_`, "")
+    return callsign
+})
 
 const name = computed(() => {
     if (controller.value) {
