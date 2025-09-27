@@ -43,6 +43,7 @@ const callsign = computed(() => {
     let callsign = props.value.callsign
     if (callsign == "ESSR_MM_APP") return "MM_RTC"
     if (callsign == "ESSR_CTR") return "OS_RTC"
+    if (callsign.endsWith("I_TWR")) return "AFIS"
     if (props.prefix) callsign = callsign.replace(`${props.prefix}__`, "").replace(`${props.prefix}_`, "")
     return callsign
 })

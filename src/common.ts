@@ -9,6 +9,7 @@ export function colorForControllerCallsign(callsign: string) {
     if (callsign == "ESSR_MM_APP" || callsign == "ESSR_CTR") return "purple-darken-3"
     if (callsign.endsWith("DEL")) return "blue-darken-3"
     if (callsign.endsWith("GND")) return "green-darken-3"
+    if (callsign.endsWith("I_TWR")) return "brown-darken-1"
     if (callsign.endsWith("TWR")) return "red-darken-3"
     if (callsign.endsWith("DEP")) return "teal-darken-3"
     if (callsign.endsWith("APP")) return "cyan-darken-3"
@@ -20,6 +21,9 @@ export function labelForController(controller: Controller) {
 }
 
 export function labelForControllerCallsign(callsign: string) {
+    if (callsign == "ESSR_MM_APP") return "RTC"
+    if (callsign == "ESSR_CTR") return "RTC"
+    if (callsign.endsWith("I_TWR")) return "AFIS"
     const underscore = callsign.lastIndexOf("_")
     if (underscore >= 0) {
         return callsign.substring(underscore + 1)
