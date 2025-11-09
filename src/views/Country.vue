@@ -112,6 +112,8 @@ import moment from "moment"
 import { computed, ref, watch } from "vue"
 import { useRoute, useRouter } from "vue-router"
 import { useDisplay } from "vuetify/lib/framework.mjs"
+import { compareCallsigns } from "@/common"
+
 const route = useRoute()
 const router = useRouter()
 const vatsim = useVatsimStore()
@@ -197,7 +199,7 @@ const bookings = computed(() => {
                         callsignPrefixes.find((prefix) => b.callsign.startsWith(prefix)))) ||
                     (!b.callsign.endsWith("_CTR") && isAirportCallsign(b.callsign)))
         )
-        .sort((a, b) => moment(a.start).diff(moment(b.start)))
+        .sort((a, b) => moment(a.start).diff(moment(b.start)) || compareCallsigns(a.callsign, b.callsign))
 })
 
 const totalPilotsCount = computed(() => {
