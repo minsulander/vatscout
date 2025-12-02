@@ -279,7 +279,8 @@ export const useVatsimStore = defineStore("vatsim", () => {
                 distanceToAirport(p, airportByIcao.value[airport_icao]) < constants.atAirportDistance &&
                 distanceToAirport(p, airportByIcao.value[p.flight_plan.departure]) >= constants.atAirportDistance &&
                 distanceToAirport(p, airportByIcao.value[p.flight_plan.arrival]) >= constants.atAirportDistance &&
-                distanceToAirport(p, airportByIcao.value[p.flight_plan.alternate]) >= constants.atAirportDistance
+                distanceToAirport(p, airportByIcao.value[p.flight_plan.alternate]) >= constants.atAirportDistance &&
+                closestAirport(p)?.icao == airport_icao
             )
                 moves.invalidfp++
         }
