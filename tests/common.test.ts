@@ -1,8 +1,14 @@
 import { describe, expect, test } from "vitest"
-import { extractCallsign, extractRunwayInUseFromAtisText } from "../src/common"
+import { extractCallsign, extractRunwayInUseFromAtisText, fixLatin1Mojibake } from "../src/common"
 import { FlightPlan, Pilot } from "../src/store/vatsim"
 
 describe("common functions", () => {
+    test("fix latin1 mojibake in names", () => {
+        expect(fixLatin1Mojibake("Victor SÃ¶derstrÃ¶m ESCF")).toBe("Victor Söderström ESCF")
+        expect(fixLatin1Mojibake("Victor Söderström ESCF")).toBe("Victor Söderström ESCF")
+        expect(fixLatin1Mojibake("John Smith")).toBe("John Smith")
+    })
+
     test("extract callsign", () => {
         const callsign = extractCallsign({ callsign: "DFL5995" } as Pilot)
         expect(callsign).toBe("MEDIFLIGHT 5995")

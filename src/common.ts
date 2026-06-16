@@ -1,6 +1,19 @@
 import callsigns from "@/data/callsigns.json"
 import { Atis, Controller, Pilot, Prefile } from "./store/vatsim"
 
+// UTF-8 text misinterpreted as Latin-1, e.g. "SÃ¶derstrÃ¶m" instead of "Söderström"
+export function fixLatin1Mojibake(text: string): string {
+    if (!text || !/[ÃÂâ]/.test(text)) return text
+    try {
+        const bytes = Uint8Array.from(text, (c) => c.charCodeAt(0))
+        const decoded = new TextDecoder("utf-8", { fatal: true }).decode(bytes)
+        if (decoded.includes("\uFFFD") || /[ÃÂâ]/.test(decoded)) return text
+        return decoded
+    } catch {
+        return text
+    }
+}
+
 export function colorForController(controller: Controller) {
     return colorForControllerCallsign(controller.callsign) || "grey"
 }

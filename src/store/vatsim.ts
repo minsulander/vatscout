@@ -7,7 +7,7 @@ import GeoJSON from "ol/format/GeoJSON"
 import { defineStore } from "pinia"
 import { computed, ref } from "vue"
 import { useSettingsStore } from "./settings"
-import { compareCallsigns } from "@/common"
+import { compareCallsigns, fixLatin1Mojibake } from "@/common"
 
 export const apiBaseUrl = "https://api.vatscout.com"
 
@@ -352,12 +352,21 @@ export const useVatsimStore = defineStore("vatsim", () => {
         )
     }
 
+    function normalizeVatsimData(vatsimData: VatsimData) {
+        for (const pilot of vatsimData.pilots ?? []) pilot.name = fixLatin1Mojibake(pilot.name)
+        for (const controller of vatsimData.controllers ?? []) controller.name = fixLatin1Mojibake(controller.name)
+        for (const atis of vatsimData.atis ?? []) atis.name = fixLatin1Mojibake(atis.name)
+        for (const prefile of vatsimData.prefiles ?? []) prefile.name = fixLatin1Mojibake(prefile.name)
+    }
+
     async function fetchData() {
         refreshing.value++
         try {
             const startRequest = new Date().getTime()
             const response = await axios.get(`${apiBaseUrl}/data`)
-            data.value = response.data as VatsimData
+            const vatsimData = response.data as VatsimData
+            normalizeVatsimData(vatsimData)
+            data.value = vatsimData
             if (spy.value.airports && spy.value.airports.length > 0) movements.value = {}
             console.log(`Got data in ${(new Date().getTime() - startRequest).toFixed()} ms`)
         } finally {
